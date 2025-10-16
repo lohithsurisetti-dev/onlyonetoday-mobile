@@ -83,12 +83,24 @@ export default function TrendingScreen() {
   const [sharePost, setSharePost] = useState<TrendingPost | null>(null);
   
   const scrollY = useRef(new Animated.Value(0)).current;
+  const livePulse = useRef(new Animated.Value(1)).current;
   
-  const formatCount = (count: number) => {
-    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-    return count.toString();
-  };
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(livePulse, {
+          toValue: 1.2,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(livePulse, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
   
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -119,29 +131,18 @@ export default function TrendingScreen() {
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
         scrollEventThrottle={16}
       >
-        {/* Hero - Engaging & Dynamic */}
+        {/* Hero - Ultra Minimal with Live Indicator */}
         <View style={styles.hero}>
           <View style={styles.heroHeader}>
-            <View style={styles.liveIndicator}>
-              <View style={styles.livePulse} />
+            <View style={styles.heroTitleContainer}>
+              <Text style={styles.heroTitle}>Trending</Text>
+              <Text style={styles.heroSubtitle}>What the world is doing now</Text>
+            </View>
+            
+            {/* Live Pill */}
+            <View style={styles.livePill}>
+              <Animated.View style={[styles.liveDot, { transform: [{ scale: livePulse }] }]} />
               <Text style={styles.liveText}>LIVE</Text>
-            </View>
-          </View>
-          <Text style={styles.heroTitle}>Trending Now</Text>
-          <Text style={styles.heroSubtitle}>Happening right now around the world</Text>
-          
-          {/* Quick Stats */}
-          <View style={styles.quickStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{trendingPosts.length}</Text>
-              <Text style={styles.statLabel}>Hot Topics</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {formatCount(trendingPosts.reduce((sum, p) => sum + p.count, 0))}
-              </Text>
-              <Text style={styles.statLabel}>Active Now</Text>
             </View>
           </View>
         </View>
@@ -179,21 +180,12 @@ interface TrendingCardProps {
 function TrendingCard({ post, index, onShare }: TrendingCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
   
   React.useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 500, delay: index * 100, useNativeDriver: true }),
       Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 40, delay: index * 100, useNativeDriver: true }),
     ]).start();
-    
-    // Subtle pulse animation for engagement
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.02, duration: 2000, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
-      ])
-    ).start();
   }, []);
   
   const formatCount = (count: number) => {
@@ -202,56 +194,28 @@ function TrendingCard({ post, index, onShare }: TrendingCardProps) {
     return count.toString();
   };
   
-  const getSourceEmoji = (source: string) => {
-    switch (source) {
-      case 'Spotify': return '🎵';
-      case 'Reddit': return '💬';
-      case 'YouTube': return '📺';
-      case 'Sports': return '⚽';
-      default: return '🔥';
-    }
-  };
-  
-  const getRankColor = (index: number) => {
-    if (index === 0) return '#f59e0b'; // Gold
-    if (index === 1) return '#a78bfa'; // Purple
-    if (index === 2) return '#ec4899'; // Pink
-    return '#8b5cf6'; // Default purple
-  };
-  
   return (
-    <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: slideAnim }, { scale: pulseAnim }] }]}>
-      <BlurView intensity={30} tint="dark" style={styles.cardBlur}>
+    <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+      <BlurView intensity={15} tint="dark" style={styles.cardBlur}>
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.04)']}
+          colors={['rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.01)']}
           style={styles.cardGradient}
         >
-          {/* Rank Badge */}
-          <View style={[styles.rankBadge, { backgroundColor: `${getRankColor(index)}25` }]}>
-            <Text style={[styles.rankText, { color: getRankColor(index) }]}>#{index + 1}</Text>
-          </View>
-          
           {/* Share Button */}
           <TouchableOpacity style={styles.shareButton} onPress={() => onShare(post)} activeOpacity={0.6}>
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="rgba(255, 255, 255, 0.6)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
           </TouchableOpacity>
           
-          {/* Source Badge with Emoji */}
-          <View style={styles.sourceBadge}>
-            <Text style={styles.sourceEmoji}>{getSourceEmoji(post.source)}</Text>
-            <Text style={styles.sourceName}>{post.source}</Text>
-          </View>
-          
-          {/* Content - Bold & Prominent */}
+          {/* Content */}
           <Text style={styles.cardContent}>{post.content}</Text>
           
-          {/* Fire Count - Exciting */}
-          <View style={styles.fireCount}>
-            <Text style={styles.fireEmoji}>🔥</Text>
+          {/* Footer - Minimal */}
+          <View style={styles.cardFooter}>
+            <Text style={styles.sourceText}>{post.source}</Text>
+            <View style={styles.dot} />
             <Text style={styles.countText}>{formatCount(post.count)}</Text>
-            <Text style={styles.countLabel}>people</Text>
           </View>
         </LinearGradient>
       </BlurView>
@@ -289,24 +253,40 @@ const styles = StyleSheet.create({
   hero: {
     paddingHorizontal: scale(20),
     paddingTop: scale(60),
-    paddingBottom: scale(28),
+    paddingBottom: scale(24),
   },
   heroHeader: {
-    marginBottom: scale(16),
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
   },
-  liveIndicator: {
+  heroTitleContainer: {
+    flex: 1,
+    gap: scale(4),
+  },
+  heroTitle: {
+    fontSize: moderateScale(32, 0.3),
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: -0.5,
+  },
+  heroSubtitle: {
+    fontSize: moderateScale(14, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    letterSpacing: 0.3,
+  },
+  livePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(6),
-    alignSelf: 'flex-start',
+    gap: scale(5),
     paddingHorizontal: scale(10),
-    paddingVertical: scale(5),
+    paddingVertical: scale(6),
     backgroundColor: 'rgba(239, 68, 68, 0.15)',
     borderRadius: scale(12),
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
   },
-  livePulse: {
+  liveDot: {
     width: scale(6),
     height: scale(6),
     borderRadius: scale(3),
@@ -316,122 +296,62 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(10, 0.2),
     fontWeight: '800',
     color: '#ef4444',
-    letterSpacing: 1,
-  },
-  heroTitle: {
-    fontSize: moderateScale(36, 0.3),
-    fontWeight: '900',
-    color: '#ffffff',
-    letterSpacing: -0.8,
-    marginBottom: scale(6),
-    textShadowColor: 'rgba(139, 92, 246, 0.4)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-  },
-  heroSubtitle: {
-    fontSize: moderateScale(14, 0.2),
-    color: 'rgba(255, 255, 255, 0.6)',
-    letterSpacing: 0.3,
-    marginBottom: scale(20),
-  },
-  quickStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(20),
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: moderateScale(20, 0.3),
-    fontWeight: '800',
-    color: '#a78bfa',
-    marginBottom: scale(2),
-  },
-  statLabel: {
-    fontSize: moderateScale(10, 0.2),
-    color: 'rgba(255, 255, 255, 0.4)',
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  statDivider: {
-    width: scale(1),
-    height: scale(30),
-    backgroundColor: 'rgba(139, 92, 246, 0.3)',
+    letterSpacing: 0.8,
   },
   postsContainer: {
     paddingHorizontal: scale(20),
     gap: scale(12),
   },
   card: {
-    borderRadius: scale(24),
+    borderRadius: scale(16),
     overflow: 'hidden',
   },
   cardBlur: {
-    borderRadius: scale(24),
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    overflow: 'hidden',
+    borderRadius: scale(16),
   },
   cardGradient: {
     padding: scale(20),
-    borderRadius: scale(24),
+    borderRadius: scale(16),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    gap: scale(12),
     position: 'relative',
   },
-  rankBadge: {
-    paddingHorizontal: scale(10),
-    paddingVertical: scale(4),
-    borderRadius: scale(10),
-  },
-  rankText: {
-    fontSize: moderateScale(11, 0.2),
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
   shareButton: {
-    padding: scale(6),
-  },
-  sourceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(6),
-    marginBottom: scale(14),
-  },
-  sourceEmoji: {
-    fontSize: moderateScale(16, 0.2),
-  },
-  sourceName: {
-    fontSize: moderateScale(11, 0.2),
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    position: 'absolute',
+    top: scale(16),
+    right: scale(16),
+    zIndex: 10,
+    padding: scale(4),
   },
   cardContent: {
-    fontSize: moderateScale(16, 0.2),
-    lineHeight: moderateScale(26, 0.2),
+    fontSize: moderateScale(15, 0.2),
+    lineHeight: moderateScale(23, 0.2),
     color: '#ffffff',
-    fontWeight: '600',
-    marginBottom: scale(16),
+    fontWeight: '500',
+    paddingRight: scale(32),
   },
-  fireCount: {
+  cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(6),
+    gap: scale(8),
   },
-  fireEmoji: {
-    fontSize: moderateScale(14, 0.2),
+  sourceText: {
+    fontSize: moderateScale(11, 0.2),
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.4)',
+    letterSpacing: 0.5,
+  },
+  dot: {
+    width: scale(3),
+    height: scale(3),
+    borderRadius: scale(1.5),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   countText: {
-    fontSize: moderateScale(13, 0.2),
-    color: '#f59e0b',
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
-  countLabel: {
     fontSize: moderateScale(11, 0.2),
-    color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.4)',
+    letterSpacing: 0.5,
   },
 });

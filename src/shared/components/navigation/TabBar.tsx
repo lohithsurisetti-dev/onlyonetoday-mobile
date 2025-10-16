@@ -201,25 +201,18 @@ export default function TabBar({ activeTab, onTabChange }: TabBarProps) {
             </Animated.View>
           </TouchableOpacity>
 
-          {/* Create (Center, Elevated) */}
+          {/* Create (Center, Simple) */}
           <TouchableOpacity
             style={styles.createTab}
             onPress={() => handlePress('create')}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnims.create }] }}>
-              <LinearGradient
-                colors={['#8b5cf6', '#ec4899']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.createButton}
-              >
-                <View style={styles.iconWrapper}>
-                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-                    <Path d="M12 4v16m8-8H4" stroke="#ffffff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                </View>
-              </LinearGradient>
+              <View style={styles.createIconContainer}>
+                <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 4v16m8-8H4" stroke="#8b5cf6" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </View>
             </Animated.View>
           </TouchableOpacity>
 
@@ -281,9 +274,8 @@ const styles = StyleSheet.create({
   tabs: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    height: scale(64),
     paddingHorizontal: scale(8),
-    height: scale(56),
   },
   tab: {
     flex: 1,
@@ -292,23 +284,23 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   createTab: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -scale(16),
+  },
+  createIconContainer: {
+    width: scale(48),
+    height: scale(48),
+    borderRadius: scale(24),
+    borderWidth: 1.5,
+    borderColor: 'rgba(139, 92, 246, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(139, 92, 246, 0.08)',
   },
   createButton: {
-    width: scale(56),
-    height: scale(56),
-    borderRadius: scale(28),
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.6,
-    shadowRadius: 16,
-    elevation: 12,
-    borderWidth: 3,
-    borderColor: '#0a0a1a',
   },
   label: {
     fontSize: moderateScale(10, 0.2),
@@ -343,8 +335,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   iconWrapper: {
-    width: 24,
-    height: 24,
+    width: scale(24),
+    height: scale(24),
     alignItems: 'center',
     justifyContent: 'center',
   },

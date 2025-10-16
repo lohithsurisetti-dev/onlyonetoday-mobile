@@ -114,7 +114,7 @@ const SAMPLE_POSTS: Post[] = [
     time: '1d ago',
     scope: 'world',
     input_type: 'action',
-    percentile: { percentile: 65, tier: 'common', displayText: 'Top 65%', comparison: 'Similar to many' },
+    percentile: { percentile: 65, tier: 'common', displayText: 'Top 65%', comparison: 'Popular choice' },
     funny_count: 2,
     creative_count: 3,
     must_try_count: 8,
@@ -125,7 +125,7 @@ const SAMPLE_POSTS: Post[] = [
     time: '2d ago',
     scope: 'world',
     input_type: 'action',
-    percentile: { percentile: 78, tier: 'popular', displayText: 'Top 78%', comparison: 'Common activity' },
+    percentile: { percentile: 78, tier: 'popular', displayText: 'Top 78%', comparison: 'Well loved activity' },
     funny_count: 4,
     creative_count: 1,
     must_try_count: 3,
@@ -595,13 +595,11 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
           <TouchableOpacity
             style={styles.shareButton}
             onPress={() => onShare(post)}
-            activeOpacity={0.7}
+            activeOpacity={0.6}
           >
-            <BlurView intensity={40} tint="dark" style={styles.shareButtonBlur}>
-              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </BlurView>
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
           </TouchableOpacity>
           
           {/* Content */}
@@ -817,20 +815,10 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     position: 'absolute',
-    top: scale(12),
-    right: scale(12),
-    borderRadius: scale(10),
-    overflow: 'hidden',
+    top: scale(14),
+    right: scale(14),
     zIndex: 10,
-  },
-  shareButtonBlur: {
-    width: scale(32),
-    height: scale(32),
-    borderRadius: scale(10),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    padding: scale(4),
   },
   postContent: {
     fontSize: moderateScale(15, 0.2),

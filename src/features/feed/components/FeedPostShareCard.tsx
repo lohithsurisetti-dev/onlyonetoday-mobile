@@ -214,7 +214,7 @@ export default function FeedPostShareCard({ visible, onClose, post, tierColors }
               <View style={styles.footer}>
                 <Text style={styles.welcomeTitle}>Track your uniqueness</Text>
                 <Text style={styles.welcomeMessage}>
-                  Join thousands discovering how unique their daily actions are
+                  Discover what makes you different
                 </Text>
                 <View style={styles.ctaContainer}>
                   <Text style={styles.ctaText}>Download now</Text>

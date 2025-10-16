@@ -130,25 +130,19 @@ export default function TrendingShareCard({ visible, onClose, post }: TrendingSh
                 <Text style={styles.brandTagline}>TODAY</Text>
               </View>
 
-              {/* Trending Badge */}
-              <View style={styles.trendingBadge}>
-                <View style={styles.trendingDot} />
-                <Text style={styles.trendingText}>TRENDING NOW</Text>
-              </View>
-
               {/* Content */}
               <View style={styles.contentSection}>
                 <Text style={styles.quoteText} numberOfLines={4}>"{post.content}"</Text>
                 <View style={styles.statsRow}>
                   <Text style={styles.statCount}>{formatCount(post.count)}</Text>
-                  <Text style={styles.statLabel}>are doing this</Text>
+                  <Text style={styles.statLabel}>doing this now</Text>
                 </View>
               </View>
 
               {/* Footer */}
               <View style={styles.footer}>
-                <Text style={styles.welcomeTitle}>See what's trending worldwide</Text>
-                <Text style={styles.welcomeMessage}>Discover what makes you different</Text>
+                <Text style={styles.welcomeTitle}>See what's trending</Text>
+                <Text style={styles.welcomeMessage}>Track your uniqueness</Text>
                 <Text style={styles.ctaUrl}>onlyonetoday.com</Text>
               </View>
 
@@ -247,34 +241,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: scale(3),
     opacity: 0.95,
-  },
-  trendingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(8),
-    alignSelf: 'center',
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(8),
-    borderRadius: scale(12),
-    backgroundColor: 'rgba(167, 139, 250, 0.15)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(167, 139, 250, 0.3)',
-  },
-  trendingDot: {
-    width: scale(6),
-    height: scale(6),
-    borderRadius: scale(3),
-    backgroundColor: '#a78bfa',
-    shadowColor: '#a78bfa',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-  },
-  trendingText: {
-    fontSize: moderateScale(11, 0.2),
-    fontWeight: '800',
-    color: '#a78bfa',
-    letterSpacing: 1.5,
   },
   contentSection: {
     flex: 1,

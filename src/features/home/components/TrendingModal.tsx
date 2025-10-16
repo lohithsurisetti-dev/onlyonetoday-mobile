@@ -88,21 +88,21 @@ export default function TrendingModal({ visible, onClose, onExploreTrending, ite
               style={styles.cardGradient}
             >
               {/* Close Button */}
-              <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
-                <BlurView intensity={30} tint="dark" style={styles.closeButtonBlur}>
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                    <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.8}>
+                <View style={styles.buttonCircle}>
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                    <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
-                </BlurView>
+                </View>
               </TouchableOpacity>
 
               {/* Share Button */}
-              <TouchableOpacity style={styles.shareButton} onPress={handleShare} activeOpacity={0.7}>
-                <BlurView intensity={30} tint="dark" style={styles.shareButtonBlur}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              <TouchableOpacity style={styles.shareButton} onPress={handleShare} activeOpacity={0.8}>
+                <View style={styles.buttonCircle}>
+                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                    <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#ffffff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
-                </BlurView>
+                </View>
               </TouchableOpacity>
 
               {/* Rank Badge */}
@@ -187,34 +187,27 @@ const styles = StyleSheet.create({
     top: scale(16),
     right: scale(16),
     zIndex: 10,
-    borderRadius: scale(20),
-    overflow: 'hidden',
-  },
-  closeButtonBlur: {
-    width: scale(40),
-    height: scale(40),
-    borderRadius: scale(20),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   shareButton: {
     position: 'absolute',
     top: scale(16),
     left: scale(16),
     zIndex: 10,
-    borderRadius: scale(20),
-    overflow: 'hidden',
   },
-  shareButtonBlur: {
-    width: scale(40),
-    height: scale(40),
-    borderRadius: scale(20),
+  buttonCircle: {
+    width: scale(44),
+    height: scale(44),
+    borderRadius: scale(22),
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   rankBadge: {
     alignSelf: 'center',

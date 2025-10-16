@@ -228,12 +228,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(42, 0.3),
-    fontWeight: '200',
+    fontWeight: '300',
     color: '#ffffff',
     letterSpacing: scale(8),
-    textShadowColor: '#8b5cf6',
+    textShadowColor: '#a78bfa',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+    textShadowRadius: 28,
   },
   divider: {
     width: scale(60),

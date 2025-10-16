@@ -296,12 +296,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(20, 0.3),
-    fontWeight: '300',
+    fontWeight: '500',
     color: '#ffffff',
     letterSpacing: scale(3),
-    textShadowColor: 'rgba(139, 92, 246, 0.3)',
+    textShadowColor: 'rgba(139, 92, 246, 0.8)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    textShadowRadius: 24,
   },
   subtitle: {
     fontSize: moderateScale(9, 0.2),

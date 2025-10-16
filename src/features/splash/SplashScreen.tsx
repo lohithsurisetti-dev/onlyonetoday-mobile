@@ -1,6 +1,6 @@
 /**
- * Home Screen - Main Feed
- * Browse posts and discover what others are doing
+ * Splash Screen - ONLYONE.TODAY
+ * 3-second intro with floating stars animation
  */
 
 import React, { useRef, useEffect } from 'react';
@@ -10,14 +10,12 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
-  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
-import { usePlatformStats } from '@/lib/hooks/useStats';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// Responsive scaling
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
@@ -102,6 +100,7 @@ const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
         ])
       ).start();
     };
+
     animate();
   }, []);
 
@@ -118,29 +117,44 @@ const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
   );
 };
 
-type HomeScreenProps = {
-  navigation: any;
+type SplashScreenProps = {
+  onFinish: () => void;
 };
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  // const { stats } = usePlatformStats();
-  const stats: any = null;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
+    // Fade in and scale animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        damping: 15,
+        stiffness: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Auto navigate after 3 seconds (no fade out here, handled by App.tsx)
+    const timer = setTimeout(() => {
+      onFinish();
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <View style={styles.safeArea}>
       <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#2d1b4e']} style={styles.gradient}>
-        {/* Floating Stars */}
+        {/* Floating Stars Background */}
         <View style={styles.starsContainer} pointerEvents="none">
-          {[...Array(15)].map((_, i) => (
+          {[...Array(20)].map((_, i) => (
             <View
               key={i}
               style={{
@@ -149,58 +163,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 left: `${Math.random() * 100}%`,
               }}
             >
-              <FloatingStar delay={i * 200} />
+              <FloatingStar delay={i * 100} />
             </View>
           ))}
         </View>
 
-        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-          {/* Header */}
-          <View style={styles.header}>
+        {/* Logo Content */}
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          <View style={styles.logoContainer}>
             <Text style={styles.title}>ONLYONE</Text>
-            <Text style={styles.subtitle}>DISCOVER YOUR UNIQUENESS</Text>
+            <View style={styles.divider} />
+            <Text style={styles.subtitle}>TODAY</Text>
           </View>
-
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Premium Stats Cards */}
-            <View style={styles.statsRow}>
-              <BlurView intensity={30} tint="dark" style={styles.statCard}>
-                <LinearGradient
-                  colors={['rgba(139, 92, 246, 0.15)', 'transparent']}
-                  style={styles.statGradient}
-                >
-                  <Text style={styles.statLabel}>TODAY</Text>
-                  <Text style={styles.statValue}>
-                    {stats?.totalPostsToday?.toLocaleString() || '0'}
-                  </Text>
-                  <Text style={styles.statSubtext}>Posts</Text>
-                </LinearGradient>
-              </BlurView>
-
-              <BlurView intensity={30} tint="dark" style={styles.statCard}>
-                <LinearGradient
-                  colors={['rgba(236, 72, 153, 0.15)', 'transparent']}
-                  style={styles.statGradient}
-                >
-                  <Text style={styles.statLabel}>UNIQUE</Text>
-                  <Text style={styles.statValue}>
-                    {stats?.uniqueActionsToday?.toLocaleString() || '0'}
-                  </Text>
-                  <Text style={styles.statSubtext}>Actions</Text>
-                </LinearGradient>
-              </BlurView>
-            </View>
-
-            <Text style={styles.placeholderText}>Home Feed</Text>
-            <Text style={styles.placeholderSubtext}>Coming soon...</Text>
-            {/* TODO: Implement feed */}
-          </ScrollView>
+          <Text style={styles.tagline}>DISCOVER YOUR UNIQUENESS</Text>
         </Animated.View>
       </LinearGradient>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -232,83 +218,48 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  header: {
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: scale(20),
-    paddingBottom: scale(16),
+    zIndex: 1,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: scale(32),
   },
   title: {
-    fontSize: moderateScale(24, 0.3),
+    fontSize: moderateScale(42, 0.3),
     fontWeight: '200',
     color: '#ffffff',
-    letterSpacing: scale(4),
+    letterSpacing: scale(8),
+    textShadowColor: '#8b5cf6',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
+  },
+  divider: {
+    width: scale(60),
+    height: 1,
+    backgroundColor: '#8b5cf6',
+    marginVertical: scale(12),
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
   },
   subtitle: {
-    fontSize: moderateScale(10, 0.2),
-    color: '#9ca3af',
-    marginTop: scale(6),
-    letterSpacing: scale(2),
-    fontWeight: '300',
-  },
-  scrollContent: {
-    padding: scale(20),
-    paddingBottom: scale(120),
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: scale(16),
-    marginBottom: scale(28),
-  },
-  statCard: {
-    flex: 1,
-    borderRadius: scale(18),
-    overflow: 'hidden',
-    backgroundColor: 'rgba(26, 26, 46, 0.6)',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.2)',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  statGradient: {
-    padding: scale(16),
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: moderateScale(10, 0.2),
-    color: '#9ca3af',
-    letterSpacing: scale(1.5),
-    fontWeight: '600',
-    marginBottom: scale(6),
-  },
-  statValue: {
-    fontSize: moderateScale(28, 0.4),
+    fontSize: moderateScale(36, 0.3),
     fontWeight: '200',
     color: '#ffffff',
-    letterSpacing: -1,
+    letterSpacing: scale(6),
+    textShadowColor: '#ec4899',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
-  statSubtext: {
+  tagline: {
     fontSize: moderateScale(11, 0.2),
-    color: '#6b7280',
-    marginTop: scale(4),
-    fontWeight: '300',
-  },
-  placeholderText: {
-    fontSize: moderateScale(20, 0.3),
-    fontWeight: '300',
-    color: '#ffffff',
-    letterSpacing: 1,
-    marginBottom: scale(8),
-    marginTop: scale(20),
-    textAlign: 'center',
-  },
-  placeholderSubtext: {
-    fontSize: moderateScale(13, 0.2),
     color: '#9ca3af',
-    letterSpacing: 1,
+    letterSpacing: scale(3),
+    fontWeight: '300',
     textAlign: 'center',
   },
 });
+

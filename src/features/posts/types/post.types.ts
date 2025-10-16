@@ -65,9 +65,22 @@ export type PostResponse = z.infer<typeof PostResponseSchema>
 export interface CreatePostRequest extends CreatePostDto {}
 
 export interface CreatePostResponse {
-  success: boolean
   post: Post
-  message?: string
+  similarPosts?: Post[]
+  matchCount: number
+  uniquenessScore: number
+  percentile?: {
+    percentile: number
+    tier: 'elite' | 'rare' | 'unique' | 'notable' | 'common' | 'popular'
+    displayText: string
+    badge: string
+    message: string
+    comparison: string
+  }
+  totalPosts?: number
+  activities?: string[]
+  activityCount?: number
+  isDaySummary?: boolean
 }
 
 export interface GetPostsRequest {

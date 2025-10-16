@@ -16,6 +16,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { usePlatformStats } from '@/lib/hooks/useStats';
+import { useLocation } from '@/lib/hooks/useLocation';
+import LocationLeaderboard from '@/features/home/components/LocationLeaderboard';
+import TrendingLeaderboard from '@/features/home/components/TrendingLeaderboard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -126,6 +129,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   // const { stats } = usePlatformStats();
   const stats: any = null;
+  const { location } = useLocation();
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -166,6 +170,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             showsVerticalScrollIndicator={false}
           >
             {/* Premium Stats Cards */}
+            {/* Global Pulse Stats */}
             <View style={styles.statsRow}>
               <BlurView intensity={30} tint="dark" style={styles.statCard}>
                 <LinearGradient
@@ -194,9 +199,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               </BlurView>
             </View>
 
-            <Text style={styles.placeholderText}>Home Feed</Text>
-            <Text style={styles.placeholderSubtext}>Coming soon...</Text>
-            {/* TODO: Implement feed */}
+            {/* Location Leaderboard */}
+            <LocationLeaderboard userLocation={location} />
+
+            {/* Trending Leaderboard */}
+            <TrendingLeaderboard />
           </ScrollView>
         </Animated.View>
       </LinearGradient>

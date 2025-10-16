@@ -31,7 +31,7 @@ const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size
 // TYPES
 // ============================================================================
 
-export type FilterType = 'all' | 'unique' | 'common' | 'trending';
+export type FilterType = 'all' | 'unique' | 'common';
 export type ScopeFilter = 'world' | 'city' | 'state' | 'country';
 export type ReactionFilter = 'all' | 'funny' | 'creative' | 'must_try';
 export type InputTypeFilter = 'all' | 'action' | 'day';
@@ -154,8 +154,6 @@ function getTierColors(tier?: string) {
 
 function getFilterPillColors(filter: FilterType): [string, string] {
   switch (filter) {
-    case 'trending':
-      return ['rgba(251, 146, 60, 0.5)', 'rgba(251, 146, 60, 0.25)'];
     case 'unique':
       return ['rgba(139, 92, 246, 0.5)', 'rgba(139, 92, 246, 0.25)'];
     case 'common':
@@ -291,9 +289,11 @@ export default function FeedScreen() {
   
   // Filtered posts
   const filteredPosts = posts.filter(post => {
+    // Filter out ghost/trending posts (those are for the Trending tab)
+    if (post.isGhost) return false;
+    
     if (filter === 'unique' && post.percentile && !['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier)) return false;
     if (filter === 'common' && post.percentile && !['common', 'popular'].includes(post.percentile.tier)) return false;
-    if (filter === 'trending' && !post.isGhost) return false;
     if (inputTypeFilter === 'action' && post.input_type !== 'action') return false;
     if (inputTypeFilter === 'day' && post.input_type !== 'day') return false;
     if (scopeFilter !== 'world' && post.scope !== scopeFilter) return false;
@@ -408,7 +408,7 @@ export default function FeedScreen() {
                       style={styles.activePillGradient}
                     >
                       <Text style={styles.activePillText}>
-                        {filter === 'trending' ? 'Trending' : filter === 'unique' ? 'Unique' : 'Common'}
+                        {filter === 'unique' ? 'Unique' : 'Common'}
                       </Text>
                       <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
                         <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />

@@ -22,7 +22,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
-type FilterType = 'all' | 'unique' | 'common' | 'trending';
+type FilterType = 'all' | 'unique' | 'common';
 type ScopeFilter = 'world' | 'city' | 'state' | 'country';
 type ReactionFilter = 'all' | 'funny' | 'creative' | 'must_try';
 type InputTypeFilter = 'all' | 'action' | 'day';
@@ -158,7 +158,7 @@ export default function FilterSheet({
                   <Text style={styles.sectionTitle}>Post Type</Text>
                 </View>
                 <View style={styles.optionsGrid}>
-                  {(['all', 'unique', 'common', 'trending'] as FilterType[]).map((type) => {
+                  {(['all', 'unique', 'common'] as FilterType[]).map((type) => {
                     const isActive = filter === type;
                     return (
                       <TouchableOpacity
@@ -189,8 +189,7 @@ export default function FilterSheet({
               </View>
 
               {/* Content Type */}
-              {filter !== 'trending' && (
-                <View style={styles.section}>
+              <View style={styles.section}>
                   <View style={styles.sectionHeader}>
                     <View style={styles.sectionIndicator} />
                     <Text style={styles.sectionTitle}>Content Type</Text>
@@ -224,12 +223,10 @@ export default function FilterSheet({
                       );
                     })}
                   </View>
-                </View>
-              )}
+              </View>
 
               {/* Location Scope */}
-              {filter !== 'trending' && (
-                <View style={styles.section}>
+              <View style={styles.section}>
                   <View style={styles.sectionHeader}>
                     <View style={styles.sectionIndicator} />
                     <Text style={styles.sectionTitle}>Location Scope</Text>
@@ -271,12 +268,10 @@ export default function FilterSheet({
                       );
                     })}
                   </View>
-                </View>
-              )}
+              </View>
 
               {/* Reactions */}
-              {filter !== 'trending' && (
-                <View style={styles.section}>
+              <View style={styles.section}>
                   <View style={styles.sectionHeader}>
                     <View style={styles.sectionIndicator} />
                     <Text style={styles.sectionTitle}>Reactions</Text>
@@ -312,8 +307,7 @@ export default function FilterSheet({
                       );
                     })}
                   </View>
-                </View>
-              )}
+              </View>
 
               {/* Clear All Button */}
               <TouchableOpacity style={styles.clearButton} onPress={handleClearAll} activeOpacity={0.8}>
@@ -337,8 +331,6 @@ export default function FilterSheet({
 // Helper functions
 function getFilterGradient(type: FilterType): [string, string] {
   switch (type) {
-    case 'trending':
-      return ['rgba(251, 146, 60, 0.5)', 'rgba(251, 146, 60, 0.25)'];
     case 'unique':
       return ['rgba(139, 92, 246, 0.5)', 'rgba(139, 92, 246, 0.25)'];
     case 'common':

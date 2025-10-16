@@ -16,12 +16,25 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import Svg, { Path, Circle } from 'react-native-svg';
-import { captureRef } from 'react-native-view-shot';
-import * as MediaLibrary from 'expo-media-library';
-import * as Sharing from 'expo-sharing';
+import Svg, { Path } from 'react-native-svg';
+
+// Dynamic imports for Expo Go compatibility
+let captureRef: any = null;
+let MediaLibrary: any = null;
+let Sharing: any = null;
+
+try {
+  const ViewShot = require('react-native-view-shot');
+  captureRef = ViewShot.captureRef;
+  MediaLibrary = require('expo-media-library');
+  Sharing = require('expo-sharing');
+} catch (error) {
+  console.warn('Share/Save features require a development build. Not available in Expo Go.');
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = SCREEN_WIDTH - 40;
+const CARD_HEIGHT = CARD_WIDTH * 1.4;
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
@@ -172,6 +185,11 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
   }, [visible]);
 
   const handleShare = async () => {
+    if (!captureRef || !Sharing) {
+      Alert.alert('Not Available', 'Share feature requires a development build. Please build the app with "npx expo prebuild" and "npx expo run:ios"');
+      return;
+    }
+
     try {
       if (!cardRef.current) return;
 
@@ -192,6 +210,11 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
   };
 
   const handleSaveImage = async () => {
+    if (!captureRef || !MediaLibrary) {
+      Alert.alert('Not Available', 'Save feature requires a development build. Please build the app with "npx expo prebuild" and "npx expo run:ios"');
+      return;
+    }
+
     try {
       if (!cardRef.current) return;
 
@@ -221,13 +244,7 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
       animationType="fade"
       onRequestClose={onClose}
     >
-      <TouchableOpacity
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        {/* Full-screen blur backdrop so underlying screen isn't visible */}
-        <BlurView intensity={30} tint="dark" style={styles.fullscreenBlur} pointerEvents="none" />
+      <View style={styles.modalOverlay}>
         <Animated.View
           style={[
             styles.cardContainer,
@@ -238,7 +255,7 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
           ]}
         >
           {/* The Shareable Card */}
-          <View ref={cardRef} style={styles.card}>
+          <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0b0b18' }]}>
             <LinearGradient
               // Lighter cosmic top, warm flame only in bottom 50%
               colors={['#0b0b18', '#171a2c', '#3a1a10']}
@@ -328,79 +345,71 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
               <View style={styles.cornerBR} />
             </LinearGradient>
           </View>
+
+          {/* Close Button below card */}
+          <TouchableOpacity 
+            style={styles.closeButton}
+            onPress={onClose}
+            activeOpacity={0.7}
+          >
+            <BlurView intensity={60} tint="dark" style={styles.closeButtonBlur}>
+              <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </BlurView>
+          </TouchableOpacity>
+
+          {/* Action Buttons matching ShareCard layout */}
+          <View style={[styles.actionButtons, { width: CARD_WIDTH }]}>
+            <TouchableOpacity style={[styles.actionButton, { flex: 1 }]} activeOpacity={0.8} onPress={handleShare}>
+              <View style={styles.actionButtonOutline}>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+                <Text style={styles.actionButtonText}>Share</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.actionButton, { flex: 1 }]} activeOpacity={0.8} onPress={handleSaveImage}>
+              <View style={styles.actionButtonOutline}>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                  <Path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+                <Text style={styles.actionButtonText}>Save Image</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
         </Animated.View>
-      </TouchableOpacity>
-
-      {/* Actions below card */}
-      <View style={styles.belowCardContainer}>
-        {/* Centered Close Button between card and buttons */}
-        <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.closeBetween}>
-          <BlurView intensity={40} tint="dark" style={styles.closeBetweenBlur}>
-            <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-              <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          </BlurView>
-        </TouchableOpacity>
-
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={handleShare}>
-            <View style={styles.actionButtonOutline}>
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-              <Text style={styles.actionButtonText}>Share</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={handleSaveImage}>
-            <View style={styles.actionButtonOutline}>
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-              <Text style={styles.actionButtonText}>Save Image</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  fullscreenBlur: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    padding: 20,
   },
   cardContainer: {
-    width: SCREEN_WIDTH * 0.85,
-    aspectRatio: 1 / 1.4,
-    borderRadius: scale(28),
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 20,
+    alignItems: 'center',
   },
   card: {
-    flex: 1,
-    backgroundColor: '#0a0a1a',
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 40,
+    elevation: 20,
   },
   cardGradient: {
     flex: 1,
-    paddingHorizontal: scale(20),
-    paddingTop: scale(8),
-    paddingBottom: scale(16),
+    position: 'relative',
+    borderRadius: 24, // Match card border radius
   },
   starsBackground: {
     position: 'absolute',
@@ -586,53 +595,38 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   closeButton: {
-    position: 'absolute',
-    top: scale(40),
-    right: scale(20),
-    zIndex: 20,
+    marginTop: scale(20),
+    borderRadius: scale(28),
+    overflow: 'hidden',
   },
   closeButtonBlur: {
-    borderRadius: scale(22),
-    overflow: 'hidden',
-    width: scale(44),
-    height: scale(44),
+    width: scale(56),
+    height: scale(56),
+    borderRadius: scale(28),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(26, 26, 46, 0.6)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  belowCardContainer: {
-    alignItems: 'center',
-    gap: scale(10),
-    marginTop: scale(10),
-  },
   actionButtons: {
     flexDirection: 'row',
-    gap: scale(16),
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: scale(12),
+    marginTop: scale(16),
   },
   actionButton: {
     borderRadius: scale(14),
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
   },
   actionButtonOutline: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: scale(12),
-    paddingHorizontal: scale(20),
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: scale(14),
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
     gap: scale(8),
+    paddingVertical: scale(14),
+    borderRadius: scale(14),
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   actionButtonText: {
     color: '#ffffff',

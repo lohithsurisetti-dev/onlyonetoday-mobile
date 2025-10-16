@@ -4,7 +4,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import * as Location from 'expo-location';
+
+// Dynamic import to handle Expo Go compatibility
+let Location: any = null;
+try {
+  Location = require('expo-location');
+} catch (error) {
+  console.warn('expo-location not available in Expo Go. Use a development build for location features.');
+}
 
 export interface UserLocation {
   city?: string;
@@ -21,6 +28,12 @@ export const useLocation = () => {
   const [hasPermission, setHasPermission] = useState(false);
 
   const requestLocationPermission = async () => {
+    if (!Location) {
+      setError('Location services not available. Please use a development build.');
+      setIsLoading(false);
+      return false;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -46,6 +59,12 @@ export const useLocation = () => {
   };
 
   const fetchLocation = async () => {
+    if (!Location) {
+      setError('Location services not available');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       

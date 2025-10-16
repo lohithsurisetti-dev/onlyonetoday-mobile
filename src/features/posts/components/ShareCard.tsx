@@ -19,9 +19,20 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Circle, Path, Defs, LinearGradient as SvgLinearGradient, Stop, G } from 'react-native-svg';
-import { captureRef } from 'react-native-view-shot';
-import * as MediaLibrary from 'expo-media-library';
-import * as Sharing from 'expo-sharing';
+
+// Dynamic imports for Expo Go compatibility
+let captureRef: any = null;
+let MediaLibrary: any = null;
+let Sharing: any = null;
+
+try {
+  const ViewShot = require('react-native-view-shot');
+  captureRef = ViewShot.captureRef;
+  MediaLibrary = require('expo-media-library');
+  Sharing = require('expo-sharing');
+} catch (error) {
+  console.warn('Share/Save features require a development build. Not available in Expo Go.');
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 40;
@@ -157,6 +168,11 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
   const progress = 1 - data.percentile.value / 100;
 
   const handleShare = async () => {
+    if (!captureRef || !Sharing) {
+      Alert.alert('Not Available', 'Share feature requires a development build. Please build the app with "npx expo prebuild" and "npx expo run:ios"');
+      return;
+    }
+
     try {
       if (!cardRef.current) return;
 
@@ -177,6 +193,11 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
   };
 
   const handleSaveImage = async () => {
+    if (!captureRef || !MediaLibrary) {
+      Alert.alert('Not Available', 'Save feature requires a development build. Please build the app with "npx expo prebuild" and "npx expo run:ios"');
+      return;
+    }
+
     try {
       if (!cardRef.current) return;
 
@@ -223,7 +244,7 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
           ]}
         >
           {/* The Shareable Card */}
-          <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }]}>
+          <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0a0a1a' }]}>
             <LinearGradient
               colors={['#0a0a1a', '#1a1a2e', tierColors.backgroundGradient]}
               style={styles.cardGradient}
@@ -393,6 +414,7 @@ const styles = StyleSheet.create({
   cardGradient: {
     flex: 1,
     position: 'relative',
+    borderRadius: 24, // Match card border radius
   },
   starsContainer: {
     position: 'absolute',

@@ -330,51 +330,34 @@ export default function FeedScreen() {
         )}
         scrollEventThrottle={16}
       >
-        {/* Hero Section */}
+        {/* Hero Section - Compact */}
         <View style={styles.hero}>
-          <Text style={styles.heroTitle}>Discover</Text>
-          <Text style={styles.heroSubtitle}>See what makes others unique</Text>
-          
-          {/* Filter Button */}
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => setFilterSheetVisible(true)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#8b5cf6', '#a78bfa']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.filterButtonGradient}
+          <View style={styles.heroHeader}>
+            <View style={styles.heroLeft}>
+              <Text style={styles.heroTitle}>Discover</Text>
+              <Text style={styles.heroSubtitle}>{filteredPosts.length} posts nearby</Text>
+            </View>
+            
+            {/* Compact Filter Button */}
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setFilterSheetVisible(true)}
+              activeOpacity={0.8}
             >
-              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                <Path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-              <Text style={styles.filterButtonText}>
-                {hasActiveFilters ? 'Filters Active' : 'All Posts'}
-              </Text>
-              {hasActiveFilters && <View style={styles.filterDot} />}
-            </LinearGradient>
-          </TouchableOpacity>
-          
-          {/* Stats */}
-          <View style={styles.stats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{filteredPosts.length}</Text>
-              <Text style={styles.statLabel}>Posts</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {filteredPosts.filter(p => p.percentile && ['elite', 'rare', 'unique', 'notable'].includes(p.percentile.tier)).length}
-              </Text>
-              <Text style={styles.statLabel}>Unique</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>World</Text>
-              <Text style={styles.statLabel}>Scope</Text>
-            </View>
+              <BlurView intensity={40} tint="dark" style={styles.filterButtonBlur}>
+                <LinearGradient
+                  colors={hasActiveFilters ? ['#8b5cf6', '#a78bfa'] : ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.filterButtonGradient}
+                >
+                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                    <Path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                  {hasActiveFilters && <View style={styles.filterDot} />}
+                </LinearGradient>
+              </BlurView>
+            </TouchableOpacity>
           </View>
         </View>
         
@@ -577,88 +560,59 @@ const styles = StyleSheet.create({
     paddingBottom: scale(100),
   },
   hero: {
-    padding: scale(24),
-    paddingTop: scale(70),
-    gap: scale(20),
+    paddingHorizontal: scale(20),
+    paddingTop: scale(60),
+    paddingBottom: scale(16),
   },
-  heroTitle: {
-    fontSize: moderateScale(36, 0.3),
-    fontWeight: '900',
-    color: '#ffffff',
-    letterSpacing: -0.5,
-    textShadowColor: 'rgba(139, 92, 246, 0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-  },
-  heroSubtitle: {
-    fontSize: moderateScale(16, 0.2),
-    color: 'rgba(255, 255, 255, 0.6)',
-    letterSpacing: 0.5,
-    marginTop: scale(-12),
-  },
-  filterButton: {
-    borderRadius: scale(16),
-    overflow: 'hidden',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  filterButtonGradient: {
+  heroHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: scale(10),
-    paddingVertical: scale(16),
-    paddingHorizontal: scale(20),
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: scale(16),
+    justifyContent: 'space-between',
   },
-  filterButtonText: {
-    fontSize: moderateScale(16, 0.2),
-    fontWeight: '700',
+  heroLeft: {
+    gap: scale(2),
+  },
+  heroTitle: {
+    fontSize: moderateScale(28, 0.3),
+    fontWeight: '800',
     color: '#ffffff',
-    letterSpacing: 0.5,
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(139, 92, 246, 0.3)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 16,
+  },
+  heroSubtitle: {
+    fontSize: moderateScale(13, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    letterSpacing: 0.3,
+  },
+  filterButton: {
+    borderRadius: scale(14),
+    overflow: 'hidden',
+  },
+  filterButtonBlur: {
+    borderRadius: scale(14),
+  },
+  filterButtonGradient: {
+    width: scale(48),
+    height: scale(48),
+    borderRadius: scale(14),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    position: 'relative',
   },
   filterDot: {
+    position: 'absolute',
+    top: scale(6),
+    right: scale(6),
     width: scale(8),
     height: scale(8),
     borderRadius: scale(4),
     backgroundColor: '#ef4444',
     borderWidth: 1.5,
     borderColor: '#ffffff',
-  },
-  stats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    padding: scale(20),
-    borderRadius: scale(20),
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  statItem: {
-    alignItems: 'center',
-    gap: scale(4),
-  },
-  statValue: {
-    fontSize: moderateScale(20, 0.3),
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  statLabel: {
-    fontSize: moderateScale(11, 0.2),
-    color: 'rgba(255, 255, 255, 0.5)',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  statDivider: {
-    width: 1,
-    height: scale(30),
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   postsContainer: {
     padding: scale(20),

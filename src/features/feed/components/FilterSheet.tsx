@@ -150,11 +150,7 @@ export default function FilterSheet({
             </View>
 
             {/* Content */}
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-            >
+            <View style={styles.content}>
               {/* Post Type */}
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
@@ -330,7 +326,7 @@ export default function FilterSheet({
                   </View>
                 </BlurView>
               </TouchableOpacity>
-            </ScrollView>
+            </View>
           </LinearGradient>
         </BlurView>
       </Animated.View>
@@ -375,7 +371,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: SCREEN_HEIGHT * 0.82,
     borderTopLeftRadius: scale(32),
     borderTopRightRadius: scale(32),
     overflow: 'hidden',
@@ -392,25 +387,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   handleBar: {
-    width: scale(48),
-    height: scale(5),
-    borderRadius: scale(2.5),
+    width: scale(40),
+    height: scale(4),
+    borderRadius: scale(2),
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     alignSelf: 'center',
-    marginTop: scale(14),
-    marginBottom: scale(24),
+    marginTop: scale(10),
+    marginBottom: scale(16),
   },
   sheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: scale(24),
-    paddingBottom: scale(24),
+    paddingHorizontal: scale(20),
+    paddingBottom: scale(16),
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(139, 92, 246, 0.2)',
   },
   sheetTitle: {
-    fontSize: moderateScale(28, 0.3),
+    fontSize: moderateScale(24, 0.3),
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: -0.5,
@@ -419,80 +414,78 @@ const styles = StyleSheet.create({
     textShadowRadius: 12,
   },
   sheetSubtitle: {
-    fontSize: moderateScale(13, 0.2),
+    fontSize: moderateScale(12, 0.2),
     color: 'rgba(255, 255, 255, 0.5)',
     marginTop: scale(2),
     letterSpacing: 0.3,
   },
   closeButton: {
-    borderRadius: scale(20),
+    borderRadius: scale(18),
     overflow: 'hidden',
   },
   closeButtonBlur: {
-    width: scale(40),
-    height: scale(40),
-    borderRadius: scale(20),
+    width: scale(36),
+    height: scale(36),
+    borderRadius: scale(18),
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: scale(24),
-    paddingBottom: scale(60),
-    gap: scale(32),
+  content: {
+    padding: scale(20),
+    paddingBottom: scale(30),
+    gap: scale(20),
   },
   section: {
-    gap: scale(16),
+    gap: scale(10),
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(10),
+    gap: scale(8),
+    marginBottom: scale(4),
   },
   sectionIndicator: {
-    width: scale(3),
-    height: scale(18),
-    borderRadius: scale(1.5),
+    width: scale(2.5),
+    height: scale(14),
+    borderRadius: scale(1.25),
     backgroundColor: '#8b5cf6',
   },
   sectionTitle: {
-    fontSize: moderateScale(13, 0.2),
+    fontSize: moderateScale(11, 0.2),
     fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.7)',
-    letterSpacing: 2,
+    color: 'rgba(255, 255, 255, 0.6)',
+    letterSpacing: 1.8,
   },
   optionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: scale(12),
+    gap: scale(8),
   },
   optionButton: {
     flex: 1,
     minWidth: '47%',
-    borderRadius: scale(16),
+    borderRadius: scale(12),
     overflow: 'hidden',
   },
   optionButtonActive: {
     shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   optionButtonDisabled: {
     opacity: 0.25,
   },
   optionBlur: {
-    borderRadius: scale(16),
+    borderRadius: scale(12),
   },
   optionGradient: {
-    paddingVertical: scale(18),
-    paddingHorizontal: scale(20),
-    borderRadius: scale(16),
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(12),
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
@@ -500,10 +493,10 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   optionLabel: {
-    fontSize: moderateScale(13, 0.2),
+    fontSize: moderateScale(12, 0.2),
     fontWeight: '700',
     color: 'rgba(255, 255, 255, 0.6)',
-    letterSpacing: 1.2,
+    letterSpacing: 1,
   },
   optionLabelActive: {
     color: '#ffffff',
@@ -513,33 +506,33 @@ const styles = StyleSheet.create({
   },
   activeIndicator: {
     position: 'absolute',
-    top: scale(8),
-    right: scale(8),
-    width: scale(8),
-    height: scale(8),
+    top: scale(6),
+    right: scale(6),
+    width: scale(6),
+    height: scale(6),
   },
   clearButton: {
-    marginTop: scale(16),
-    borderRadius: scale(16),
+    marginTop: scale(8),
+    borderRadius: scale(12),
     overflow: 'hidden',
   },
   clearButtonBlur: {
-    borderRadius: scale(16),
+    borderRadius: scale(12),
   },
   clearButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: scale(10),
-    paddingVertical: scale(18),
+    gap: scale(8),
+    paddingVertical: scale(14),
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: scale(16),
+    borderRadius: scale(12),
   },
   clearButtonText: {
-    fontSize: moderateScale(15, 0.2),
+    fontSize: moderateScale(13, 0.2),
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.7)',
     letterSpacing: 0.5,
   },
 });

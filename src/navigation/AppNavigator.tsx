@@ -12,6 +12,7 @@ import OTPVerificationScreen from '@/features/auth/screens/OTPVerificationScreen
 import MainTabs from './MainTabs';
 import ResponseScreen from '@features/posts/screens/ResponseScreen';
 import AllPostsScreen from '@/features/profile/screens/AllPostsScreen';
+import NotificationsScreen from '@/features/notifications/screens/NotificationsScreen';
 
 export type RootStackParamList = {
   Signup: undefined;
@@ -34,6 +35,7 @@ export type RootStackParamList = {
     scope?: string;
   };
   AllPosts: undefined;
+  Notifications: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -65,6 +67,13 @@ export default function AppNavigator() {
         <Stack.Screen 
           name="AllPosts" 
           component={AllPostsScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen 
+          name="Notifications" 
+          component={NotificationsScreen}
           options={{
             animation: 'slide_from_right',
           }}

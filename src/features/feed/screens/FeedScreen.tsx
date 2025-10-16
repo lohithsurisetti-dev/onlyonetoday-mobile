@@ -20,6 +20,7 @@ import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import FilterSheet from '../components/FilterSheet';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -63,7 +64,7 @@ interface Post {
 const SAMPLE_POSTS: Post[] = [
   {
     id: '1',
-    content: 'Meditated for 20 minutes this morning while watching the sunrise',
+    content: 'Meditated for 20 minutes this morning while watching the sunrise from my rooftop',
     time: '2 hrs ago',
     scope: 'world',
     input_type: 'action',
@@ -71,7 +72,7 @@ const SAMPLE_POSTS: Post[] = [
       percentile: 2.5,
       tier: 'elite',
       displayText: 'Top 3%',
-      comparison: 'More unique than 97% of posts',
+      comparison: 'More unique than 97%',
     },
     funny_count: 12,
     creative_count: 24,
@@ -88,7 +89,7 @@ const SAMPLE_POSTS: Post[] = [
       percentile: 15,
       tier: 'unique',
       displayText: 'Top 15%',
-      comparison: 'More unique than 85% of posts',
+      comparison: 'More unique than 85%',
     },
     funny_count: 5,
     creative_count: 18,
@@ -96,7 +97,7 @@ const SAMPLE_POSTS: Post[] = [
   },
   {
     id: '3',
-    content: 'Went to the gym and did cardio',
+    content: 'Went to the gym and did cardio for 45 minutes',
     time: '1 day ago',
     scope: 'world',
     input_type: 'action',
@@ -104,11 +105,59 @@ const SAMPLE_POSTS: Post[] = [
       percentile: 65,
       tier: 'common',
       displayText: 'Top 65%',
-      comparison: 'Similar to many others',
+      comparison: 'Similar to many',
     },
     funny_count: 2,
     creative_count: 3,
     must_try_count: 8,
+  },
+  {
+    id: '4',
+    content: 'Built a treehouse with my kids in the backyard - took all weekend!',
+    time: '3 hrs ago',
+    scope: 'world',
+    input_type: 'action',
+    percentile: {
+      percentile: 8,
+      tier: 'rare',
+      displayText: 'Top 8%',
+      comparison: 'More unique than 92%',
+    },
+    funny_count: 18,
+    creative_count: 42,
+    must_try_count: 28,
+  },
+  {
+    id: '5',
+    content: 'Tried making sushi at home for the first time. It was a delicious mess!',
+    time: '7 hrs ago',
+    scope: 'world',
+    input_type: 'action',
+    percentile: {
+      percentile: 22,
+      tier: 'notable',
+      displayText: 'Top 22%',
+      comparison: 'More unique than 78%',
+    },
+    funny_count: 28,
+    creative_count: 15,
+    must_try_count: 62,
+  },
+  {
+    id: '6',
+    content: 'Had coffee with friends at the usual spot',
+    time: '2 days ago',
+    scope: 'world',
+    input_type: 'action',
+    percentile: {
+      percentile: 78,
+      tier: 'popular',
+      displayText: 'Top 78%',
+      comparison: 'Common activity',
+    },
+    funny_count: 4,
+    creative_count: 1,
+    must_try_count: 3,
   },
 ];
 
@@ -336,6 +385,20 @@ export default function FeedScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* Filter Sheet */}
+      <FilterSheet
+        visible={filterSheetVisible}
+        onClose={() => setFilterSheetVisible(false)}
+        filter={filter}
+        onFilterChange={setFilter}
+        scopeFilter={scopeFilter}
+        onScopeFilterChange={setScopeFilter}
+        reactionFilter={reactionFilter}
+        onReactionFilterChange={setReactionFilter}
+        inputTypeFilter={inputTypeFilter}
+        onInputTypeFilterChange={setInputTypeFilter}
+      />
     </View>
   );
 }

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OnlyOne.Today - Global Feed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#8347eb",
+                    "background-light": "#f7f6f8",
+                    "background-dark": "#0D0C1D",
+                    "tier-legendary": "#FFD700",
+                    "tier-epic": "#9400D3",
+                    "tier-rare": "#0070DD",
+                    "tier-uncommon": "#1E8449",
+                    "tier-common": "#979797",
+                },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.75rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+                },
+            },
+        },
+    }
+    </script>
+<style>
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-dark text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col items-center overflow-x-hidden">
+<div class="fixed top-0 left-0 right-0 z-10 w-full glassmorphism" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(13, 12, 29, 0.7);">
+<div class="max-w-md mx-auto px-6">
+<div class="flex items-center justify-between h-16">
+<h1 class="text-xl font-bold">Global Feed</h1>
+<button class="p-2 rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+<div class="pb-3 overflow-x-auto no-scrollbar">
+<div class="flex space-x-2">
+<button class="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-full whitespace-nowrap">All</button>
+<button class="px-4 py-2 text-sm font-semibold text-gray-300 bg-white/10 rounded-full whitespace-nowrap hover:bg-white/20">Trending</button>
+<button class="px-4 py-2 text-sm font-semibold text-gray-300 bg-white/10 rounded-full whitespace-nowrap hover:bg-white/20">Elite</button>
+<button class="px-4 py-2 text-sm font-semibold text-gray-300 bg-white/10 rounded-full whitespace-nowrap hover:bg-white/20">Actions</button>
+<button class="px-4 py-2 text-sm font-semibold text-gray-300 bg-white/10 rounded-full whitespace-nowrap hover:bg-white/20">Summaries</button>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full max-w-md px-6 pt-36 pb-12">
+<div class="flex items-center justify-center -mt-8 mb-4 text-gray-400">
+<span class="material-symbols-outlined animate-spin">autorenew</span>
+<span class="ml-2">Refreshing...</span>
+</div>
+<div class="space-y-6">
+<div class="p-4 rounded-xl glassmorphism border-l-4 border-tier-legendary">
+<div class="flex justify-between items-center mb-3">
+<div class="px-2 py-1 text-xs font-bold text-black rounded bg-tier-legendary">LEGENDARY</div>
+<p class="text-xs text-gray-400">2h ago</p>
+</div>
+<p class="text-lg font-medium italic text-white mb-4 line-clamp-3">"Ate breakfast on a hot air balloon while juggling flaming torches."</p>
+<div class="flex items-center space-x-2 text-xs mb-4">
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">#1</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Worldwide</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Action</span>
+</div>
+<div class="flex justify-end">
+<button class="p-2 rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined text-gray-300">share</span>
+</button>
+</div>
+</div>
+<div class="p-4 rounded-xl glassmorphism border-l-4 border-tier-epic">
+<div class="flex justify-between items-center mb-3">
+<div class="px-2 py-1 text-xs font-bold text-white rounded bg-tier-epic">EPIC</div>
+<p class="text-xs text-gray-400">5h ago</p>
+</div>
+<p class="text-lg font-medium italic text-white mb-4 line-clamp-3">"Wrote and performed a one-act play for my cats. They were a tough crowd but the tuna bribes at the end secured a standing ovation."</p>
+<div class="flex items-center space-x-2 text-xs mb-4">
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">#3</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Country</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Action</span>
+</div>
+<div class="flex justify-end">
+<button class="p-2 rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined text-gray-300">share</span>
+</button>
+</div>
+</div>
+<div class="p-4 rounded-xl glassmorphism border-l-4 border-tier-rare">
+<div class="flex justify-between items-center mb-3">
+<div class="px-2 py-1 text-xs font-bold text-white rounded bg-tier-rare">RARE</div>
+<p class="text-xs text-gray-400">8h ago</p>
+</div>
+<p class="text-lg font-medium italic text-white mb-4 line-clamp-3">"Learned to solve a Rubik's cube with my feet."</p>
+<div class="flex items-center space-x-2 text-xs mb-4">
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">#12</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Worldwide</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Action</span>
+</div>
+<div class="flex justify-end">
+<button class="p-2 rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined text-gray-300">share</span>
+</button>
+</div>
+</div>
+<div class="p-4 rounded-xl glassmorphism border-l-4 border-tier-uncommon">
+<div class="flex justify-between items-center mb-3">
+<div class="px-2 py-1 text-xs font-bold text-white rounded bg-tier-uncommon">UNCOMMON</div>
+<p class="text-xs text-gray-400">1d ago</p>
+</div>
+<p class="text-lg font-medium italic text-white mb-4 line-clamp-3">"Spent the day productively: meditated, exercised, ate healthy, and connected with loved ones. It was a good day."</p>
+<div class="flex items-center space-x-2 text-xs mb-4">
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">#458</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">State</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Summary</span>
+</div>
+<div class="flex justify-end">
+<button class="p-2 rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined text-gray-300">share</span>
+</button>
+</div>
+</div>
+<div class="p-4 rounded-xl glassmorphism border-l-4 border-tier-common">
+<div class="flex justify-between items-center mb-3">
+<div class="px-2 py-1 text-xs font-bold text-black rounded bg-tier-common">COMMON</div>
+<p class="text-xs text-gray-400">2d ago</p>
+</div>
+<p class="text-lg font-medium italic text-white mb-4 line-clamp-3">"Watched a new movie."</p>
+<div class="flex items-center space-x-2 text-xs mb-4">
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">#10,234</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">City</span>
+<span class="bg-white/10 text-gray-300 px-2 py-1 rounded-full">Action</span>
+</div>
+<div class="flex justify-end">
+<button class="p-2 rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined text-gray-300">share</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

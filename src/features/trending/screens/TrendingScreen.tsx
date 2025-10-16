@@ -1,6 +1,6 @@
 /**
- * Trending Screen - Premium Cosmic Theme
- * Live trending content from Spotify, Reddit, YouTube, Sports & more
+ * Trending Screen - Ultra Premium Design
+ * Elegant monochrome with subtle cosmic accents
  */
 
 import React, { useState, useRef, useCallback } from 'react';
@@ -18,6 +18,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
+import TrendingShareCard from '../components/TrendingShareCard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -42,117 +43,30 @@ interface TrendingPost {
 // ============================================================================
 
 const SAMPLE_TRENDING: TrendingPost[] = [
-  {
-    id: 't1',
-    content: 'Listening to "Cruel Summer" by Taylor Swift',
-    source: 'spotify',
-    count: 12500000,
-    time: 'Live',
-  },
-  {
-    id: 't2',
-    content: 'Reading about "AI breaks new barrier in medicine" on Reddit',
-    source: 'reddit',
-    count: 45000,
-    time: 'Live',
-  },
-  {
-    id: 't3',
-    content: 'Watching "The most satisfying video ever" on YouTube',
-    source: 'youtube',
-    count: 2800000,
-    time: 'Live',
-  },
-  {
-    id: 't4',
-    content: 'Following Lakers vs Warriors game',
-    source: 'sports',
-    count: 156000,
-    time: 'Live',
-  },
-  {
-    id: 't5',
-    content: 'Listening to "Paint The Town Red" by Doja Cat',
-    source: 'spotify',
-    count: 9200000,
-    time: 'Live',
-  },
-  {
-    id: 't6',
-    content: 'Reading about "SpaceX launches new satellite" on Reddit',
-    source: 'reddit',
-    count: 38000,
-    time: 'Live',
-  },
+  { id: 't1', content: 'Listening to "Cruel Summer" by Taylor Swift', source: 'spotify', count: 12500000, time: 'Live' },
+  { id: 't2', content: 'Reading about "AI breaks new barrier in medicine" on Reddit', source: 'reddit', count: 45000, time: 'Live' },
+  { id: 't3', content: 'Watching "The most satisfying video ever" on YouTube', source: 'youtube', count: 2800000, time: 'Live' },
+  { id: 't4', content: 'Following Lakers vs Warriors game', source: 'sports', count: 156000, time: 'Live' },
+  { id: 't5', content: 'Listening to "Paint The Town Red" by Doja Cat', source: 'spotify', count: 9200000, time: 'Live' },
+  { id: 't6', content: 'Reading about "SpaceX launches new satellite" on Reddit', source: 'reddit', count: 38000, time: 'Live' },
 ];
 
 // ============================================================================
-// SOURCE ICONS & COLORS
+// SOURCE INFO
 // ============================================================================
 
 function getSourceInfo(source: TrendingSource) {
   switch (source) {
     case 'spotify':
-      return {
-        name: 'Spotify',
-        color: '#1DB954',
-        gradient: ['rgba(29, 185, 84, 0.3)', 'rgba(29, 185, 84, 0.15)'],
-        icon: (
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Circle cx={12} cy={12} r={10} stroke="#1DB954" strokeWidth={2} />
-            <Path d="M8 10c2 0 4 1 6 1s4-1 6-1M8 13c2 0 4 1 6 1s4-1 6-1M8 16c2 0 4 1 6 1s4-1 6-1" stroke="#1DB954" strokeWidth={2} strokeLinecap="round" />
-          </Svg>
-        ),
-      };
+      return { name: 'Spotify', emoji: '🎵' };
     case 'reddit':
-      return {
-        name: 'Reddit',
-        color: '#FF4500',
-        gradient: ['rgba(255, 69, 0, 0.3)', 'rgba(255, 69, 0, 0.15)'],
-        icon: (
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Circle cx={12} cy={12} r={10} stroke="#FF4500" strokeWidth={2} />
-            <Circle cx={9} cy={11} r={1.5} fill="#FF4500" />
-            <Circle cx={15} cy={11} r={1.5} fill="#FF4500" />
-            <Path d="M9 15s1 2 3 2 3-2 3-2" stroke="#FF4500" strokeWidth={2} strokeLinecap="round" />
-          </Svg>
-        ),
-      };
+      return { name: 'Reddit', emoji: '💬' };
     case 'youtube':
-      return {
-        name: 'YouTube',
-        color: '#FF0000',
-        gradient: ['rgba(255, 0, 0, 0.3)', 'rgba(255, 0, 0, 0.15)'],
-        icon: (
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Path d="M22 8s0-4-4-4H6S2 4 2 8v8s0 4 4 4h12s4 0 4-4V8z" stroke="#FF0000" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            <Path d="M10 9l5 3-5 3V9z" fill="#FF0000" />
-          </Svg>
-        ),
-      };
+      return { name: 'YouTube', emoji: '📺' };
     case 'sports':
-      return {
-        name: 'Sports',
-        color: '#10b981',
-        gradient: ['rgba(16, 185, 129, 0.3)', 'rgba(16, 185, 129, 0.15)'],
-        icon: (
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Circle cx={12} cy={12} r={10} stroke="#10b981" strokeWidth={2} />
-            <Path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM12 4c1.93 0 3.68.69 5.05 1.83L13 10l-2-3-2.92 4.37L6 9.28A7.94 7.94 0 0112 4zm0 16c-4.41 0-8-3.59-8-8 0-.05.01-.1.01-.15l2.74 2.09L9 10.5l2 3 4-6 2.23 3.34c.5 1.1.77 2.32.77 3.61 0 4.41-3.59 8-8 8z" fill="#10b981" opacity={0.3} />
-          </Svg>
-        ),
-      };
+      return { name: 'Sports', emoji: '⚽' };
     default:
-      return {
-        name: 'Curated',
-        color: '#8b5cf6',
-        gradient: ['rgba(139, 92, 246, 0.3)', 'rgba(139, 92, 246, 0.15)'],
-        icon: (
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          </Svg>
-        ),
-      };
+      return { name: 'Curated', emoji: '✨' };
   }
 }
 
@@ -168,46 +82,18 @@ const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
     Animated.loop(
       Animated.parallel([
         Animated.sequence([
-          Animated.timing(translateY, {
-            toValue: -15,
-            duration: 2000 + Math.random() * 1000,
-            delay,
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateY, {
-            toValue: 0,
-            duration: 2000 + Math.random() * 1000,
-            useNativeDriver: true,
-          }),
+          Animated.timing(translateY, { toValue: -15, duration: 2000 + Math.random() * 1000, delay, useNativeDriver: true }),
+          Animated.timing(translateY, { toValue: 0, duration: 2000 + Math.random() * 1000, useNativeDriver: true }),
         ]),
         Animated.sequence([
-          Animated.timing(opacity, {
-            toValue: 0.6,
-            duration: 1000,
-            delay,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacity, {
-            toValue: 0.2,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
+          Animated.timing(opacity, { toValue: 0.6, duration: 1000, delay, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 0.2, duration: 1000, useNativeDriver: true }),
         ]),
       ])
     ).start();
   }, []);
 
-  return (
-    <Animated.View
-      style={[
-        styles.star,
-        {
-          opacity,
-          transform: [{ translateY }],
-        },
-      ]}
-    />
-  );
+  return <Animated.View style={[styles.star, { opacity, transform: [{ translateY }] }]} />;
 };
 
 // ============================================================================
@@ -217,7 +103,7 @@ const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
 export default function TrendingScreen() {
   const [trendingPosts, setTrendingPosts] = useState<TrendingPost[]>(SAMPLE_TRENDING);
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [sharePost, setSharePost] = useState<TrendingPost | null>(null);
   
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerOpacity = scrollY.interpolate({
@@ -228,7 +114,6 @@ export default function TrendingScreen() {
   
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     setRefreshing(false);
   }, []);
@@ -236,22 +121,12 @@ export default function TrendingScreen() {
   return (
     <View style={styles.container}>
       {/* Background */}
-      <LinearGradient
-        colors={['#0a0a1a', '#1a1a2e', '#2d1b4e']}
-        style={StyleSheet.absoluteFill}
-      />
+      <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#2d1b4e']} style={StyleSheet.absoluteFill} />
       
       {/* Floating Stars */}
       <View style={styles.starsContainer} pointerEvents="none">
         {[...Array(15)].map((_, i) => (
-          <View
-            key={i}
-            style={{
-              position: 'absolute',
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-          >
+          <View key={i} style={{ position: 'absolute', top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%` }}>
             <FloatingStar delay={i * 150} />
           </View>
         ))}
@@ -260,10 +135,7 @@ export default function TrendingScreen() {
       {/* Sticky Header */}
       <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
         <BlurView intensity={80} tint="dark" style={styles.headerBlur}>
-          <LinearGradient
-            colors={['rgba(26, 26, 46, 0.95)', 'rgba(10, 10, 26, 0.95)']}
-            style={styles.headerGradient}
-          >
+          <LinearGradient colors={['rgba(26, 26, 46, 0.95)', 'rgba(10, 10, 26, 0.95)']} style={styles.headerGradient}>
             <Text style={styles.headerTitle}>Trending</Text>
           </LinearGradient>
         </BlurView>
@@ -274,50 +146,32 @@ export default function TrendingScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#fb923c"
-            colors={['#fb923c']}
-          />
-        }
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#a78bfa" colors={['#a78bfa']} />}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
         scrollEventThrottle={16}
       >
-        {/* Hero */}
+        {/* Hero - Minimal */}
         <View style={styles.hero}>
-          <View style={styles.heroIcon}>
-            <LinearGradient
-              colors={['#fb923c', '#f97316']}
-              style={styles.heroIconGradient}
-            >
-              <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-                <Path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke="#ffffff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </LinearGradient>
-          </View>
-          <Text style={styles.heroTitle}>Trending Now</Text>
-          <Text style={styles.heroSubtitle}>Live from Spotify, Reddit, YouTube & more</Text>
+          <Text style={styles.heroTitle}>Trending</Text>
+          <Text style={styles.heroSubtitle}>What the world is doing</Text>
         </View>
         
         {/* Trending Posts */}
         <View style={styles.postsContainer}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#fb923c" />
-              <Text style={styles.loadingText}>Loading trending...</Text>
-            </View>
-          ) : (
-            trendingPosts.map((post, index) => (
-              <TrendingCard key={post.id} post={post} index={index} />
-            ))
-          )}
+          {trendingPosts.map((post, index) => (
+            <TrendingCard key={post.id} post={post} index={index} onShare={setSharePost} />
+          ))}
         </View>
       </Animated.ScrollView>
+      
+      {/* Share Card */}
+      {sharePost && (
+        <TrendingShareCard
+          visible={!!sharePost}
+          onClose={() => setSharePost(null)}
+          post={sharePost}
+        />
+      )}
     </View>
   );
 }
@@ -329,28 +183,18 @@ export default function TrendingScreen() {
 interface TrendingCardProps {
   post: TrendingPost;
   index: number;
+  onShare: (post: TrendingPost) => void;
 }
 
-function TrendingCard({ post, index }: TrendingCardProps) {
+function TrendingCard({ post, index, onShare }: TrendingCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const sourceInfo = getSourceInfo(post.source);
   
   React.useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 500,
-        delay: index * 100,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        friction: 8,
-        tension: 40,
-        delay: index * 100,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 500, delay: index * 100, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 40, delay: index * 100, useNativeDriver: true }),
     ]).start();
   }, []);
   
@@ -361,36 +205,23 @@ function TrendingCard({ post, index }: TrendingCardProps) {
   };
   
   return (
-    <Animated.View
-      style={[
-        styles.trendingCard,
-        {
-          opacity: fadeAnim,
-          transform: [{ translateY: slideAnim }],
-        },
-      ]}
-    >
+    <Animated.View style={[styles.trendingCard, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <BlurView intensity={20} tint="dark" style={styles.cardBlur}>
         <LinearGradient
-          colors={sourceInfo.gradient}
+          colors={['rgba(167, 139, 250, 0.08)', 'rgba(45, 27, 78, 0.12)']}
           style={styles.cardGradient}
         >
+          {/* Share Button */}
+          <TouchableOpacity style={styles.shareButton} onPress={() => onShare(post)} activeOpacity={0.6}>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          </TouchableOpacity>
+          
           {/* Source Badge */}
           <View style={styles.sourceBadge}>
-            <BlurView intensity={40} tint="dark" style={styles.sourceBadgeBlur}>
-              <View style={styles.sourceBadgeContent}>
-                {sourceInfo.icon}
-                <Text style={[styles.sourceName, { color: sourceInfo.color }]}>
-                  {sourceInfo.name}
-                </Text>
-              </View>
-            </BlurView>
-          </View>
-          
-          {/* Trending Indicator */}
-          <View style={styles.trendingBadge}>
-            <View style={[styles.liveDot, { backgroundColor: sourceInfo.color }]} />
-            <Text style={styles.liveText}>{post.time}</Text>
+            <Text style={styles.sourceEmoji}>{sourceInfo.emoji}</Text>
+            <Text style={styles.sourceName}>{sourceInfo.name}</Text>
           </View>
           
           {/* Content */}
@@ -398,13 +229,12 @@ function TrendingCard({ post, index }: TrendingCardProps) {
           
           {/* Footer */}
           <View style={styles.cardFooter}>
+            <View style={styles.liveBadge}>
+              <View style={styles.liveDot} />
+              <Text style={styles.liveText}>LIVE</Text>
+            </View>
             <View style={styles.countBadge}>
-              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                <Path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" stroke={sourceInfo.color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-              <Text style={[styles.countText, { color: sourceInfo.color }]}>
-                {formatCount(post.count)}
-              </Text>
+              <Text style={styles.countText}>{formatCount(post.count)}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -467,54 +297,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
     paddingTop: scale(60),
     paddingBottom: scale(20),
-    alignItems: 'center',
-    gap: scale(12),
-  },
-  heroIcon: {
-    borderRadius: scale(20),
-    overflow: 'hidden',
-    shadowColor: '#fb923c',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  heroIconGradient: {
-    width: scale(56),
-    height: scale(56),
-    borderRadius: scale(20),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    gap: scale(4),
   },
   heroTitle: {
     fontSize: moderateScale(32, 0.3),
     fontWeight: '900',
     color: '#ffffff',
     letterSpacing: -0.5,
-    textShadowColor: 'rgba(251, 146, 60, 0.5)',
+    textShadowColor: 'rgba(167, 139, 250, 0.4)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+    textShadowRadius: 16,
   },
   heroSubtitle: {
-    fontSize: moderateScale(13, 0.2),
-    color: 'rgba(255, 255, 255, 0.6)',
-    textAlign: 'center',
+    fontSize: moderateScale(14, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
     letterSpacing: 0.3,
   },
   postsContainer: {
     padding: scale(20),
     gap: scale(14),
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    paddingVertical: scale(60),
-    gap: scale(16),
-  },
-  loadingText: {
-    fontSize: moderateScale(14, 0.2),
-    color: 'rgba(255, 255, 255, 0.6)',
   },
   trendingCard: {
     borderRadius: scale(18),
@@ -527,59 +328,36 @@ const styles = StyleSheet.create({
     padding: scale(18),
     borderRadius: scale(18),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    gap: scale(12),
+    borderColor: 'rgba(167, 139, 250, 0.15)',
+    gap: scale(14),
     position: 'relative',
   },
-  sourceBadge: {
-    position: 'absolute',
-    top: scale(14),
-    left: scale(14),
-    borderRadius: scale(10),
-    overflow: 'hidden',
-    zIndex: 10,
-  },
-  sourceBadgeBlur: {
-    borderRadius: scale(10),
-  },
-  sourceBadgeContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(6),
-    paddingHorizontal: scale(10),
-    paddingVertical: scale(6),
-    borderRadius: scale(10),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  sourceName: {
-    fontSize: moderateScale(11, 0.2),
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  trendingBadge: {
+  shareButton: {
     position: 'absolute',
     top: scale(14),
     right: scale(14),
+    zIndex: 10,
+    padding: scale(4),
+  },
+  sourceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(6),
+    alignSelf: 'flex-start',
     paddingHorizontal: scale(10),
     paddingVertical: scale(6),
     borderRadius: scale(10),
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  liveDot: {
-    width: scale(6),
-    height: scale(6),
-    borderRadius: scale(3),
+  sourceEmoji: {
+    fontSize: moderateScale(12, 0.2),
   },
-  liveText: {
+  sourceName: {
     fontSize: moderateScale(10, 0.2),
-    fontWeight: '700',
-    color: '#ffffff',
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
     letterSpacing: 0.5,
   },
   cardContent: {
@@ -587,28 +365,51 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(23, 0.2),
     color: '#ffffff',
     fontWeight: '500',
-    marginTop: scale(32),
   },
   cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
   },
-  countBadge: {
+  liveBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(6),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(8),
+    backgroundColor: 'rgba(167, 139, 250, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(167, 139, 250, 0.3)',
+  },
+  liveDot: {
+    width: scale(4),
+    height: scale(4),
+    borderRadius: scale(2),
+    backgroundColor: '#a78bfa',
+    shadowColor: '#a78bfa',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+  },
+  liveText: {
+    fontSize: moderateScale(9, 0.2),
+    fontWeight: '700',
+    color: '#a78bfa',
+    letterSpacing: 1,
+  },
+  countBadge: {
     paddingHorizontal: scale(10),
     paddingVertical: scale(6),
-    borderRadius: scale(10),
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: scale(8),
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   countText: {
-    fontSize: moderateScale(12, 0.2),
+    fontSize: moderateScale(11, 0.2),
     fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.7)',
     letterSpacing: 0.5,
   },
 });
-

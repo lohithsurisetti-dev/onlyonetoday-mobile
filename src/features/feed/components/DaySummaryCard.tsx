@@ -76,35 +76,36 @@ export default function DaySummaryCard({
         onPress={() => onPress(post)}
         activeOpacity={0.9}
       >
-        <BlurView intensity={20} tint="dark" style={styles.blur}>
+        <BlurView intensity={25} tint="dark" style={styles.blur}>
           <LinearGradient
-            colors={isTopTier ? ['rgba(139, 92, 246, 0.12)', 'rgba(236, 72, 153, 0.08)'] : ['rgba(59, 130, 246, 0.08)', 'rgba(26, 26, 46, 0.15)']}
+            colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
             style={styles.gradient}
           >
-          {/* Header with tier indicator and share */}
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              {post.percentile && (
-                <View style={[styles.tierBadge, { backgroundColor: `${tierColors.primary}30` }]}>
-                  <View style={[styles.tierDot, { backgroundColor: tierColors.primary }]} />
-                  <Text style={[styles.tierText, { color: tierColors.primary }]}>
-                    {post.percentile.displayText}
-                  </Text>
-                </View>
-              )}
+            {/* Header with tier indicator and share */}
+            <View style={styles.header}>
+              <View style={styles.headerLeft}>
+                {post.percentile && (
+                  <View style={[styles.tierBadge, { backgroundColor: `${tierColors.primary}30` }]}>
+                    <View style={[styles.tierDot, { backgroundColor: tierColors.primary }]} />
+                    <Text style={[styles.tierText, { color: tierColors.primary }]}>
+                      {post.percentile.displayText}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              
               <Text style={styles.dateLabel}>Day Summary</Text>
+              
+              <TouchableOpacity
+                style={styles.shareBtn}
+                onPress={() => onShare(post)}
+                activeOpacity={0.6}
+              >
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </TouchableOpacity>
             </View>
-            
-            <TouchableOpacity
-              style={styles.shareBtn}
-              onPress={() => onShare(post)}
-              activeOpacity={0.6}
-            >
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </TouchableOpacity>
-          </View>
 
           {/* Content - Limited with press hint */}
           <Text style={styles.summaryText} numberOfLines={3}>
@@ -112,27 +113,27 @@ export default function DaySummaryCard({
           </Text>
           <Text style={styles.tapHint}>Tap to read more</Text>
 
-          {/* Footer */}
+          {/* Footer - Single row with meta and reactions */}
           <View style={styles.footer}>
-            <View style={styles.metaInfo}>
-              <Text style={styles.time}>{post.time}</Text>
-              <View style={styles.dot} />
-              <View style={styles.scopeTag}>
-                <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
-                  {post.scope === 'world' ? (
-                    <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2.5} />
-                  ) : (
-                    <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2.5} />
-                  )}
-                </Svg>
-                <Text style={styles.scopeLabel} numberOfLines={1}>
-                  {post.scope === 'world' ? 'World' : 
-                   post.scope === 'city' ? post.location_city :
-                   post.scope === 'state' ? post.location_state :
-                   post.location_country}
-                </Text>
-              </View>
+            <Text style={styles.time}>{post.time}</Text>
+            <View style={styles.dot} />
+            <View style={styles.scopeTag}>
+              <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
+                {post.scope === 'world' ? (
+                  <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2.5} />
+                ) : (
+                  <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2.5} />
+                )}
+              </Svg>
+              <Text style={styles.scopeLabel} numberOfLines={1}>
+                {post.scope === 'world' ? 'World' : 
+                 post.scope === 'city' ? post.location_city :
+                 post.scope === 'state' ? post.location_state :
+                 post.location_country}
+              </Text>
             </View>
+
+            <View style={{ flex: 1 }} />
 
             {/* Reactions - Compact */}
             <View style={styles.reactions}>
@@ -174,24 +175,23 @@ const styles = StyleSheet.create({
   blur: {
     borderRadius: scale(22),
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   gradient: {
     padding: scale(16),
     borderRadius: scale(22),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: scale(12),
+    position: 'relative',
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(8),
-    flex: 1,
+    position: 'absolute',
+    left: 0,
   },
   tierBadge: {
     flexDirection: 'row',
@@ -219,6 +219,8 @@ const styles = StyleSheet.create({
   },
   shareBtn: {
     padding: scale(4),
+    position: 'absolute',
+    right: 0,
   },
   summaryText: {
     fontSize: moderateScale(15, 0.2),
@@ -233,15 +235,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.3,
     marginBottom: scale(14),
+    textAlign: 'right',
   },
   footer: {
-    gap: scale(10),
-  },
-  metaInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
-    marginBottom: scale(8),
   },
   time: {
     fontSize: moderateScale(10, 0.2),
@@ -263,7 +262,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(10, 0.2),
     color: '#9ca3af',
     fontWeight: '500',
-    maxWidth: scale(100),
+    maxWidth: scale(80),
   },
   reactions: {
     flexDirection: 'row',

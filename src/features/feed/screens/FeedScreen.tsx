@@ -712,16 +712,38 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
         },
       ]}
     >
-      <BlurView intensity={20} tint="dark" style={styles.postCardBlur}>
+      <BlurView intensity={25} tint="dark" style={styles.postCardBlur}>
         <LinearGradient
-          colors={isTopTier ? ['rgba(139, 92, 246, 0.15)', 'rgba(45, 27, 78, 0.3)'] : ['rgba(59, 130, 246, 0.1)', 'rgba(26, 26, 46, 0.2)']}
+          colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
           style={styles.postCardGradient}
         >
-          {/* Header Row - Tier badge, Time, Scope, Share */}
+          {/* Header Row - Percentile pill left, Share right */}
           <View style={styles.compactHeader}>
             {post.percentile && (
-              <View style={[styles.tierDot, { backgroundColor: tierColors.primary }]} />
+              <View style={[styles.percentilePill, { backgroundColor: `${tierColors.primary}20`, borderColor: `${tierColors.primary}40` }]}>
+                <View style={[styles.tierDot, { backgroundColor: tierColors.primary }]} />
+                <Text style={[styles.percentilePillText, { color: tierColors.primary }]}>
+                  {post.percentile.displayText}
+                </Text>
+              </View>
             )}
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity
+              style={styles.shareButtonCompact}
+              onPress={() => onShare(post)}
+              activeOpacity={0.6}
+            >
+              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Content */}
+          <Text style={styles.postContent} numberOfLines={3}>{post.content}</Text>
+          
+          {/* Footer Row - Time, Location, Reactions */}
+          <View style={styles.compactFooter}>
             <Text style={styles.postTime}>{post.time}</Text>
             <View style={styles.dotSeparator} />
             <View style={styles.scopeCompact}>
@@ -740,27 +762,6 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
               </Text>
             </View>
             <View style={{ flex: 1 }} />
-            <TouchableOpacity
-              style={styles.shareButtonCompact}
-              onPress={() => onShare(post)}
-              activeOpacity={0.6}
-            >
-              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </TouchableOpacity>
-          </View>
-          
-          {/* Content */}
-          <Text style={styles.postContent} numberOfLines={3}>{post.content}</Text>
-          
-          {/* Footer Row - Percentile and Reactions */}
-          <View style={styles.compactFooter}>
-            {post.percentile && (
-              <Text style={[styles.percentileCompact, { color: tierColors.primary }]}>
-                {post.percentile.displayText}
-              </Text>
-            )}
             <View style={styles.reactions}>
               {(['funny', 'creative', 'must_try'] as const).map(type => {
                 const isActive = userReactions.has(`${post.id}-${type}`);
@@ -993,6 +994,8 @@ const styles = StyleSheet.create({
   },
   postCardBlur: {
     borderRadius: scale(20),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
     overflow: 'hidden',
   },
   postCardGradient: {
@@ -1004,13 +1007,27 @@ const styles = StyleSheet.create({
   compactHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(6),
-    marginBottom: scale(8),
+    gap: scale(8),
+    marginBottom: scale(10),
   },
   tierDot: {
     width: scale(6),
     height: scale(6),
     borderRadius: scale(3),
+  },
+  percentilePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(5),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(8),
+    borderWidth: 1,
+  },
+  percentilePillText: {
+    fontSize: moderateScale(9, 0.2),
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   dotSeparator: {
     width: scale(2),
@@ -1022,12 +1039,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(3),
-    maxWidth: scale(90),
   },
   scopeCompactText: {
     fontSize: moderateScale(9, 0.2),
     color: '#9ca3af',
     fontWeight: '500',
+    maxWidth: scale(80),
   },
   shareButtonCompact: {
     padding: scale(4),
@@ -1042,7 +1059,8 @@ const styles = StyleSheet.create({
   compactFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: scale(8),
+    flexWrap: 'wrap',
   },
   percentileCompact: {
     fontSize: moderateScale(10, 0.2),

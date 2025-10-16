@@ -25,6 +25,7 @@ interface DaySummaryCardProps {
   index: number;
   onReact: (postId: string, reactionType: 'funny' | 'creative' | 'must_try') => void;
   onShare: (post: any) => void;
+  onPress: (post: any) => void;
   userReactions: Set<string>;
   tierColors: any;
 }
@@ -33,7 +34,8 @@ export default function DaySummaryCard({
   post, 
   index, 
   onReact, 
-  onShare, 
+  onShare,
+  onPress,
   userReactions,
   tierColors 
 }: DaySummaryCardProps) {
@@ -70,11 +72,15 @@ export default function DaySummaryCard({
         },
       ]}
     >
-      <BlurView intensity={20} tint="dark" style={styles.blur}>
-        <LinearGradient
-          colors={isTopTier ? ['rgba(139, 92, 246, 0.12)', 'rgba(236, 72, 153, 0.08)'] : ['rgba(59, 130, 246, 0.08)', 'rgba(26, 26, 46, 0.15)']}
-          style={styles.gradient}
-        >
+      <TouchableOpacity
+        onPress={() => onPress(post)}
+        activeOpacity={0.9}
+      >
+        <BlurView intensity={20} tint="dark" style={styles.blur}>
+          <LinearGradient
+            colors={isTopTier ? ['rgba(139, 92, 246, 0.12)', 'rgba(236, 72, 153, 0.08)'] : ['rgba(59, 130, 246, 0.08)', 'rgba(26, 26, 46, 0.15)']}
+            style={styles.gradient}
+          >
           {/* Header with tier indicator and share */}
           <View style={styles.header}>
             <View style={styles.headerLeft}>
@@ -100,10 +106,11 @@ export default function DaySummaryCard({
             </TouchableOpacity>
           </View>
 
-          {/* Content - Expandable */}
-          <Text style={styles.summaryText} numberOfLines={5}>
+          {/* Content - Limited with press hint */}
+          <Text style={styles.summaryText} numberOfLines={3}>
             {post.content}
           </Text>
+          <Text style={styles.tapHint}>Tap to read more</Text>
 
           {/* Footer */}
           <View style={styles.footer}>
@@ -153,8 +160,9 @@ export default function DaySummaryCard({
               })}
             </View>
           </View>
-        </LinearGradient>
-      </BlurView>
+          </LinearGradient>
+        </BlurView>
+      </TouchableOpacity>
     </Animated.View>
   );
 }
@@ -217,6 +225,13 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     lineHeight: moderateScale(23, 0.2),
     fontWeight: '400',
+    marginBottom: scale(8),
+  },
+  tapHint: {
+    fontSize: moderateScale(11, 0.2),
+    color: '#8b5cf6',
+    fontWeight: '600',
+    letterSpacing: 0.3,
     marginBottom: scale(14),
   },
   footer: {

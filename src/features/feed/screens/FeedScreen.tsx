@@ -23,6 +23,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FilterSheet from '../components/FilterSheet';
 import FeedPostShareCard from '../components/FeedPostShareCard';
 import DaySummaryCard from '../components/DaySummaryCard';
+import DaySummaryModal from '../components/DaySummaryModal';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -272,6 +273,7 @@ export default function FeedScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userReactions, setUserReactions] = useState<Set<string>>(new Set());
   const [sharePost, setSharePost] = useState<Post | null>(null);
+  const [summaryModalPost, setSummaryModalPost] = useState<Post | null>(null);
   const [toggleContainerWidth, setToggleContainerWidth] = useState(0);
   
   // Toggle animation
@@ -284,6 +286,7 @@ export default function FeedScreen() {
       damping: 20,
       mass: 0.8,
       stiffness: 120,
+      overshootClamping: false,
     }).start();
     setShowDaySummaries(showSummaries);
   };
@@ -447,7 +450,10 @@ export default function FeedScreen() {
                       {
                         translateX: togglePosition.interpolate({
                           inputRange: [0, 1],
-                          outputRange: [0, toggleContainerWidth / 2],
+                          outputRange: [
+                            0,
+                            (toggleContainerWidth / 2) - scale(3),
+                          ],
                         }),
                       },
                     ],
@@ -455,7 +461,7 @@ export default function FeedScreen() {
                 ]}
               >
                 <LinearGradient
-                  colors={showDaySummaries ? ['rgba(251, 146, 60, 0.5)', 'rgba(249, 115, 22, 0.3)'] : ['rgba(139, 92, 246, 0.5)', 'rgba(124, 58, 237, 0.3)']}
+                  colors={['rgba(139, 92, 246, 0.5)', 'rgba(124, 58, 237, 0.3)']}
                   style={styles.toggleIndicatorGradient}
                 />
               </Animated.View>
@@ -601,6 +607,7 @@ export default function FeedScreen() {
                   index={index}
                   onReact={handleReaction}
                   onShare={setSharePost}
+                  onPress={setSummaryModalPost}
                   userReactions={userReactions}
                   tierColors={getTierColors(post.percentile?.tier)}
                 />
@@ -638,6 +645,20 @@ export default function FeedScreen() {
           onClose={() => setSharePost(null)}
           post={sharePost}
           tierColors={getTierColors(sharePost.percentile?.tier)}
+        />
+      )}
+
+      {/* Day Summary Modal */}
+      {summaryModalPost && (
+        <DaySummaryModal
+          visible={!!summaryModalPost}
+          onClose={() => setSummaryModalPost(null)}
+          post={summaryModalPost}
+          tierColors={getTierColors(summaryModalPost.percentile?.tier)}
+          onShare={() => {
+            setSharePost(summaryModalPost);
+            setSummaryModalPost(null);
+          }}
         />
       )}
     </View>
@@ -853,7 +874,7 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     position: 'relative',
-    height: scale(44),
+    height: scale(40),
   },
   toggleBackground: {
     position: 'absolute',
@@ -862,7 +883,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: scale(12),
+    borderRadius: scale(14),
     padding: scale(3),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -873,12 +894,13 @@ const styles = StyleSheet.create({
     top: scale(3),
     bottom: scale(3),
     right: '50%',
-    borderRadius: scale(10),
+    borderRadius: scale(12),
     overflow: 'hidden',
+    marginRight: scale(3),
   },
   toggleIndicatorGradient: {
     flex: 1,
-    borderRadius: scale(10),
+    borderRadius: scale(12),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
@@ -889,12 +911,12 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   toggleBtn: {
-    paddingHorizontal: scale(16),
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   toggleBtnText: {
-    fontSize: moderateScale(11, 0.2),
+    fontSize: moderateScale(12, 0.2),
     fontWeight: '600',
     color: 'rgba(255, 255, 255, 0.4)',
     letterSpacing: 0.3,

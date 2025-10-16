@@ -13,20 +13,12 @@ import HomeScreen from '@/features/posts/screens/HomeScreen';
 import CreateScreen from '@/features/posts/screens/CreateScreen';
 import ProfileScreen from '@/features/profile/screens/ProfileScreen';
 import FeedScreen from '@/features/feed/screens/FeedScreen';
+import TrendingScreen from '@/features/trending/screens/TrendingScreen';
 import TabBar from '@/shared/components/navigation/TabBar';
 
 type MainTabsProps = {
   navigation: any;
 };
-
-const TrendingScreen = () => (
-  <SafeAreaView style={styles.placeholder} edges={['top']}>
-    <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#2d1b4e']} style={styles.placeholderGradient}>
-      <Text style={styles.placeholderText}>Trending Screen</Text>
-      <Text style={styles.placeholderSubtext}>Coming soon...</Text>
-    </LinearGradient>
-  </SafeAreaView>
-);
 
 // ProfileScreen now imported from features/profile
 

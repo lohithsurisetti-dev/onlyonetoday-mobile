@@ -275,20 +275,24 @@ export default function FeedScreen() {
       <View style={styles.header}>
         <BlurView intensity={80} tint="dark" style={styles.headerBlur}>
           <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>OnlyOne Today</Text>
+            <View style={styles.headerLeft}>
+              <Text style={styles.headerTitle}>Feed</Text>
+              <Text style={styles.headerSubtitle}>{filteredPosts.length} posts</Text>
+            </View>
             
-            {/* Active Filters */}
+            {/* Active Filters & Filter Button */}
             <View style={styles.activeFilters}>
               {filter !== 'all' && (
                 <TouchableOpacity
                   style={[styles.filterPill, getFilterPillStyle(filter)]}
                   onPress={() => setFilter('all')}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterPillText}>
-                    {filter === 'trending' ? '🔥 Trending' : filter === 'unique' ? '✨ Unique' : '👥 Common'}
+                    {filter === 'trending' ? '🔥' : filter === 'unique' ? '✨' : '👥'}
                   </Text>
-                  <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                    <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+                  <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                    <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
                   </Svg>
                 </TouchableOpacity>
               )}
@@ -296,10 +300,21 @@ export default function FeedScreen() {
               <TouchableOpacity
                 style={styles.filterButton}
                 onPress={() => setFilterSheetVisible(true)}
+                activeOpacity={0.7}
               >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
+                <LinearGradient
+                  colors={['#8b5cf6', '#a78bfa']}
+                  style={styles.filterButtonGradient}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                  {(filter !== 'all' || scopeFilter !== 'world' || reactionFilter !== 'all' || inputTypeFilter !== 'all') && (
+                    <View style={styles.filterBadge}>
+                      <View style={styles.filterBadgeDot} />
+                    </View>
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -540,11 +555,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  headerLeft: {
+    gap: scale(2),
+  },
   headerTitle: {
-    fontSize: moderateScale(20, 0.3),
+    fontSize: moderateScale(24, 0.3),
     fontWeight: '700',
     color: '#ffffff',
     letterSpacing: 0.5,
+  },
+  headerSubtitle: {
+    fontSize: moderateScale(12, 0.2),
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.5)',
   },
   activeFilters: {
     flexDirection: 'row',
@@ -554,26 +577,52 @@ const styles = StyleSheet.create({
   filterPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(6),
-    paddingHorizontal: scale(12),
+    gap: scale(4),
+    paddingHorizontal: scale(10),
     paddingVertical: scale(6),
-    borderRadius: scale(20),
-    borderWidth: 1,
+    borderRadius: scale(16),
+    borderWidth: 1.5,
   },
   filterPillText: {
-    fontSize: moderateScale(12, 0.2),
-    fontWeight: '600',
-    color: '#ffffff',
+    fontSize: moderateScale(16, 0.2),
   },
   filterButton: {
-    width: scale(36),
-    height: scale(36),
-    borderRadius: scale(18),
-    backgroundColor: 'rgba(139, 92, 246, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.4)',
+    width: scale(44),
+    height: scale(44),
+    borderRadius: scale(22),
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  filterButtonGradient: {
+    width: scale(44),
+    height: scale(44),
+    borderRadius: scale(22),
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: scale(4),
+    right: scale(4),
+    width: scale(10),
+    height: scale(10),
+    borderRadius: scale(5),
+    backgroundColor: '#ef4444',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#ffffff',
+  },
+  filterBadgeDot: {
+    width: scale(4),
+    height: scale(4),
+    borderRadius: scale(2),
+    backgroundColor: '#ffffff',
   },
   scrollView: {
     flex: 1,

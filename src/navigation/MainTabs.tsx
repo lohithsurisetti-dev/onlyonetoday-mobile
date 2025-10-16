@@ -12,21 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import HomeScreen from '@/features/posts/screens/HomeScreen';
 import CreateScreen from '@/features/posts/screens/CreateScreen';
 import ProfileScreen from '@/features/profile/screens/ProfileScreen';
+import FeedScreen from '@/features/feed/screens/FeedScreen';
 import TabBar from '@/shared/components/navigation/TabBar';
 
 type MainTabsProps = {
   navigation: any;
 };
-
-// Placeholder screens for now
-const FeedScreen = () => (
-  <SafeAreaView style={styles.placeholder} edges={['top']}>
-    <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#2d1b4e']} style={styles.placeholderGradient}>
-      <Text style={styles.placeholderText}>Feed Screen</Text>
-      <Text style={styles.placeholderSubtext}>Coming soon...</Text>
-    </LinearGradient>
-  </SafeAreaView>
-);
 
 const TrendingScreen = () => (
   <SafeAreaView style={styles.placeholder} edges={['top']}>

@@ -90,7 +90,16 @@ export default function LocationLeaderboard({ userLocation }: LocationLeaderboar
   // const hasLocation = userLocation?.city || userLocation?.state || userLocation?.country;
   const hasLocation = true; // Temporarily enabled for demo
 
-  const currentData = data[activeTab].slice(0, 5); // Show top 5
+  // Get top 5 and check if user's location is in top 10 but not in top 5
+  const allData = data[activeTab];
+  const top5 = allData.slice(0, 5);
+  
+  // Sample: Assume user is from "Phoenix" (rank 5 in cities), "Florida" (rank 4 in states), "Australia" (rank 4 in countries)
+  const userLocationName = activeTab === 'cities' ? 'Phoenix' : activeTab === 'states' ? 'Florida' : 'Australia';
+  const userEntry = allData.find(entry => entry.name === userLocationName);
+  const showUserEntry = userEntry && userEntry.rank > 5 && userEntry.rank <= 10;
+  
+  const currentData = showUserEntry ? [...top5, userEntry] : top5;
 
   return (
     <View style={styles.container}>
@@ -124,15 +133,29 @@ export default function LocationLeaderboard({ userLocation }: LocationLeaderboar
             </View>
           ) : (
             <View style={styles.leaderboard}>
-              {currentData.map((entry) => (
-                <View key={entry.rank} style={styles.leaderboardRow}>
-                  <Text style={[styles.rankText, { color: getRankColor(entry.rank) }]}>
-                    {getRankDisplay(entry.rank)}
-                  </Text>
-                  <Text style={styles.nameText} numberOfLines={1}>{entry.name}</Text>
-                  <Text style={styles.countText}>{entry.count.toLocaleString()}</Text>
-                </View>
-              ))}
+              {currentData.map((entry, index) => {
+                const isUserLocation = entry.name === userLocationName;
+                return (
+                  <View 
+                    key={entry.rank} 
+                    style={[
+                      styles.leaderboardRow,
+                      isUserLocation && styles.userLocationRow
+                    ]}
+                  >
+                    <Text style={[styles.rankText, { color: getRankColor(entry.rank) }]}>
+                      {getRankDisplay(entry.rank)}
+                    </Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.nameText} numberOfLines={1}>{entry.name}</Text>
+                      {isUserLocation && (
+                        <Text style={styles.yourLocationText}>Your location</Text>
+                      )}
+                    </View>
+                    <Text style={styles.countText}>{entry.count.toLocaleString()}</Text>
+                  </View>
+                );
+              })}
             </View>
           )}
         </LinearGradient>
@@ -217,16 +240,27 @@ const styles = StyleSheet.create({
     borderRadius: scale(10),
     backgroundColor: 'rgba(255, 255, 255, 0.02)',
   },
+  userLocationRow: {
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
   rankText: {
     fontSize: moderateScale(16, 0.2),
     fontWeight: '700',
     width: scale(32),
   },
   nameText: {
-    flex: 1,
     fontSize: moderateScale(14, 0.2),
     fontWeight: '500',
     color: '#ffffff',
+  },
+  yourLocationText: {
+    fontSize: moderateScale(10, 0.2),
+    fontWeight: '600',
+    color: '#a78bfa',
+    marginTop: scale(2),
+    letterSpacing: 0.5,
   },
   countText: {
     fontSize: moderateScale(12, 0.2),

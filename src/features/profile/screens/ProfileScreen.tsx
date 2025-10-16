@@ -127,13 +127,13 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             >
               <BlurView intensity={15} tint="dark" style={styles.streakBlur}>
                 <LinearGradient
-                  colors={['rgba(251, 146, 60, 0.15)', 'rgba(249, 115, 22, 0.08)'] as const}
+                  colors={['rgba(249, 115, 22, 0.2)', 'rgba(234, 88, 12, 0.12)'] as const}
                   style={styles.streakGradient}
                 >
                   <View style={styles.streakHeader}>
                     <View style={styles.streakLeft}>
                       <Svg width={scale(28)} height={scale(28)} viewBox="0 0 24 24" fill="none">
-                        <Path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" stroke="#fbbf24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                        <Path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" stroke="#fb923c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                       </Svg>
                       <View style={styles.streakInfo}>
                         <Text style={styles.streakDays}>{userStats.streak} Days</Text>
@@ -142,7 +142,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                     </View>
                     <View style={styles.shareIconContainer}>
                       <Svg width={scale(18)} height={scale(18)} viewBox="0 0 24 24" fill="none">
-                        <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#fbbf24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                        <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#fb923c" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                       </Svg>
                     </View>
                   </View>
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   streakInfo: { flex: 1 },
   streakDays: { fontSize: moderateScale(20, 0.3), fontWeight: '700', color: '#ffffff', marginBottom: scale(2) },
   streakLabel: { fontSize: moderateScale(11, 0.2), color: 'rgba(255, 255, 255, 0.6)', fontWeight: '500', letterSpacing: 0.3 },
-  shareIconContainer: { width: scale(40), height: scale(40), borderRadius: scale(20), backgroundColor: 'rgba(251, 191, 36, 0.1)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(251, 191, 36, 0.2)' },
+  shareIconContainer: { width: scale(40), height: scale(40), borderRadius: scale(20), backgroundColor: 'rgba(251, 146, 60, 0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(249, 115, 22, 0.3)' },
 
   // Posts Section
   postsSection: { paddingHorizontal: scale(20) },

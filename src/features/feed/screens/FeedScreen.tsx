@@ -429,69 +429,69 @@ export default function FeedScreen() {
                   </LinearGradient>
                 </BlurView>
               </TouchableOpacity>
-            </View>
           </View>
+        </View>
 
-          {/* Toggle Row - Actions / Summaries */}
-          <View style={styles.toggleRow}>
-            <View 
-              style={styles.toggleContainer}
-              onLayout={(e) => setToggleContainerWidth(e.nativeEvent.layout.width)}
-            >
-              <View style={styles.toggleBackground}>
-                <Animated.View
-                  style={[
-                    styles.toggleIndicator,
-                    {
-                      transform: [
-                        {
-                          translateX: togglePosition.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, toggleContainerWidth / 2],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <LinearGradient
-                    colors={showDaySummaries ? ['rgba(251, 146, 60, 0.5)', 'rgba(249, 115, 22, 0.3)'] : ['rgba(139, 92, 246, 0.5)', 'rgba(124, 58, 237, 0.3)']}
-                    style={styles.toggleIndicatorGradient}
-                  />
-                </Animated.View>
-              </View>
-              
-              <View style={styles.toggleButtons}>
-                <TouchableOpacity
-                  style={styles.toggleBtn}
-                  onPress={() => handleToggleChange(false)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.toggleBtnText, !showDaySummaries && styles.toggleBtnTextActive]}>
-                    Actions
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.toggleBtn}
-                  onPress={() => handleToggleChange(true)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.toggleBtnText, showDaySummaries && styles.toggleBtnTextActive]}>
-                    Summaries
-                  </Text>
-                </TouchableOpacity>
-              </View>
+        {/* Toggle Row - Actions / Summaries */}
+        <View style={styles.toggleRow}>
+          <View 
+            style={styles.toggleContainer}
+            onLayout={(e) => setToggleContainerWidth(e.nativeEvent.layout.width)}
+          >
+            <View style={styles.toggleBackground}>
+              <Animated.View
+                style={[
+                  styles.toggleIndicator,
+                  {
+                    transform: [
+                      {
+                        translateX: togglePosition.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, toggleContainerWidth / 2],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <LinearGradient
+                  colors={showDaySummaries ? ['rgba(251, 146, 60, 0.5)', 'rgba(249, 115, 22, 0.3)'] : ['rgba(139, 92, 246, 0.5)', 'rgba(124, 58, 237, 0.3)']}
+                  style={styles.toggleIndicatorGradient}
+                />
+              </Animated.View>
+            </View>
+            
+            <View style={styles.toggleButtons}>
+              <TouchableOpacity
+                style={styles.toggleBtn}
+                onPress={() => handleToggleChange(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.toggleBtnText, !showDaySummaries && styles.toggleBtnTextActive]}>
+                  Actions
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.toggleBtn}
+                onPress={() => handleToggleChange(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.toggleBtnText, showDaySummaries && styles.toggleBtnTextActive]}>
+                  Summaries
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
-          
-          {/* Active Filters Pills */}
-          {hasActiveFilters && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.activeFiltersScroll}
-              contentContainerStyle={styles.activeFiltersContent}
-            >
+        </View>
+
+        {/* Active Filters Pills */}
+        {hasActiveFilters && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.activeFiltersScroll}
+            contentContainerStyle={styles.activeFiltersContent}
+          >
               {filter !== 'all' && (
                 <TouchableOpacity
                   style={styles.activePill}

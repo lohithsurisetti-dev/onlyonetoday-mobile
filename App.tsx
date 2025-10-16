@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { queryClient } from './src/lib/queryClient';
 import { validateEnv } from './src/config/env';
+import HomeScreen from './src/features/posts/screens/HomeScreen';
 
 // Validate environment variables on startup
 validateEnv();
@@ -15,8 +16,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
           <StatusBar style="light" />
-          {/* TODO: Add navigation container */}
-          {/* Placeholder for now */}
+          <HomeScreen />
         </SafeAreaProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>

@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   tabIndicator: {
     position: 'absolute',
-    left: scale(6),
+    left: scale(4),
     top: scale(4),
     bottom: scale(4),
     right: '70%', // Width for 1 of 3 tabs with padding

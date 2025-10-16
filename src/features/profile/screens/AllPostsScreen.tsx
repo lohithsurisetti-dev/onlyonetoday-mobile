@@ -1,6 +1,6 @@
 /**
  * All Posts Screen - Complete Redesign
- * Today/All Time tabs, reactions count, share buttons
+ * Actions/Summaries toggle, premium card styling matching Feed screen
  */
 
 import React, { useRef, useEffect, useState } from 'react';
@@ -17,6 +17,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { getTierColors } from '@/shared/constants/tierColors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -33,73 +34,59 @@ interface Post {
   tier: 'elite' | 'rare' | 'unique';
   percentile: number;
   timestamp: number;
-  isToday: boolean;
+  input_type: 'action' | 'day';
   scope: 'world' | 'city' | 'state' | 'country';
   location?: string;
-  reactions: {
-    love: number;
-    fire: number;
-    wow: number;
-  };
+  username: string;
 }
 
 export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [activeTab, setActiveTab] = useState<'today' | 'all'>('today');
+  const [showDaySummaries, setShowDaySummaries] = useState(false);
   const [tabContainerWidth, setTabContainerWidth] = useState(0);
   const tabIndicatorPosition = useRef(new Animated.Value(0)).current;
 
-  // Mock posts
+  // Mock posts - Mix of actions and day summaries
   const allPosts: Post[] = [
-    { id: '1', content: 'Discovered a hidden rooftop garden', date: '2h', tier: 'elite', percentile: 99.8, timestamp: Date.now(), isToday: true, scope: 'world', reactions: { love: 24, fire: 18, wow: 12 } },
-    { id: '2', content: 'Had breakfast underwater', date: '5h', tier: 'rare', percentile: 95.2, timestamp: Date.now(), isToday: true, scope: 'city', location: 'Phoenix', reactions: { love: 15, fire: 22, wow: 8 } },
-    { id: '3', content: 'Wrote a poem in binary code', date: '2d', tier: 'unique', percentile: 87.5, timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000, isToday: false, scope: 'country', location: 'United States', reactions: { love: 32, fire: 9, wow: 14 } },
-    { id: '4', content: 'Learned to juggle with my eyes closed', date: '3d', tier: 'elite', percentile: 98.1, timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000, isToday: false, scope: 'state', location: 'California', reactions: { love: 19, fire: 27, wow: 11 } },
-    { id: '5', content: 'Created a time-lapse of clouds for 12 hours', date: '4d', tier: 'rare', percentile: 93.7, timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000, isToday: false, scope: 'world', reactions: { love: 28, fire: 15, wow: 19 } },
+    { id: '1', content: 'Discovered a hidden rooftop garden with 360° city views', date: '2h', tier: 'elite', percentile: 99.8, timestamp: Date.now(), input_type: 'action', scope: 'world', username: 'cosmic_wanderer' },
+    { id: '2', content: 'Had breakfast underwater at an aquarium restaurant', date: '5h', tier: 'rare', percentile: 95.2, timestamp: Date.now(), input_type: 'action', scope: 'city', location: 'Phoenix', username: 'cosmic_wanderer' },
+    { id: '3', content: 'Today was incredibly productive. Started with a morning meditation session that helped clear my mind, then tackled my most challenging project at work. Had a great lunch with an old friend I hadn\'t seen in years, and ended the day with a peaceful walk in nature. Feeling grateful for these meaningful moments.', date: '1d', tier: 'unique', percentile: 87.5, timestamp: Date.now() - 1 * 24 * 60 * 60 * 1000, input_type: 'day', scope: 'country', location: 'United States', username: 'cosmic_wanderer' },
+    { id: '4', content: 'Learned to juggle with my eyes closed', date: '3d', tier: 'elite', percentile: 98.1, timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000, input_type: 'action', scope: 'state', location: 'California', username: 'cosmic_wanderer' },
+    { id: '5', content: 'An eventful day filled with surprises. Morning started slow, but picked up when I received unexpected good news about a project I\'d been working on for months. Spent the afternoon celebrating with family, sharing stories and laughter. The evening was quiet, reflecting on how far I\'ve come. Days like these remind me to appreciate the journey.', date: '4d', tier: 'rare', percentile: 93.7, timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000, input_type: 'day', scope: 'world', username: 'cosmic_wanderer' },
+    { id: '6', content: 'Created a time-lapse of clouds for 12 hours straight', date: '5d', tier: 'elite', percentile: 96.3, timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000, input_type: 'action', scope: 'world', username: 'cosmic_wanderer' },
   ];
 
-  const filteredPosts = activeTab === 'today' 
-    ? allPosts.filter(p => p.isToday)
-    : allPosts;
+  const filteredPosts = showDaySummaries 
+    ? allPosts.filter(p => p.input_type === 'day')
+    : allPosts.filter(p => p.input_type === 'action');
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
   }, []);
 
-  const handleTabChange = (tab: 'today' | 'all') => {
-    const tabIndex = tab === 'today' ? 0 : 1;
+  const handleToggleChange = (showSummaries: boolean) => {
     Animated.spring(tabIndicatorPosition, {
-      toValue: tabIndex,
+      toValue: showSummaries ? 1 : 0,
       useNativeDriver: true,
       damping: 20,
       mass: 0.8,
       stiffness: 120,
+      overshootClamping: false,
     }).start();
-    setActiveTab(tab);
+    setShowDaySummaries(showSummaries);
   };
 
   const handleShare = async (post: Post) => {
     try {
       await Share.share({
-        message: `Check out my post on OnlyOne: "${post.content}" - Top ${(100 - post.percentile).toFixed(1)}% uniqueness!`,
+        message: `Check out my ${post.input_type === 'day' ? 'day summary' : 'action'} on OnlyOne: "${post.content}" - Top ${(100 - post.percentile).toFixed(1)}% uniqueness!`,
       });
     } catch (error) {
       console.error('Share error:', error);
     }
   };
 
-  const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'elite': return '#a78bfa';
-      case 'rare': return '#f9a8d4';
-      case 'unique': return '#22d3ee';
-      default: return '#6b7280';
-    }
-  };
 
-  const getTotalReactions = (reactions: Post['reactions']) => {
-    return reactions.love + reactions.fire + reactions.wow;
-  };
 
   return (
     <View style={styles.safeArea}>
@@ -120,7 +107,7 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
             <View style={styles.headerSpacer} />
           </View>
 
-          {/* Today / All Time Tabs */}
+          {/* Actions / Summaries Toggle */}
           <View style={styles.tabsSection}>
             <View 
               style={styles.tabContainer}
@@ -135,7 +122,7 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
                         {
                           translateX: tabIndicatorPosition.interpolate({
                             inputRange: [0, 1],
-                            outputRange: [0, tabContainerWidth / 2],
+                            outputRange: [0, (tabContainerWidth / 2) - scale(3)],
                           }),
                         },
                       ],
@@ -143,7 +130,7 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
                   ]}
                 >
                   <LinearGradient
-                    colors={['rgba(139, 92, 246, 0.4)', 'rgba(168, 85, 247, 0.2)'] as const}
+                    colors={['rgba(139, 92, 246, 0.5)', 'rgba(124, 58, 237, 0.3)'] as const}
                     style={styles.tabIndicatorGradient}
                   />
                 </Animated.View>
@@ -152,20 +139,20 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
               <View style={styles.tabButtons}>
                 <TouchableOpacity
                   style={styles.tab}
-                  onPress={() => handleTabChange('today')}
+                  onPress={() => handleToggleChange(false)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.tabText, activeTab === 'today' && styles.tabTextActive]}>
-                    Today
+                  <Text style={[styles.tabText, !showDaySummaries && styles.tabTextActive]}>
+                    Actions
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.tab}
-                  onPress={() => handleTabChange('all')}
+                  onPress={() => handleToggleChange(true)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.tabText, activeTab === 'all' && styles.tabTextActive]}>
-                    All Time
+                  <Text style={[styles.tabText, showDaySummaries && styles.tabTextActive]}>
+                    Summaries
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -177,90 +164,84 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {filteredPosts.map((post) => (
+            {filteredPosts.map((post) => {
+              const tierColors = getTierColors(post.tier);
+              return (
               <View key={post.id} style={styles.postCard}>
-                <BlurView intensity={10} tint="dark" style={styles.postBlur}>
+                <BlurView intensity={25} tint="dark" style={styles.postBlur}>
                   <LinearGradient
-                    colors={['rgba(255, 255, 255, 0.03)', 'transparent'] as const}
+                    colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)'] as const}
                     style={styles.postContent}
                   >
-                    {/* Header */}
+                    {/* Header - Username & Percentile/Tier */}
                     <View style={styles.postHeader}>
-                      <View style={styles.tierContainer}>
-                        <View style={[styles.tierDot, { backgroundColor: getTierColor(post.tier) }]} />
-                        <Text style={[styles.tierLabel, { color: getTierColor(post.tier) }]}>
-                          {post.tier.toUpperCase()}
+                      {post.input_type === 'day' ? (
+                        <>
+                          <Text style={styles.postUsername}>@{post.username}</Text>
+                          <Text style={styles.summaryLabel}>'s summary</Text>
+                        </>
+                      ) : (
+                        <Text style={styles.postUsername}>@{post.username}</Text>
+                      )}
+                      
+                      <View style={{ flex: 1 }} />
+                      
+                      <View style={[styles.percentilePill, { borderColor: tierColors.primary }]}>
+                        <Text style={[styles.percentileText, { color: tierColors.primary }]}>
+                          {post.input_type === 'day' ? post.tier.toUpperCase() : `Top ${(100 - post.percentile).toFixed(1)}%`}
                         </Text>
-                      </View>
-                      <Text style={styles.timeAgo}>{post.date}</Text>
-                    </View>
-
-                    {/* Content */}
-                    <Text style={styles.postText}>{post.content}</Text>
-
-                    {/* Meta Row */}
-                    <View style={styles.metaRow}>
-                      <View style={styles.percentileBadge}>
-                        <Text style={styles.percentileText}>Top {(100 - post.percentile).toFixed(1)}%</Text>
                       </View>
                       
-                      <View style={styles.scopeBadge}>
-                        <Svg width={scale(9)} height={scale(9)} viewBox="0 0 24 24" fill="none">
-                          {post.scope === 'world' ? (
-                            <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2} />
-                          ) : (
-                            <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2} />
-                          )}
-                        </Svg>
-                        <Text style={styles.scopeText}>
-                          {post.scope === 'world' ? 'World' : post.location || post.scope}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Reactions and Share Row */}
-                    <View style={styles.actionsRow}>
-                      <View style={styles.reactionsContainer}>
-                        {post.reactions.love > 0 && (
-                          <View style={styles.reactionItem}>
-                            <Text style={styles.reactionEmoji}>❤️</Text>
-                            <Text style={styles.reactionCount}>{post.reactions.love}</Text>
-                          </View>
-                        )}
-                        {post.reactions.fire > 0 && (
-                          <View style={styles.reactionItem}>
-                            <Text style={styles.reactionEmoji}>🔥</Text>
-                            <Text style={styles.reactionCount}>{post.reactions.fire}</Text>
-                          </View>
-                        )}
-                        {post.reactions.wow > 0 && (
-                          <View style={styles.reactionItem}>
-                            <Text style={styles.reactionEmoji}>😮</Text>
-                            <Text style={styles.reactionCount}>{post.reactions.wow}</Text>
-                          </View>
-                        )}
-                      </View>
-
-                      <TouchableOpacity
-                        style={styles.shareButton}
+                      <TouchableOpacity 
+                        style={styles.shareIconBtn} 
                         onPress={() => handleShare(post)}
-                        activeOpacity={0.7}
+                        activeOpacity={0.6}
                       >
-                        <Svg width={scale(18)} height={scale(18)} viewBox="0 0 24 24" fill="none">
+                        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
                           <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                         </Svg>
                       </TouchableOpacity>
                     </View>
+
+                    {/* Content */}
+                    <Text 
+                      style={styles.postText} 
+                      numberOfLines={post.input_type === 'day' ? 3 : undefined}
+                    >
+                      {post.content}
+                    </Text>
+                    {post.input_type === 'day' && post.content.length > 150 && (
+                      <Text style={styles.readMore}>Tap to read more</Text>
+                    )}
+
+                    {/* Footer - Time & Location */}
+                    <View style={styles.postFooter}>
+                      <Text style={styles.postTime}>{post.date}</Text>
+                      <View style={styles.footerDot} />
+                      <View style={styles.scopeTag}>
+                        <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
+                          {post.scope === 'world' ? (
+                            <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2.5} />
+                          ) : (
+                            <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2.5} />
+                          )}
+                        </Svg>
+                        <Text style={styles.scopeText} numberOfLines={1}>
+                          {post.scope === 'world' ? 'World' : post.location || post.scope}
+                        </Text>
+                      </View>
+                    </View>
                   </LinearGradient>
                 </BlurView>
               </View>
-            ))}
+              );
+            })}
 
             {filteredPosts.length === 0 && (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No posts {activeTab === 'today' ? 'today' : 'yet'}</Text>
+                <Text style={styles.emptyText}>No {showDaySummaries ? 'summaries' : 'actions'} yet</Text>
                 <Text style={styles.emptySubtext}>
-                  {activeTab === 'today' ? 'Create your first post today!' : 'Start sharing your uniqueness!'}
+                  {showDaySummaries ? 'Start writing day summaries!' : 'Create your first action!'}
                 </Text>
               </View>
             )}
@@ -319,7 +300,8 @@ const styles = StyleSheet.create({
     left: scale(4),
     top: scale(4),
     bottom: scale(4),
-    right: '50%',
+    width: '50%',
+    marginRight: scale(3),
     borderRadius: scale(10),
     overflow: 'hidden',
   },
@@ -327,7 +309,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: scale(10),
     borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.4)',
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
   tabButtons: {
     flexDirection: 'row',
@@ -351,125 +333,104 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Posts
+  // Posts - Match Feed Style
   scrollContent: {
     paddingHorizontal: scale(20),
     paddingBottom: scale(100),
   },
   postCard: {
-    marginBottom: scale(12),
+    marginBottom: scale(14),
   },
   postBlur: {
-    borderRadius: scale(18),
+    borderRadius: scale(16),
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   postContent: {
     padding: scale(14),
   },
   postHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: scale(10),
-  },
-  tierContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(6),
-  },
-  tierDot: {
-    width: scale(6),
-    height: scale(6),
-    borderRadius: scale(3),
-  },
-  tierLabel: {
-    fontSize: moderateScale(9, 0.2),
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
-  timeAgo: {
-    fontSize: moderateScale(11, 0.2),
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-  postText: {
-    fontSize: moderateScale(14, 0.2),
-    color: '#ffffff',
-    lineHeight: moderateScale(20, 0.2),
-    marginBottom: scale(10),
-    fontWeight: '400',
-  },
-  metaRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
     marginBottom: scale(10),
-    flexWrap: 'wrap',
   },
-  percentileBadge: {
-    paddingHorizontal: scale(8),
-    paddingVertical: scale(4),
-    borderRadius: scale(8),
-    backgroundColor: 'rgba(139, 92, 246, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.25)',
-  },
-  percentileText: {
-    fontSize: moderateScale(10, 0.2),
-    color: '#c4b5fd',
+  postUsername: {
+    fontSize: moderateScale(11, 0.2),
+    color: '#8b5cf6',
     fontWeight: '700',
     letterSpacing: 0.3,
   },
-  scopeBadge: {
+  summaryLabel: {
+    fontSize: moderateScale(10, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontWeight: '500',
+    letterSpacing: 0.3,
+  },
+  percentilePill: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: scale(8), 
+    paddingVertical: scale(4), 
+    borderRadius: scale(10), 
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+  },
+  percentileText: {
+    fontSize: moderateScale(9, 0.2),
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  shareIconBtn: {
+    padding: scale(4),
+  },
+  postText: {
+    fontSize: moderateScale(13, 0.2),
+    color: '#ffffff',
+    lineHeight: moderateScale(19, 0.2),
+    marginBottom: scale(12),
+    fontWeight: '400',
+  },
+  readMore: {
+    fontSize: moderateScale(11, 0.2),
+    color: '#8b5cf6',
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: scale(12),
+    textAlign: 'right',
+  },
+  postFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+  },
+  postTime: {
+    fontSize: moderateScale(9, 0.2),
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontWeight: '500',
+  },
+  footerDot: {
+    width: scale(3),
+    height: scale(3),
+    borderRadius: scale(1.5),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  scopeTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(4),
     paddingHorizontal: scale(8),
     paddingVertical: scale(4),
     borderRadius: scale(8),
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'rgba(107, 114, 128, 0.12)',
+    flex: 0,
   },
   scopeText: {
-    fontSize: moderateScale(10, 0.2),
+    fontSize: moderateScale(9, 0.2),
     color: '#9ca3af',
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: scale(10),
-  },
-  reactionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(8),
-  },
-  reactionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(3),
-  },
-  reactionEmoji: {
-    fontSize: moderateScale(10, 0.2),
-  },
-  reactionCount: {
-    fontSize: moderateScale(10, 0.2),
-    color: '#9ca3af',
-    fontWeight: '600',
-  },
-  shareButton: {
-    width: scale(36),
-    height: scale(36),
-    borderRadius: scale(18),
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontWeight: '500',
+    maxWidth: scale(100),
   },
 
   // Empty State

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { getTierColors } from '@/shared/constants/tierColors';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -15,20 +16,22 @@ interface BadgeProps {
 }
 
 export default function Badge({ children, variant = 'default', color, style }: BadgeProps) {
-  const getTierColor = () => {
+  const getColorForTier = () => {
     if (color) return color;
 
-    // Default tier colors
+    // Use centralized tier colors
     const text = String(children).toLowerCase();
-    if (text.includes('legendary') || text.includes('elite')) return '#FFD700';
-    if (text.includes('epic') || text.includes('rare')) return '#9400D3';
-    if (text.includes('unique')) return '#0070DD';
-    if (text.includes('notable') || text.includes('uncommon')) return '#1E8449';
-    return '#979797'; // common
+    if (text.includes('elite')) return getTierColors('elite').primary;
+    if (text.includes('rare')) return getTierColors('rare').primary;
+    if (text.includes('unique')) return getTierColors('unique').primary;
+    if (text.includes('notable')) return getTierColors('notable').primary;
+    if (text.includes('popular')) return getTierColors('popular').primary;
+    if (text.includes('common')) return getTierColors('common').primary;
+    return getTierColors('common').primary; // fallback
   };
 
-  const badgeColor = variant === 'tier' ? getTierColor() : color || '#8347eb';
-  const textColor = variant === 'tier' && badgeColor === '#FFD700' ? '#000000' : '#ffffff';
+  const badgeColor = variant === 'tier' ? getColorForTier() : color || '#8347eb';
+  const textColor = '#ffffff'; // Always white text for consistency
 
   return (
     <View

@@ -231,9 +231,9 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     color: '#ffffff',
     letterSpacing: scale(8),
-    textShadowColor: '#a78bfa',
+    textShadowColor: '#8b5cf6',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 28,
+    textShadowRadius: 20,
   },
   divider: {
     width: scale(60),

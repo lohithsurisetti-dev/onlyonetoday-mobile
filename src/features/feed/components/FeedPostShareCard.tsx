@@ -39,6 +39,107 @@ const CARD_HEIGHT = CARD_WIDTH * 1.4;
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
+// Floating star component
+const FloatingStar = ({ delay = 0, size = 2 }: { delay?: number; size?: number }) => {
+  const translateY = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const starScale = useRef(new Animated.Value(0.5)).current;
+
+  useEffect(() => {
+    const animate = () => {
+      Animated.loop(
+        Animated.parallel([
+          Animated.sequence([
+            Animated.timing(translateY, {
+              toValue: -30,
+              duration: 3000 + Math.random() * 2000,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateY, {
+              toValue: 0,
+              duration: 3000 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(translateX, {
+              toValue: 20,
+              duration: 2500 + Math.random() * 2000,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+              toValue: -20,
+              duration: 2500 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+              toValue: 0,
+              duration: 2500 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(opacity, {
+              toValue: 0.4,
+              duration: 1500,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0.15,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0.4,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(starScale, {
+              toValue: 1,
+              duration: 1500,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(starScale, {
+              toValue: 0.5,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(starScale, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ]),
+        ])
+      ).start();
+    };
+
+    animate();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.star,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          transform: [{ translateY }, { translateX }, { scale: starScale }],
+          opacity,
+        },
+      ]}
+    />
+  );
+};
+
 interface FeedPostShareCardProps {
   visible: boolean;
   onClose: () => void;
@@ -61,6 +162,20 @@ export default function FeedPostShareCard({ visible, onClose, post, tierColors }
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const cardRef = useRef<View>(null);
+
+  // Get subtle gradient color based on tier - matching StreakShareCard approach
+  const getSubtleGradientColor = () => {
+    const tier = post.percentile?.tier?.toLowerCase() || 'common';
+    switch (tier) {
+      case 'elite': return '#2a1a2e'; // Aurora magenta dark
+      case 'rare': return '#221a2e'; // Deep violet dark
+      case 'unique': return '#1a2530'; // Comet blue dark
+      case 'notable': return '#2a1220'; // Supernova pink dark (same as streak)
+      case 'popular': return '#2e2a1a'; // Solar gold dark
+      case 'common': return '#1f2028'; // Asteroid gray dark
+      default: return '#1f2028';
+    }
+  };
 
   useEffect(() => {
     if (visible) {
@@ -170,11 +285,28 @@ export default function FeedPostShareCard({ visible, onClose, post, tierColors }
           ]}
         >
           {/* The Shareable Card */}
-          <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0a0a1a' }]}>
+          <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0b0b18' }]}>
             <LinearGradient
-              colors={['#0a0a1a', '#1a1a2e', tierColors.primary + '20']}
+              colors={['#0b0b18', '#171a2c', getSubtleGradientColor()]}
+              locations={[0, 0.5, 1]}
               style={styles.cardGradient}
             >
+              {/* Floating Stars Background */}
+              <View style={styles.starsBackground} pointerEvents="none">
+                {[...Array(15)].map((_, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      top: `${Math.random() * 100}%`,
+                      left: `${Math.random() * 100}%`,
+                    }}
+                  >
+                    <FloatingStar delay={i * 100} size={2 + Math.random() * 2} />
+                  </View>
+                ))}
+              </View>
+
               {/* Header */}
               <View style={styles.cardHeader}>
                 <Text style={styles.brandName}>ONLYONE</Text>
@@ -297,6 +429,21 @@ const styles = StyleSheet.create({
     paddingTop: scale(28),
     paddingBottom: scale(24),
     justifyContent: 'space-between',
+  },
+  starsBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  star: {
+    backgroundColor: '#ffffff',
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
   },
   cardHeader: {
     alignItems: 'center',

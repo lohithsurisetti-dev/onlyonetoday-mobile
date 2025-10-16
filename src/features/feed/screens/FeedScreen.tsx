@@ -24,6 +24,7 @@ import FilterSheet from '../components/FilterSheet';
 import FeedPostShareCard from '../components/FeedPostShareCard';
 import DaySummaryCard from '../components/DaySummaryCard';
 import DaySummaryModal from '../components/DaySummaryModal';
+import { getTierColors as getStandardTierColors } from '@/shared/constants/tierColors';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -71,6 +72,7 @@ const SAMPLE_POSTS: Post[] = [
     time: '2h ago',
     scope: 'world',
     input_type: 'action',
+    username: 'alex_zen',
     percentile: { percentile: 2.5, tier: 'elite', displayText: 'Top 3%', comparison: 'More unique than 97%' },
     funny_count: 12,
     creative_count: 24,
@@ -83,6 +85,7 @@ const SAMPLE_POSTS: Post[] = [
     scope: 'city',
     location_city: 'Phoenix',
     input_type: 'day',
+    username: 'sarah_codes',
     percentile: { percentile: 5.2, tier: 'rare', displayText: 'Top 5%', comparison: 'More unique than 95%' },
     funny_count: 8,
     creative_count: 18,
@@ -95,6 +98,7 @@ const SAMPLE_POSTS: Post[] = [
     scope: 'state',
     location_state: 'California',
     input_type: 'day',
+    username: 'mike_creates',
     percentile: { percentile: 12.8, tier: 'unique', displayText: 'Top 13%', comparison: 'More unique than 87%' },
     funny_count: 15,
     creative_count: 22,
@@ -107,6 +111,7 @@ const SAMPLE_POSTS: Post[] = [
     scope: 'country',
     location_country: 'United States',
     input_type: 'action',
+    username: 'dev_explorer',
     percentile: { percentile: 15, tier: 'unique', displayText: 'Top 15%', comparison: 'More unique than 85%' },
     funny_count: 5,
     creative_count: 18,
@@ -117,6 +122,7 @@ const SAMPLE_POSTS: Post[] = [
     content: 'Built a treehouse with my kids in the backyard - took all weekend!',
     time: '3h ago',
     scope: 'world',
+    username: 'dad_builder',
     input_type: 'action',
     percentile: { percentile: 8, tier: 'rare', displayText: 'Top 8%', comparison: 'More unique than 92%' },
     funny_count: 18,
@@ -162,20 +168,9 @@ const SAMPLE_POSTS: Post[] = [
 // TIER COLORS (matching our cosmic theme)
 // ============================================================================
 
+// Use centralized tier colors
 function getTierColors(tier?: string) {
-  switch (tier?.toLowerCase()) {
-    case 'elite':
-    case 'rare':
-      return { primary: '#a78bfa', secondary: '#c4b5fd', glow: '#a78bfa' };
-    case 'unique':
-    case 'notable':
-      return { primary: '#f97316', secondary: '#fb923c', glow: '#f97316' };
-    case 'common':
-    case 'popular':
-      return { primary: '#3b82f6', secondary: '#60a5fa', glow: '#3b82f6' };
-    default:
-      return { primary: '#8b5cf6', secondary: '#a78bfa', glow: '#8b5cf6' };
-  }
+  return getStandardTierColors(tier || 'common');
 }
 
 function getFilterPillColors(filter: FilterType): [string, string] {
@@ -717,17 +712,17 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
           colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
           style={styles.postCardGradient}
         >
-          {/* Header Row - Percentile pill left, Share right */}
+          {/* Header Row - Username, Percentile pill, Share */}
           <View style={styles.compactHeader}>
+            <Text style={styles.username}>@{post.username}</Text>
+            <View style={{ flex: 1 }} />
             {post.percentile && (
-              <View style={[styles.percentilePill, { backgroundColor: `${tierColors.primary}20`, borderColor: `${tierColors.primary}40` }]}>
-                <View style={[styles.tierDot, { backgroundColor: tierColors.primary }]} />
+              <View style={[styles.percentilePill, { borderColor: tierColors.primary }]}>
                 <Text style={[styles.percentilePillText, { color: tierColors.primary }]}>
                   {post.percentile.displayText}
                 </Text>
               </View>
             )}
-            <View style={{ flex: 1 }} />
             <TouchableOpacity
               style={styles.shareButtonCompact}
               onPress={() => onShare(post)}
@@ -1010,22 +1005,17 @@ const styles = StyleSheet.create({
     gap: scale(8),
     marginBottom: scale(10),
   },
-  tierDot: {
-    width: scale(6),
-    height: scale(6),
-    borderRadius: scale(3),
-  },
   percentilePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(5),
     paddingHorizontal: scale(8),
     paddingVertical: scale(4),
-    borderRadius: scale(8),
+    borderRadius: scale(10),
     borderWidth: 1,
+    backgroundColor: 'transparent',
   },
   percentilePillText: {
-    fontSize: moderateScale(9, 0.2),
+    fontSize: moderateScale(8.5, 0.2),
     fontWeight: '700',
     letterSpacing: 0.3,
   },
@@ -1087,8 +1077,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
+  username: {
+    fontSize: moderateScale(11, 0.2),
+    color: '#8b5cf6',
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
   postTime: {
-    fontSize: moderateScale(10, 0.2),
+    fontSize: moderateScale(9, 0.2),
     color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '500',
   },

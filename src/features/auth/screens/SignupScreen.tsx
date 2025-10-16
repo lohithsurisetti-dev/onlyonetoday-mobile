@@ -429,13 +429,13 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: moderateScale(36, 0.3),
-    fontWeight: '400',
+    fontWeight: '300',
     color: '#ffffff',
     letterSpacing: scale(6),
     marginTop: scale(8),
-    textShadowColor: '#a78bfa',
+    textShadowColor: '#8b5cf6',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 24,
+    textShadowRadius: 15,
   },
   subtitle: {
     fontSize: moderateScale(12, 0.2),

@@ -60,8 +60,6 @@ export default function DaySummaryCard({
     ]).start();
   }, []);
 
-  const isTopTier = post.percentile && ['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier);
-
   return (
     <Animated.View
       style={[
@@ -81,20 +79,22 @@ export default function DaySummaryCard({
             colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
             style={styles.gradient}
           >
-            {/* Header with tier indicator and share */}
+            {/* Header with username's summary, tier pill, and share */}
             <View style={styles.header}>
               <View style={styles.headerLeft}>
-                {post.percentile && (
-                  <View style={[styles.tierBadge, { backgroundColor: `${tierColors.primary}30` }]}>
-                    <View style={[styles.tierDot, { backgroundColor: tierColors.primary }]} />
-                    <Text style={[styles.tierText, { color: tierColors.primary }]}>
-                      {post.percentile.displayText}
-                    </Text>
-                  </View>
-                )}
+                <Text style={styles.username}>@{post.username}</Text>
+                <Text style={styles.summaryLabel}>'s summary</Text>
               </View>
               
-              <Text style={styles.dateLabel}>Day Summary</Text>
+              <View style={{ flex: 1 }} />
+              
+              {post.percentile && (
+                <View style={[styles.tierBadge, { borderColor: tierColors.primary }]}>
+                  <Text style={[styles.tierText, { color: tierColors.primary }]}>
+                    {post.percentile.displayText}
+                  </Text>
+                </View>
+              )}
               
               <TouchableOpacity
                 style={styles.shareBtn}
@@ -113,7 +113,7 @@ export default function DaySummaryCard({
           </Text>
           <Text style={styles.tapHint}>Tap to read more</Text>
 
-          {/* Footer - Single row with meta and reactions */}
+          {/* Footer - Time, Location, Reactions */}
           <View style={styles.footer}>
             <Text style={styles.time}>{post.time}</Text>
             <View style={styles.dot} />
@@ -184,30 +184,31 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: scale(12),
-    position: 'relative',
+    gap: scale(8),
+    marginBottom: scale(10),
   },
   headerLeft: {
-    position: 'absolute',
-    left: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: moderateScale(10, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontWeight: '500',
+    letterSpacing: 0.3,
   },
   tierBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(4),
     paddingHorizontal: scale(8),
     paddingVertical: scale(4),
-    borderRadius: scale(8),
-  },
-  tierDot: {
-    width: scale(6),
-    height: scale(6),
-    borderRadius: scale(3),
+    borderRadius: scale(10),
+    borderWidth: 1,
+    backgroundColor: 'transparent',
   },
   tierText: {
-    fontSize: moderateScale(10, 0.2),
+    fontSize: moderateScale(9, 0.2),
     fontWeight: '700',
     letterSpacing: 0.3,
   },
@@ -219,8 +220,6 @@ const styles = StyleSheet.create({
   },
   shareBtn: {
     padding: scale(4),
-    position: 'absolute',
-    right: 0,
   },
   summaryText: {
     fontSize: moderateScale(15, 0.2),
@@ -242,8 +241,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: scale(8),
   },
+  username: {
+    fontSize: moderateScale(11, 0.2),
+    color: '#8b5cf6',
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
   time: {
-    fontSize: moderateScale(10, 0.2),
+    fontSize: moderateScale(9, 0.2),
     color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '500',
   },

@@ -257,8 +257,8 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
           {/* The Shareable Card */}
           <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0b0b18' }]}>
             <LinearGradient
-              // Lighter cosmic top, warm flame only in bottom 50%
-              colors={['#0b0b18', '#171a2c', '#3a1a10']}
+              // Cosmic gradient with supernova pink accent
+              colors={['#0b0b18', '#171a2c', '#2a1220']}
               locations={[0, 0.5, 1]}
               style={styles.cardGradient}
             >
@@ -293,11 +293,11 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
                     <Svg width={160} height={160} viewBox="0 0 24 24" fill="none">
                       <Path 
                         d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" 
-                        stroke="#fb923c" 
+                        stroke="#fb7185" 
                         strokeWidth={1.5}
                         strokeLinecap="round" 
                         strokeLinejoin="round"
-                        fill="rgba(251, 146, 60, 0.2)"
+                        fill="rgba(251, 113, 133, 0.2)"
                       />
                     </Svg>
                     <View style={styles.flameGlow} />
@@ -436,8 +436,8 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     alignItems: 'center',
-    marginBottom: scale(4),
-    marginTop: scale(-6),
+    marginBottom: scale(8),
+    marginTop: scale(4),
   },
   brandName: {
     fontSize: moderateScale(26, 0.3),
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     height: 2.5,
     borderRadius: 2,
     marginVertical: scale(10),
-    backgroundColor: '#fb923c',
+    backgroundColor: '#fb7185',
     opacity: 0.8,
   },
   brandTagline: {
@@ -467,10 +467,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-    paddingTop: scale(0),
-    paddingBottom: scale(8),
+    paddingVertical: scale(12),
     minHeight: scale(280),
-    gap: scale(8),
+    gap: scale(10),
   },
   flameContainer: {
     position: 'relative',
@@ -483,8 +482,8 @@ const styles = StyleSheet.create({
     width: 170,
     height: 170,
     borderRadius: 85,
-    backgroundColor: '#fb923c',
-    opacity: 0.12,
+    backgroundColor: '#fb7185',
+    opacity: 0.15,
   },
   flameCenterContent: {
     position: 'absolute',
@@ -505,7 +504,7 @@ const styles = StyleSheet.create({
   streakLabel: {
     fontSize: moderateScale(13, 0.2),
     fontWeight: '700',
-    color: '#fb923c',
+    color: '#fb7185',
     letterSpacing: scale(3),
     marginTop: scale(6),
     marginBottom: scale(8),
@@ -528,13 +527,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footer: {
-    paddingTop: scale(12),
+    paddingTop: scale(16),
     paddingBottom: scale(8),
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
-    gap: scale(12),
-    marginTop: scale(4),
+    gap: scale(8),
   },
   footerMessage: {
     fontSize: moderateScale(12, 0.2),
@@ -558,7 +556,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderTopWidth: 2,
     borderLeftWidth: 2,
-    borderColor: '#fb923c',
+    borderColor: '#fb7185',
     borderRadius: 8,
   },
   cornerTR: {
@@ -569,7 +567,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderTopWidth: 2,
     borderRightWidth: 2,
-    borderColor: '#fb923c',
+    borderColor: '#fb7185',
     borderRadius: 8,
   },
   cornerBL: {
@@ -580,7 +578,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
-    borderColor: '#fb923c',
+    borderColor: '#fb7185',
     borderRadius: 8,
   },
   cornerBR: {
@@ -591,7 +589,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderBottomWidth: 2,
     borderRightWidth: 2,
-    borderColor: '#fb923c',
+    borderColor: '#fb7185',
     borderRadius: 8,
   },
   closeButton: {

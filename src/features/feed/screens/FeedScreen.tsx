@@ -241,7 +241,7 @@ export default function FeedScreen() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>('world');
   const [reactionFilter, setReactionFilter] = useState<ReactionFilter>('all');
-  const [inputTypeFilter, setInputTypeFilter] = useState<InputTypeFilter>('all');
+  const [showDaySummaries, setShowDaySummaries] = useState(false);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [posts, setPosts] = useState<Post[]>(SAMPLE_POSTS);
   const [refreshing, setRefreshing] = useState(false);
@@ -289,19 +289,22 @@ export default function FeedScreen() {
   
   // Filtered posts
   const filteredPosts = posts.filter(post => {
-    // Filter out ghost/trending posts (those are for the Trending tab)
+    // Filter out ghost/trending posts
     if (post.isGhost) return false;
     
+    // Filter by post type (action vs day summary)
+    if (showDaySummaries && post.input_type !== 'day') return false;
+    if (!showDaySummaries && post.input_type !== 'action') return false;
+    
+    // Apply other filters
     if (filter === 'unique' && post.percentile && !['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier)) return false;
     if (filter === 'common' && post.percentile && !['common', 'popular'].includes(post.percentile.tier)) return false;
-    if (inputTypeFilter === 'action' && post.input_type !== 'action') return false;
-    if (inputTypeFilter === 'day' && post.input_type !== 'day') return false;
     if (scopeFilter !== 'world' && post.scope !== scopeFilter) return false;
     if (reactionFilter !== 'all' && (!post[`${reactionFilter}_count`] || post[`${reactionFilter}_count`] === 0)) return false;
     return true;
   });
   
-  const hasActiveFilters = filter !== 'all' || scopeFilter !== 'world' || reactionFilter !== 'all' || inputTypeFilter !== 'all';
+  const hasActiveFilters = filter !== 'all' || scopeFilter !== 'world' || reactionFilter !== 'all';
   
   return (
     <View style={styles.container}>
@@ -363,29 +366,47 @@ export default function FeedScreen() {
           <View style={styles.heroHeader}>
             <View style={styles.heroLeft}>
               <Text style={styles.heroTitle}>Discover</Text>
-              <Text style={styles.heroSubtitle}>{filteredPosts.length} posts nearby</Text>
+              <Text style={styles.heroSubtitle}>{filteredPosts.length} {showDaySummaries ? 'summaries' : 'actions'}</Text>
             </View>
             
-            {/* Compact Filter Button */}
-            <TouchableOpacity
-              style={styles.filterButton}
-              onPress={() => setFilterSheetVisible(true)}
-              activeOpacity={0.8}
-            >
-              <BlurView intensity={40} tint="dark" style={styles.filterButtonBlur}>
-                <LinearGradient
-                  colors={hasActiveFilters ? ['#8b5cf6', '#a78bfa'] : ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.filterButtonGradient}
-                >
-                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                    <Path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                  </Svg>
-                  {hasActiveFilters && <View style={styles.filterDot} />}
-                </LinearGradient>
-              </BlurView>
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              {/* Toggle: Actions / Day Summaries */}
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setShowDaySummaries(!showDaySummaries)}
+                activeOpacity={0.8}
+              >
+                <BlurView intensity={30} tint="dark" style={styles.toggleBlur}>
+                  <LinearGradient
+                    colors={showDaySummaries ? ['rgba(251, 146, 60, 0.4)', 'rgba(249, 115, 22, 0.2)'] : ['rgba(139, 92, 246, 0.4)', 'rgba(124, 58, 237, 0.2)']}
+                    style={styles.toggleGradient}
+                  >
+                    <Text style={styles.toggleText}>{showDaySummaries ? '📝' : '⚡'}</Text>
+                  </LinearGradient>
+                </BlurView>
+              </TouchableOpacity>
+
+              {/* Filter Button */}
+              <TouchableOpacity
+                style={styles.filterButton}
+                onPress={() => setFilterSheetVisible(true)}
+                activeOpacity={0.8}
+              >
+                <BlurView intensity={40} tint="dark" style={styles.filterButtonBlur}>
+                  <LinearGradient
+                    colors={hasActiveFilters ? ['#8b5cf6', '#a78bfa'] : ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.filterButtonGradient}
+                  >
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                    {hasActiveFilters && <View style={styles.filterDot} />}
+                  </LinearGradient>
+                </BlurView>
+              </TouchableOpacity>
+            </View>
           </View>
           
           {/* Active Filters Pills */}
@@ -522,8 +543,6 @@ export default function FeedScreen() {
         onScopeFilterChange={setScopeFilter}
         reactionFilter={reactionFilter}
         onReactionFilterChange={setReactionFilter}
-        inputTypeFilter={inputTypeFilter}
-        onInputTypeFilterChange={setInputTypeFilter}
       />
       
       {/* Share Card */}
@@ -726,6 +745,7 @@ const styles = StyleSheet.create({
   },
   heroLeft: {
     gap: scale(2),
+    flex: 1,
   },
   heroTitle: {
     fontSize: moderateScale(28, 0.3),
@@ -740,6 +760,29 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(13, 0.2),
     color: 'rgba(255, 255, 255, 0.5)',
     letterSpacing: 0.3,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: scale(10),
+  },
+  toggleButton: {
+    borderRadius: scale(14),
+    overflow: 'hidden',
+  },
+  toggleBlur: {
+    borderRadius: scale(14),
+  },
+  toggleGradient: {
+    width: scale(44),
+    height: scale(44),
+    borderRadius: scale(14),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  toggleText: {
+    fontSize: moderateScale(18, 0.2),
   },
   filterButton: {
     borderRadius: scale(14),

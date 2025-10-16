@@ -36,8 +36,6 @@ interface FilterSheetProps {
   onScopeFilterChange: (scope: ScopeFilter) => void;
   reactionFilter: ReactionFilter;
   onReactionFilterChange: (reaction: ReactionFilter) => void;
-  inputTypeFilter: InputTypeFilter;
-  onInputTypeFilterChange: (inputType: InputTypeFilter) => void;
   userLocation?: {
     city?: string;
     state?: string;
@@ -54,8 +52,6 @@ export default function FilterSheet({
   onScopeFilterChange,
   reactionFilter,
   onReactionFilterChange,
-  inputTypeFilter,
-  onInputTypeFilterChange,
   userLocation,
 }: FilterSheetProps) {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -188,42 +184,6 @@ export default function FilterSheet({
                 </View>
               </View>
 
-              {/* Content Type */}
-              <View style={styles.section}>
-                  <View style={styles.sectionHeader}>
-                    <View style={styles.sectionIndicator} />
-                    <Text style={styles.sectionTitle}>Content Type</Text>
-                  </View>
-                  <View style={styles.optionsGrid}>
-                    {(['all', 'action', 'day'] as InputTypeFilter[]).map((type) => {
-                      const isActive = inputTypeFilter === type;
-                      return (
-                        <TouchableOpacity
-                          key={type}
-                          style={[styles.optionButton, isActive && styles.optionButtonActive]}
-                          onPress={() => onInputTypeFilterChange(type)}
-                          activeOpacity={0.7}
-                        >
-                          <BlurView intensity={isActive ? 60 : 20} tint="dark" style={styles.optionBlur}>
-                            <LinearGradient
-                              colors={isActive ? ['rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.2)'] : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
-                              style={styles.optionGradient}
-                            >
-                              <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
-                                {type === 'all' ? 'ALL' : type === 'action' ? 'ACTIONS' : 'DAYS'}
-                              </Text>
-                              {isActive && (
-                                <View style={styles.activeIndicator}>
-                                  <Circle cx={4} cy={4} r={3} fill="#ffffff" />
-                                </View>
-                              )}
-                            </LinearGradient>
-                          </BlurView>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-              </View>
 
               {/* Location Scope */}
               <View style={styles.section}>

@@ -21,6 +21,7 @@ import Svg, { Path, Circle } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FilterSheet from '../components/FilterSheet';
+import FeedPostShareCard from '../components/FeedPostShareCard';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -247,6 +248,7 @@ export default function FeedScreen() {
   const [posts, setPosts] = useState<Post[]>(SAMPLE_POSTS);
   const [refreshing, setRefreshing] = useState(false);
   const [userReactions, setUserReactions] = useState<Set<string>>(new Set());
+  const [sharePost, setSharePost] = useState<Post | null>(null);
   
   // Animations
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -502,6 +504,7 @@ export default function FeedScreen() {
                 post={post}
                 index={index}
                 onReact={handleReaction}
+                onShare={setSharePost}
                 userReactions={userReactions}
               />
             ))
@@ -522,6 +525,16 @@ export default function FeedScreen() {
         inputTypeFilter={inputTypeFilter}
         onInputTypeFilterChange={setInputTypeFilter}
       />
+      
+      {/* Share Card */}
+      {sharePost && (
+        <FeedPostShareCard
+          visible={!!sharePost}
+          onClose={() => setSharePost(null)}
+          post={sharePost}
+          tierColors={getTierColors(sharePost.percentile?.tier)}
+        />
+      )}
     </View>
   );
 }
@@ -534,10 +547,11 @@ interface PostCardProps {
   post: Post;
   index: number;
   onReact: (postId: string, reactionType: 'funny' | 'creative' | 'must_try') => void;
+  onShare: (post: Post) => void;
   userReactions: Set<string>;
 }
 
-function PostCard({ post, index, onReact, userReactions }: PostCardProps) {
+function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const tierColors = getTierColors(post.percentile?.tier);
@@ -577,6 +591,19 @@ function PostCard({ post, index, onReact, userReactions }: PostCardProps) {
           colors={isTopTier ? ['rgba(139, 92, 246, 0.15)', 'rgba(45, 27, 78, 0.3)'] : ['rgba(59, 130, 246, 0.1)', 'rgba(26, 26, 46, 0.2)']}
           style={styles.postCardGradient}
         >
+          {/* Share Button - Top Right */}
+          <TouchableOpacity
+            style={styles.shareButton}
+            onPress={() => onShare(post)}
+            activeOpacity={0.7}
+          >
+            <BlurView intensity={40} tint="dark" style={styles.shareButtonBlur}>
+              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </BlurView>
+          </TouchableOpacity>
+          
           {/* Content */}
           <Text style={styles.postContent}>{post.content}</Text>
           
@@ -786,6 +813,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: scale(14),
+    position: 'relative',
+  },
+  shareButton: {
+    position: 'absolute',
+    top: scale(12),
+    right: scale(12),
+    borderRadius: scale(10),
+    overflow: 'hidden',
+    zIndex: 10,
+  },
+  shareButtonBlur: {
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(10),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   postContent: {
     fontSize: moderateScale(15, 0.2),

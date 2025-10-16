@@ -76,6 +76,30 @@ const SAMPLE_POSTS: Post[] = [
     must_try_count: 45,
   },
   {
+    id: 'day1',
+    content: 'Started my day with a 5AM workout, followed by a healthy breakfast. Spent the morning working on a new coding project - finally fixed that bug I\'ve been struggling with! Had lunch with an old friend I haven\'t seen in years. Afternoon was productive with meetings and planning. Evening walk in the park helped me decompress. Ended the day reading a great book about minimalism.',
+    time: '6h ago',
+    scope: 'city',
+    location_city: 'Phoenix',
+    input_type: 'day',
+    percentile: { percentile: 5.2, tier: 'rare', displayText: 'Top 5%', comparison: 'More unique than 95%' },
+    funny_count: 8,
+    creative_count: 18,
+    must_try_count: 32,
+  },
+  {
+    id: 'day2',
+    content: 'Woke up feeling grateful. Tried a new coffee recipe that turned out amazing. Deep work session on my passion project - made significant progress. Lunch was a spontaneous picnic. Attended a virtual workshop on design thinking. Cooked a new recipe for dinner that everyone loved. Quality time with family playing board games. Reflected on personal growth before bed.',
+    time: '1d ago',
+    scope: 'state',
+    location_state: 'California',
+    input_type: 'day',
+    percentile: { percentile: 12.8, tier: 'unique', displayText: 'Top 13%', comparison: 'More unique than 87%' },
+    funny_count: 15,
+    creative_count: 22,
+    must_try_count: 19,
+  },
+  {
     id: '2',
     content: 'Learned a new coding language today - Rust is amazing!',
     time: '5h ago',
@@ -248,6 +272,21 @@ export default function FeedScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userReactions, setUserReactions] = useState<Set<string>>(new Set());
   const [sharePost, setSharePost] = useState<Post | null>(null);
+  const [toggleContainerWidth, setToggleContainerWidth] = useState(0);
+  
+  // Toggle animation
+  const togglePosition = useRef(new Animated.Value(0)).current;
+  
+  const handleToggleChange = (showSummaries: boolean) => {
+    Animated.spring(togglePosition, {
+      toValue: showSummaries ? 1 : 0,
+      useNativeDriver: true,
+      damping: 20,
+      mass: 0.8,
+      stiffness: 120,
+    }).start();
+    setShowDaySummaries(showSummaries);
+  };
   
   // Animations
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -370,29 +409,12 @@ export default function FeedScreen() {
               <Text style={styles.heroSubtitle}>{filteredPosts.length} {showDaySummaries ? 'summaries' : 'actions'}</Text>
             </View>
             
-            <View style={styles.headerActions}>
-              {/* Toggle: Actions / Day Summaries */}
-              <TouchableOpacity
-                style={styles.toggleButton}
-                onPress={() => setShowDaySummaries(!showDaySummaries)}
-                activeOpacity={0.8}
-              >
-                <BlurView intensity={30} tint="dark" style={styles.toggleBlur}>
-                  <LinearGradient
-                    colors={showDaySummaries ? ['rgba(251, 146, 60, 0.4)', 'rgba(249, 115, 22, 0.2)'] : ['rgba(139, 92, 246, 0.4)', 'rgba(124, 58, 237, 0.2)']}
-                    style={styles.toggleGradient}
-                  >
-                    <Text style={styles.toggleText}>{showDaySummaries ? '📝' : '⚡'}</Text>
-                  </LinearGradient>
-                </BlurView>
-              </TouchableOpacity>
-
-              {/* Filter Button */}
-              <TouchableOpacity
-                style={styles.filterButton}
-                onPress={() => setFilterSheetVisible(true)}
-                activeOpacity={0.8}
-              >
+            {/* Filter Button */}
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setFilterSheetVisible(true)}
+              activeOpacity={0.8}
+            >
                 <BlurView intensity={40} tint="dark" style={styles.filterButtonBlur}>
                   <LinearGradient
                     colors={hasActiveFilters ? ['#8b5cf6', '#a78bfa'] : ['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
@@ -407,6 +429,58 @@ export default function FeedScreen() {
                   </LinearGradient>
                 </BlurView>
               </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Toggle Row - Actions / Summaries */}
+          <View style={styles.toggleRow}>
+            <View 
+              style={styles.toggleContainer}
+              onLayout={(e) => setToggleContainerWidth(e.nativeEvent.layout.width)}
+            >
+              <View style={styles.toggleBackground}>
+                <Animated.View
+                  style={[
+                    styles.toggleIndicator,
+                    {
+                      transform: [
+                        {
+                          translateX: togglePosition.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, toggleContainerWidth / 2],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  <LinearGradient
+                    colors={showDaySummaries ? ['rgba(251, 146, 60, 0.5)', 'rgba(249, 115, 22, 0.3)'] : ['rgba(139, 92, 246, 0.5)', 'rgba(124, 58, 237, 0.3)']}
+                    style={styles.toggleIndicatorGradient}
+                  />
+                </Animated.View>
+              </View>
+              
+              <View style={styles.toggleButtons}>
+                <TouchableOpacity
+                  style={styles.toggleBtn}
+                  onPress={() => handleToggleChange(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.toggleBtnText, !showDaySummaries && styles.toggleBtnTextActive]}>
+                    Actions
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.toggleBtn}
+                  onPress={() => handleToggleChange(true)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.toggleBtnText, showDaySummaries && styles.toggleBtnTextActive]}>
+                    Summaries
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
           
@@ -774,28 +848,61 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
     letterSpacing: 0.3,
   },
-  headerActions: {
-    flexDirection: 'row',
-    gap: scale(10),
+  toggleRow: {
+    paddingHorizontal: scale(20),
+    marginBottom: scale(16),
   },
-  toggleButton: {
-    borderRadius: scale(14),
+  toggleContainer: {
+    position: 'relative',
+    height: scale(44),
+  },
+  toggleBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: scale(12),
+    padding: scale(3),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  toggleIndicator: {
+    position: 'absolute',
+    left: scale(3),
+    top: scale(3),
+    bottom: scale(3),
+    right: '50%',
+    borderRadius: scale(10),
     overflow: 'hidden',
   },
-  toggleBlur: {
-    borderRadius: scale(14),
+  toggleIndicatorGradient: {
+    flex: 1,
+    borderRadius: scale(10),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  toggleGradient: {
-    width: scale(44),
-    height: scale(44),
-    borderRadius: scale(14),
+  toggleButtons: {
+    flexDirection: 'row',
+    position: 'relative',
+    zIndex: 1,
+    height: '100%',
+  },
+  toggleBtn: {
+    paddingHorizontal: scale(16),
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
-  toggleText: {
-    fontSize: moderateScale(18, 0.2),
+  toggleBtnText: {
+    fontSize: moderateScale(11, 0.2),
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.4)',
+    letterSpacing: 0.3,
+  },
+  toggleBtnTextActive: {
+    color: '#ffffff',
+    fontWeight: '700',
   },
   filterButton: {
     borderRadius: scale(14),

@@ -203,7 +203,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <LocationLeaderboard userLocation={location} />
 
             {/* Trending Leaderboard */}
-            <TrendingLeaderboard />
+            <TrendingLeaderboard onExploreTrending={() => navigation.navigate('Trending')} />
           </ScrollView>
         </Animated.View>
       </LinearGradient>

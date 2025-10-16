@@ -3,15 +3,17 @@
  * Shows top trending items from Spotify, Reddit, YouTube, Sports
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import TrendingModal from './TrendingModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -38,7 +40,13 @@ const SAMPLE_TRENDING: TrendingItem[] = [
   { content: 'Watching "Cooking tutorial gone wrong"', source: 'YouTube', count: 1200000, rank: 10 },
 ];
 
-export default function TrendingLeaderboard() {
+interface TrendingLeaderboardProps {
+  onExploreTrending?: () => void;
+}
+
+export default function TrendingLeaderboard({ onExploreTrending }: TrendingLeaderboardProps) {
+  const [selectedItem, setSelectedItem] = useState<typeof SAMPLE_TRENDING[0] | null>(null);
+
   const formatCount = (count: number) => {
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
@@ -68,7 +76,12 @@ export default function TrendingLeaderboard() {
           {/* Trending List - Top 5 */}
           <View style={styles.trendingList}>
             {SAMPLE_TRENDING.slice(0, 5).map((item) => (
-              <View key={item.rank} style={styles.trendingRow}>
+              <TouchableOpacity
+                key={item.rank}
+                style={styles.trendingRow}
+                onPress={() => setSelectedItem(item)}
+                activeOpacity={0.7}
+              >
                 <Text style={[styles.rankText, { color: getRankColor(item.rank) }]}>
                   {getRankDisplay(item.rank)}
                 </Text>
@@ -80,11 +93,22 @@ export default function TrendingLeaderboard() {
                     <Text style={styles.countText}>{formatCount(item.count)}</Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </LinearGradient>
       </BlurView>
+
+      {/* Trending Modal */}
+      <TrendingModal
+        visible={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onExploreTrending={() => {
+          setSelectedItem(null);
+          onExploreTrending?.();
+        }}
+        item={selectedItem}
+      />
     </View>
   );
 }

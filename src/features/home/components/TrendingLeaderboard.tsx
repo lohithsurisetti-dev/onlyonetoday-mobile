@@ -67,7 +67,7 @@ export default function TrendingLeaderboard() {
           
           {/* Trending List */}
           <View style={styles.trendingList}>
-            {SAMPLE_TRENDING.map((item) => (
+            {SAMPLE_TRENDING.slice(0, 5).map((item) => ( {/* Show top 5 */}
               <View key={item.rank} style={styles.trendingRow}>
                 <Text style={[styles.rankText, { color: getRankColor(item.rank) }]}>
                   {getRankDisplay(item.rank)}

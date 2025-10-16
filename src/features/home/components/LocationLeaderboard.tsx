@@ -90,7 +90,7 @@ export default function LocationLeaderboard({ userLocation }: LocationLeaderboar
   // const hasLocation = userLocation?.city || userLocation?.state || userLocation?.country;
   const hasLocation = true; // Temporarily enabled for demo
 
-  const currentData = data[activeTab];
+  const currentData = data[activeTab].slice(0, 5); // Show top 5
 
   return (
     <View style={styles.container}>

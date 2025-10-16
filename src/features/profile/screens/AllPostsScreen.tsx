@@ -34,6 +34,8 @@ interface Post {
   percentile: number;
   timestamp: number;
   isToday: boolean;
+  scope: 'world' | 'city' | 'state' | 'country';
+  location?: string;
   reactions: {
     love: number;
     fire: number;
@@ -49,11 +51,11 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
 
   // Mock posts
   const allPosts: Post[] = [
-    { id: '1', content: 'Discovered a hidden rooftop garden', date: '2h', tier: 'elite', percentile: 99.8, timestamp: Date.now(), isToday: true, reactions: { love: 24, fire: 18, wow: 12 } },
-    { id: '2', content: 'Had breakfast underwater', date: '5h', tier: 'rare', percentile: 95.2, timestamp: Date.now(), isToday: true, reactions: { love: 15, fire: 22, wow: 8 } },
-    { id: '3', content: 'Wrote a poem in binary code', date: '2d', tier: 'unique', percentile: 87.5, timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000, isToday: false, reactions: { love: 32, fire: 9, wow: 14 } },
-    { id: '4', content: 'Learned to juggle with my eyes closed', date: '3d', tier: 'elite', percentile: 98.1, timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000, isToday: false, reactions: { love: 19, fire: 27, wow: 11 } },
-    { id: '5', content: 'Created a time-lapse of clouds for 12 hours', date: '4d', tier: 'rare', percentile: 93.7, timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000, isToday: false, reactions: { love: 28, fire: 15, wow: 19 } },
+    { id: '1', content: 'Discovered a hidden rooftop garden', date: '2h', tier: 'elite', percentile: 99.8, timestamp: Date.now(), isToday: true, scope: 'world', reactions: { love: 24, fire: 18, wow: 12 } },
+    { id: '2', content: 'Had breakfast underwater', date: '5h', tier: 'rare', percentile: 95.2, timestamp: Date.now(), isToday: true, scope: 'city', location: 'Phoenix', reactions: { love: 15, fire: 22, wow: 8 } },
+    { id: '3', content: 'Wrote a poem in binary code', date: '2d', tier: 'unique', percentile: 87.5, timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000, isToday: false, scope: 'country', location: 'United States', reactions: { love: 32, fire: 9, wow: 14 } },
+    { id: '4', content: 'Learned to juggle with my eyes closed', date: '3d', tier: 'elite', percentile: 98.1, timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000, isToday: false, scope: 'state', location: 'California', reactions: { love: 19, fire: 27, wow: 11 } },
+    { id: '5', content: 'Created a time-lapse of clouds for 12 hours', date: '4d', tier: 'rare', percentile: 93.7, timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000, isToday: false, scope: 'world', reactions: { love: 28, fire: 15, wow: 19 } },
   ];
 
   const filteredPosts = activeTab === 'today' 
@@ -196,37 +198,49 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
                     {/* Content */}
                     <Text style={styles.postText}>{post.content}</Text>
 
-                    {/* Footer with reactions and share */}
-                    <View style={styles.postFooter}>
-                      <View style={styles.leftFooter}>
-                        <View style={styles.percentileBadge}>
-                          <Text style={styles.percentileText}>Top {(100 - post.percentile).toFixed(1)}%</Text>
-                        </View>
-                        
-                        {/* Reactions */}
-                        <View style={styles.reactionsContainer}>
-                          {post.reactions.love > 0 && (
-                            <View style={styles.reactionItem}>
-                              <Text style={styles.reactionEmoji}>❤️</Text>
-                              <Text style={styles.reactionCount}>{post.reactions.love}</Text>
-                            </View>
+                    {/* Meta Row */}
+                    <View style={styles.metaRow}>
+                      <View style={styles.percentileBadge}>
+                        <Text style={styles.percentileText}>Top {(100 - post.percentile).toFixed(1)}%</Text>
+                      </View>
+                      
+                      <View style={styles.scopeBadge}>
+                        <Svg width={scale(9)} height={scale(9)} viewBox="0 0 24 24" fill="none">
+                          {post.scope === 'world' ? (
+                            <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2} />
+                          ) : (
+                            <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2} />
                           )}
-                          {post.reactions.fire > 0 && (
-                            <View style={styles.reactionItem}>
-                              <Text style={styles.reactionEmoji}>🔥</Text>
-                              <Text style={styles.reactionCount}>{post.reactions.fire}</Text>
-                            </View>
-                          )}
-                          {post.reactions.wow > 0 && (
-                            <View style={styles.reactionItem}>
-                              <Text style={styles.reactionEmoji}>😮</Text>
-                              <Text style={styles.reactionCount}>{post.reactions.wow}</Text>
-                            </View>
-                          )}
-                        </View>
+                        </Svg>
+                        <Text style={styles.scopeText}>
+                          {post.scope === 'world' ? 'World' : post.location || post.scope}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Reactions and Share Row */}
+                    <View style={styles.actionsRow}>
+                      <View style={styles.reactionsContainer}>
+                        {post.reactions.love > 0 && (
+                          <View style={styles.reactionItem}>
+                            <Text style={styles.reactionEmoji}>❤️</Text>
+                            <Text style={styles.reactionCount}>{post.reactions.love}</Text>
+                          </View>
+                        )}
+                        {post.reactions.fire > 0 && (
+                          <View style={styles.reactionItem}>
+                            <Text style={styles.reactionEmoji}>🔥</Text>
+                            <Text style={styles.reactionCount}>{post.reactions.fire}</Text>
+                          </View>
+                        )}
+                        {post.reactions.wow > 0 && (
+                          <View style={styles.reactionItem}>
+                            <Text style={styles.reactionEmoji}>😮</Text>
+                            <Text style={styles.reactionCount}>{post.reactions.wow}</Text>
+                          </View>
+                        )}
                       </View>
 
-                      {/* Share Button */}
                       <TouchableOpacity
                         style={styles.shareButton}
                         onPress={() => handleShare(post)}
@@ -352,13 +366,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   postContent: {
-    padding: scale(18),
+    padding: scale(14),
   },
   postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: scale(12),
+    marginBottom: scale(10),
   },
   tierContainer: {
     flexDirection: 'row',
@@ -381,22 +395,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   postText: {
-    fontSize: moderateScale(15, 0.2),
+    fontSize: moderateScale(14, 0.2),
     color: '#ffffff',
-    lineHeight: moderateScale(22, 0.2),
-    marginBottom: scale(14),
+    lineHeight: moderateScale(20, 0.2),
+    marginBottom: scale(10),
     fontWeight: '400',
   },
-  postFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  leftFooter: {
+  metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(12),
-    flex: 1,
+    gap: scale(8),
+    marginBottom: scale(10),
+    flexWrap: 'wrap',
   },
   percentileBadge: {
     paddingHorizontal: scale(8),
@@ -412,21 +422,42 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
+  scopeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(8),
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  },
+  scopeText: {
+    fontSize: moderateScale(10, 0.2),
+    color: '#9ca3af',
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: scale(10),
+  },
   reactionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(10),
+    gap: scale(8),
   },
   reactionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(4),
+    gap: scale(3),
   },
   reactionEmoji: {
-    fontSize: moderateScale(12, 0.2),
+    fontSize: moderateScale(10, 0.2),
   },
   reactionCount: {
-    fontSize: moderateScale(11, 0.2),
+    fontSize: moderateScale(10, 0.2),
     color: '#9ca3af',
     fontWeight: '600',
   },

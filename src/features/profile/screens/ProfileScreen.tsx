@@ -46,9 +46,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const [profilePic] = useState(`https://i.pravatar.cc/300?u=${user?.username || 'default'}`);
 
   const recentPosts = [
-    { id: '1', content: 'Discovered a hidden rooftop garden', date: '2h', tier: 'elite', percentile: 99.8 },
-    { id: '2', content: 'Had breakfast underwater', date: '1d', tier: 'rare', percentile: 95.2 },
-    { id: '3', content: 'Wrote a poem in binary code', date: '2d', tier: 'unique', percentile: 87.5 },
+    { id: '1', content: 'Discovered a hidden rooftop garden', date: '2h', tier: 'elite', percentile: 99.8, scope: 'world' },
+    { id: '2', content: 'Had breakfast underwater', date: '1d', tier: 'rare', percentile: 95.2, scope: 'city', location: 'Phoenix' },
+    { id: '3', content: 'Wrote a poem in binary code', date: '2d', tier: 'unique', percentile: 87.5, scope: 'country', location: 'United States' },
   ];
 
   useEffect(() => {
@@ -178,8 +178,22 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
                       <Text style={styles.postBody}>{post.content}</Text>
 
-                      <View style={styles.postFooter}>
+                      {/* Meta Row */}
+                      <View style={styles.metaRow}>
                         <Text style={styles.percentileTag}>Top {(100 - post.percentile).toFixed(1)}%</Text>
+                        
+                        <View style={styles.scopeBadge}>
+                          <Svg width={scale(9)} height={scale(9)} viewBox="0 0 24 24" fill="none">
+                            {post.scope === 'world' ? (
+                              <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2} />
+                            ) : (
+                              <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2} />
+                            )}
+                          </Svg>
+                          <Text style={styles.scopeLabel}>
+                            {post.scope === 'world' ? 'World' : post.location}
+                          </Text>
+                        </View>
                       </View>
                     </LinearGradient>
                   </BlurView>
@@ -263,13 +277,15 @@ const styles = StyleSheet.create({
   // Post Card
   postCard: { marginBottom: scale(10) },
   postBlur: { borderRadius: scale(16), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.04)' },
-  postContent: { padding: scale(16) },
-  postHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: scale(10) },
+  postContent: { padding: scale(12) },
+  postHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: scale(8) },
   tierContainer: { flexDirection: 'row', alignItems: 'center', gap: scale(6) },
   tierIndicator: { width: scale(6), height: scale(6), borderRadius: scale(3) },
   tierLabel: { fontSize: moderateScale(9, 0.2), fontWeight: '700', letterSpacing: 0.8 },
-  timeAgo: { fontSize: moderateScale(11, 0.2), color: '#6b7280', fontWeight: '500' },
-  postBody: { fontSize: moderateScale(15, 0.2), color: '#ffffff', lineHeight: moderateScale(22, 0.2), marginBottom: scale(10), fontWeight: '400' },
-  postFooter: { flexDirection: 'row', justifyContent: 'flex-end' },
+  timeAgo: { fontSize: moderateScale(10, 0.2), color: '#6b7280', fontWeight: '500' },
+  postBody: { fontSize: moderateScale(14, 0.2), color: '#ffffff', lineHeight: moderateScale(20, 0.2), marginBottom: scale(10), fontWeight: '400' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: scale(8), flexWrap: 'wrap' },
   percentileTag: { fontSize: moderateScale(10, 0.2), color: '#8b5cf6', fontWeight: '700', letterSpacing: 0.3 },
+  scopeBadge: { flexDirection: 'row', alignItems: 'center', gap: scale(4), paddingHorizontal: scale(8), paddingVertical: scale(4), borderRadius: scale(8), backgroundColor: 'rgba(255, 255, 255, 0.04)' },
+  scopeLabel: { fontSize: moderateScale(10, 0.2), color: '#9ca3af', fontWeight: '600', letterSpacing: 0.3 },
 });

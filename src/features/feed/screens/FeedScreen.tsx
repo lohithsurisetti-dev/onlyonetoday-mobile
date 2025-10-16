@@ -591,44 +591,50 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
           colors={isTopTier ? ['rgba(139, 92, 246, 0.15)', 'rgba(45, 27, 78, 0.3)'] : ['rgba(59, 130, 246, 0.1)', 'rgba(26, 26, 46, 0.2)']}
           style={styles.postCardGradient}
         >
-          {/* Share Button - Top Right */}
-          <TouchableOpacity
-            style={styles.shareButton}
-            onPress={() => onShare(post)}
-            activeOpacity={0.6}
-          >
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          </TouchableOpacity>
+          {/* Header Row - Tier badge, Time, Scope, Share */}
+          <View style={styles.compactHeader}>
+            {post.percentile && (
+              <View style={[styles.tierDot, { backgroundColor: tierColors.primary }]} />
+            )}
+            <Text style={styles.postTime}>{post.time}</Text>
+            <View style={styles.dotSeparator} />
+            <View style={styles.scopeCompact}>
+              <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
+                {post.scope === 'world' ? (
+                  <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2.5} />
+                ) : (
+                  <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2.5} />
+                )}
+              </Svg>
+              <Text style={styles.scopeCompactText} numberOfLines={1}>
+                {post.scope === 'world' ? 'World' : 
+                 post.scope === 'city' ? post.location_city :
+                 post.scope === 'state' ? post.location_state :
+                 post.location_country}
+              </Text>
+            </View>
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity
+              style={styles.shareButtonCompact}
+              onPress={() => onShare(post)}
+              activeOpacity={0.6}
+            >
+              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </TouchableOpacity>
+          </View>
           
           {/* Content */}
-          <Text style={styles.postContent}>{post.content}</Text>
+          <Text style={styles.postContent} numberOfLines={3}>{post.content}</Text>
           
-          {/* Percentile Badge */}
-          {post.percentile && (
-            <View style={styles.badge}>
-              <LinearGradient
-                colors={[`${tierColors.primary}40`, `${tierColors.secondary}20`]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.badgeGradient}
-              >
-                <Svg width={12} height={12} viewBox="0 0 20 20" fill="none">
-                  <Path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" fill={tierColors.primary} />
-                </Svg>
-                <Text style={[styles.badgeText, { color: tierColors.primary }]}>
-                  {post.percentile.displayText}
-                </Text>
-              </LinearGradient>
-            </View>
-          )}
-          
-          {/* Footer */}
-          <View style={styles.postFooter}>
-            <Text style={styles.postTime}>{post.time}</Text>
-            
-            {/* Reactions */}
+          {/* Footer Row - Percentile and Reactions */}
+          <View style={styles.compactFooter}>
+            {post.percentile && (
+              <Text style={[styles.percentileCompact, { color: tierColors.primary }]}>
+                {post.percentile.displayText}
+              </Text>
+            )}
             <View style={styles.reactions}>
               {(['funny', 'creative', 'must_try'] as const).map(type => {
                 const isActive = userReactions.has(`${post.id}-${type}`);
@@ -806,25 +812,58 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   postCardGradient: {
-    padding: scale(20),
+    padding: scale(14),
     borderRadius: scale(20),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    gap: scale(14),
-    position: 'relative',
   },
-  shareButton: {
-    position: 'absolute',
-    top: scale(14),
-    right: scale(14),
-    zIndex: 10,
+  compactHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+    marginBottom: scale(8),
+  },
+  tierDot: {
+    width: scale(6),
+    height: scale(6),
+    borderRadius: scale(3),
+  },
+  dotSeparator: {
+    width: scale(2),
+    height: scale(2),
+    borderRadius: scale(1),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  scopeCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(3),
+    maxWidth: scale(90),
+  },
+  scopeCompactText: {
+    fontSize: moderateScale(9, 0.2),
+    color: '#9ca3af',
+    fontWeight: '500',
+  },
+  shareButtonCompact: {
     padding: scale(4),
   },
   postContent: {
-    fontSize: moderateScale(15, 0.2),
-    lineHeight: moderateScale(23, 0.2),
+    fontSize: moderateScale(14, 0.2),
+    lineHeight: moderateScale(20, 0.2),
     color: '#ffffff',
-    fontWeight: '500',
+    fontWeight: '400',
+    marginBottom: scale(10),
+  },
+  compactFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  percentileCompact: {
+    fontSize: moderateScale(10, 0.2),
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   badge: {
     borderRadius: scale(12),
@@ -846,26 +885,23 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  postFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   postTime: {
-    fontSize: moderateScale(12, 0.2),
+    fontSize: moderateScale(10, 0.2),
     color: 'rgba(255, 255, 255, 0.4)',
+    fontWeight: '500',
   },
   reactions: {
     flexDirection: 'row',
-    gap: scale(8),
+    gap: scale(6),
+    alignItems: 'center',
   },
   reactionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(4),
-    paddingHorizontal: scale(10),
-    paddingVertical: scale(6),
-    borderRadius: scale(12),
+    gap: scale(3),
+    paddingHorizontal: scale(6),
+    paddingVertical: scale(4),
+    borderRadius: scale(10),
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -875,10 +911,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(139, 92, 246, 0.4)',
   },
   reactionEmoji: {
-    fontSize: moderateScale(14, 0.2),
+    fontSize: moderateScale(11, 0.2),
   },
   reactionCount: {
-    fontSize: moderateScale(11, 0.2),
+    fontSize: moderateScale(10, 0.2),
     color: '#ffffff',
     fontWeight: '600',
   },

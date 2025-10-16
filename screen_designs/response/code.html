@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OnlyOne.Today - Uniqueness Revealed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+        @keyframes move-stars {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 0 100vh;
+            }
+        }
+        .animated-bg {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%"><circle cx="10" cy="10" r="1" fill="white"/><circle cx="80" cy="20" r="0.5" fill="white"/><circle cx="30" cy="40" r="0.8" fill="white"/><circle cx="50" cy="60" r="1.2" fill="white"/><circle cx="90" cy="80" r="0.7" fill="white"/><circle cx="20" cy="90" r="0.9" fill="white"/></svg>'), linear-gradient(to bottom, #0D0C1D, #000000);
+            background-size: 100px 100px, 100% 100%;
+            animation: move-stars 60s linear infinite;
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .glowing-button {
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+        }
+        @keyframes ring-animation {
+            0% {
+                stroke-dashoffset: 628;
+            }
+            100% {
+                stroke-dashoffset: var(--stroke-offset, 628);
+            }
+        }
+        .animated-ring {
+            stroke-dasharray: 628;
+            animation: ring-animation 2s ease-out forwards;
+            animation-delay: 0.5s;
+        }
+    </style>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#8347eb",
+                    "background-light": "#f7f6f8",
+                    "background-dark": "#0D0C1D",
+                    "tier-legendary": "#FFD700",
+                    "tier-epic": "#9400D3",
+                    "tier-rare": "#0070DD",
+                    "tier-uncommon": "#1E8449",
+                    "tier-common": "#979797",
+                },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.5rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+                },
+                keyframes: {
+                    fadeInUp: {
+                        '0%': {
+                            opacity: '0',
+                            transform: 'translateY(20px)'
+                        },
+                        '100%': {
+                            opacity: '1',
+                            transform: 'translateY(0)'
+                        },
+                    }
+                },
+                animation: {
+                    'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                }
+            },
+        },
+    }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col items-center bg-background-dark dark group/design-root overflow-x-hidden animated-bg" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="w-full max-w-md px-6 pt-12 pb-32">
+<div class="text-center mb-6 animate-fade-in-up">
+<h1 class="text-white tracking-light text-4xl font-bold leading-tight">OnlyOne.Today</h1>
+<p class="text-gray-300 text-base font-normal leading-normal pt-2">Your Uniqueness Revealed</p>
+</div>
+<div class="flex flex-col items-center gap-6">
+<div class="relative w-56 h-56 flex items-center justify-center animate-fade-in-up" style="animation-delay: 0.2s;">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 220 220">
+<circle cx="110" cy="110" fill="transparent" r="100" stroke="rgba(255, 255, 255, 0.1)" stroke-width="15"></circle>
+<circle class="animated-ring text-tier-legendary" cx="110" cy="110" fill="transparent" r="100" stroke="currentColor" stroke-width="15" style="--stroke-offset: 565;"></circle>
+</svg>
+<div class="absolute text-center">
+<p class="text-white text-4xl font-bold text-tier-legendary">Top 1%</p>
+<p class="text-tier-legendary/80 text-lg font-medium">Legendary</p>
+</div>
+</div>
+<div class="w-full p-6 rounded-xl glassmorphism text-center animate-fade-in-up" style="animation-delay: 0.4s;">
+<h2 class="text-white text-2xl font-bold">A truly singular experience!</h2>
+<p class="text-gray-300 mt-1">among 1,234,567 people worldwide</p>
+</div>
+<div class="w-full p-4 rounded-xl glassmorphism animate-fade-in-up" style="animation-delay: 0.6s;">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-gray-400 mt-1">format_quote</span>
+<p class="text-white text-lg font-medium italic">"Ate breakfast on a hot air balloon while juggling flaming torches."</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 w-full animate-fade-in-up" style="animation-delay: 0.8s;">
+<div class="flex flex-col gap-2 rounded-xl p-4 glassmorphism">
+<p class="text-gray-300 text-sm font-medium leading-normal">Ranking</p>
+<p class="text-white tracking-light text-2xl font-bold leading-tight">#1</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-4 glassmorphism">
+<p class="text-gray-300 text-sm font-medium leading-normal">People</p>
+<p class="text-white tracking-light text-2xl font-bold leading-tight">1</p>
+</div>
+</div>
+<div class="w-full rounded-xl glassmorphism animate-fade-in-up" style="animation-delay: 1s;">
+<details class="group">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+<h3 class="text-white font-bold">Temporal Stats</h3>
+<span class="material-symbols-outlined text-white transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="border-t border-white/20 p-4 space-y-3">
+<p class="text-gray-300 text-sm">First time this week.</p>
+<p class="text-gray-300 text-sm">First time this month.</p>
+<p class="text-gray-300 text-sm">First time this year.</p>
+</div>
+</details>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto p-6 bg-gradient-to-t from-background-dark to-transparent pointer-events-none">
+<div class="flex flex-col gap-3 pointer-events-auto">
+<button class="w-full bg-gradient-to-r from-[#8A2BE2] to-[#4A00E0] text-white font-bold py-4 px-4 rounded-lg glowing-button transition-all duration-300 ease-in-out hover:scale-105 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">share</span>
+                    Share My Uniqueness
+                </button>
+<button class="w-full glassmorphism text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 ease-in-out hover:bg-white/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">feed</span>
+                    View Feed
+                </button>
+</div>
+</div>
+</div>
+
+</body></html>

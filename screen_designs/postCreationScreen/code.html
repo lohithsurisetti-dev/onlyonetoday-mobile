@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OnlyOne.Today</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    @keyframes move-stars {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100vh; }
+    }
+    .animated-bg {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%"><circle cx="10" cy="10" r="1" fill="white"/><circle cx="80" cy="20" r="0.5" fill="white"/><circle cx="30" cy="40" r="0.8" fill="white"/><circle cx="50" cy="60" r="1.2" fill="white"/><circle cx="90" cy="80" r="0.7" fill="white"/><circle cx="20" cy="90" r="0.9" fill="white"/></svg>'), linear-gradient(to bottom, #0D0C1D, #000000);
+      background-size: 100px 100px, 100% 100%;
+      animation: move-stars 60s linear infinite;
+    }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .glowing-button {
+      box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#8347eb",
+            "background-light": "#f7f6f8",
+            "background-dark": "#0D0C1D",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "1rem",
+            "xl": "1.5rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col items-center bg-background-dark dark group/design-root overflow-x-hidden animated-bg" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="w-full max-w-md px-6 pt-12">
+<div class="text-center mb-6">
+<h1 class="text-white tracking-light text-4xl font-bold leading-tight">OnlyOne.Today</h1>
+<p class="text-gray-300 text-base font-normal leading-normal pt-2">Record. Compare. Discover.</p>
+</div>
+<div class="flex flex-wrap gap-4 p-0 mb-6">
+<div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-4 glassmorphism">
+<p class="text-gray-300 text-sm font-medium leading-normal">Posts Today</p>
+<p class="text-white tracking-light text-2xl font-bold leading-tight">1,234,567</p>
+</div>
+<div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-4 glassmorphism">
+<p class="text-gray-300 text-sm font-medium leading-normal">Unique Actions</p>
+<p class="text-white tracking-light text-2xl font-bold leading-tight">89,123</p>
+</div>
+</div>
+<div class="w-full p-6 rounded-xl glassmorphism">
+<div class="flex flex-col items-stretch justify-start">
+<div class="flex w-full grow flex-col items-stretch justify-center gap-4">
+<p class="text-white text-xl font-bold leading-tight tracking-[-0.015em] text-center">What did YOU do today?</p>
+<div class="pb-1">
+<div class="flex border-b border-white/20">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-white text-white pb-3 pt-2 flex-1" href="#">
+<p class="text-white text-sm font-bold leading-normal tracking-[0.015em]">Single Action</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-400 pb-3 pt-2 flex-1" href="#">
+<p class="text-gray-400 text-sm font-bold leading-normal tracking-[0.015em]">Day Summary</p>
+</a>
+</div>
+</div>
+<div class="relative">
+<textarea class="w-full bg-black/20 text-white placeholder-gray-400 border border-white/20 rounded-lg p-4 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="Ate breakfast on a hot air balloon..."></textarea>
+<p class="absolute bottom-3 right-3 text-gray-400 text-xs">140/280</p>
+</div>
+<div class="flex justify-between items-center bg-black/20 rounded-full p-1">
+<button class="flex-1 text-sm font-medium py-2 rounded-full bg-primary/80 text-white">Worldwide</button>
+<button class="flex-1 text-sm font-medium py-2 rounded-full text-gray-400 hover:bg-white/10">Country</button>
+<button class="flex-1 text-sm font-medium py-2 rounded-full text-gray-400 hover:bg-white/10">State</button>
+<button class="flex-1 text-sm font-medium py-2 rounded-full text-gray-400 hover:bg-white/10">City</button>
+</div>
+<button class="w-full mt-4 bg-gradient-to-r from-[#8A2BE2] to-[#4A00E0] text-white font-bold py-4 px-4 rounded-lg glowing-button transition-all duration-300 ease-in-out hover:scale-105">
+                    Discover My Uniqueness ✨
+                  </button>
+</div>
+</div>
+</div>
+</div>
+<div class="h-12"></div>
+</div>
+</body></html>

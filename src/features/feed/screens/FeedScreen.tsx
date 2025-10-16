@@ -22,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FilterSheet from '../components/FilterSheet';
 import FeedPostShareCard from '../components/FeedPostShareCard';
+import DaySummaryCard from '../components/DaySummaryCard';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -520,14 +521,26 @@ export default function FeedScreen() {
             </View>
           ) : (
             filteredPosts.map((post, index) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                index={index}
-                onReact={handleReaction}
-                onShare={setSharePost}
-                userReactions={userReactions}
-              />
+              post.input_type === 'day' ? (
+                <DaySummaryCard
+                  key={post.id}
+                  post={post}
+                  index={index}
+                  onReact={handleReaction}
+                  onShare={setSharePost}
+                  userReactions={userReactions}
+                  tierColors={getTierColors(post.percentile?.tier)}
+                />
+              ) : (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  index={index}
+                  onReact={handleReaction}
+                  onShare={setSharePost}
+                  userReactions={userReactions}
+                />
+              )
             ))
           )}
         </View>

@@ -194,29 +194,69 @@ function TrendingCard({ post, index, onShare }: TrendingCardProps) {
     return count.toString();
   };
   
+  const getRankBadge = (index: number) => {
+    if (index === 0) return { color: '#fbbf24', label: '#1' };
+    if (index === 1) return { color: '#d1d5db', label: '#2' };
+    if (index === 2) return { color: '#f97316', label: '#3' };
+    return null;
+  };
+  
+  const getSourceColor = (source: string) => {
+    switch(source) {
+      case 'Spotify': return { bg: 'rgba(30, 215, 96, 0.15)', border: 'rgba(30, 215, 96, 0.3)', text: '#1ed760' };
+      case 'Reddit': return { bg: 'rgba(251, 146, 60, 0.15)', border: 'rgba(251, 146, 60, 0.3)', text: '#fb923c' };
+      case 'YouTube': return { bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.3)', text: '#ef4444' };
+      case 'Sports': return { bg: 'rgba(34, 197, 94, 0.15)', border: 'rgba(34, 197, 94, 0.3)', text: '#22c55e' };
+      default: return { bg: 'rgba(139, 92, 246, 0.1)', border: 'rgba(139, 92, 246, 0.2)', text: '#a78bfa' };
+    }
+  };
+  
+  const rankBadge = getRankBadge(index);
+  const sourceColor = getSourceColor(post.source);
+  
   return (
     <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      <BlurView intensity={15} tint="dark" style={styles.cardBlur}>
+      <BlurView intensity={25} tint="dark" style={styles.cardBlur}>
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.01)']}
+          colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
           style={styles.cardGradient}
         >
-          {/* Share Button */}
-          <TouchableOpacity style={styles.shareButton} onPress={() => onShare(post)} activeOpacity={0.6}>
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="rgba(255, 255, 255, 0.6)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            </Svg>
-          </TouchableOpacity>
+          {/* Single Row - All pills + Share */}
+          <View style={styles.cardHeader}>
+            {rankBadge && (
+              <View style={[styles.rankBadge, { backgroundColor: `${rankBadge.color}20`, borderColor: `${rankBadge.color}40` }]}>
+                <Text style={[styles.rankText, { color: rankBadge.color }]}>{rankBadge.label}</Text>
+              </View>
+            )}
+            {!rankBadge && (
+              <View style={styles.rankBadgeGray}>
+                <Text style={styles.rankTextGray}>#{index + 1}</Text>
+              </View>
+            )}
+            
+            <View style={styles.dot} />
+            
+            <View style={[styles.sourcePill, { backgroundColor: sourceColor.bg, borderColor: sourceColor.border }]}>
+              <Text style={[styles.sourceText, { color: sourceColor.text }]}>{post.source}</Text>
+            </View>
+            
+            <View style={styles.dot} />
+            
+            <View style={styles.fireCount}>
+              <Text style={styles.countText}>{formatCount(post.count)}</Text>
+            </View>
+            
+            <View style={{ flex: 1 }} />
+            
+            <TouchableOpacity style={styles.shareButton} onPress={() => onShare(post)} activeOpacity={0.6}>
+              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </TouchableOpacity>
+          </View>
           
           {/* Content */}
           <Text style={styles.cardContent}>{post.content}</Text>
-          
-          {/* Footer - Minimal */}
-          <View style={styles.cardFooter}>
-            <Text style={styles.sourceText}>{post.source}</Text>
-            <View style={styles.dot} />
-            <Text style={styles.countText}>{formatCount(post.count)}</Text>
-          </View>
         </LinearGradient>
       </BlurView>
     </Animated.View>
@@ -303,55 +343,88 @@ const styles = StyleSheet.create({
     gap: scale(12),
   },
   card: {
-    borderRadius: scale(16),
+    borderRadius: scale(20),
     overflow: 'hidden',
   },
   cardBlur: {
-    borderRadius: scale(16),
+    borderRadius: scale(20),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    overflow: 'hidden',
   },
   cardGradient: {
-    padding: scale(20),
-    borderRadius: scale(16),
+    padding: scale(14),
+    borderRadius: scale(20),
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+    marginBottom: scale(10),
+  },
+  rankBadge: {
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(5),
+    borderRadius: scale(10),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    gap: scale(12),
-    position: 'relative',
+  },
+  rankText: {
+    fontSize: moderateScale(11, 0.2),
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  rankBadgeGray: {
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(10),
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  rankTextGray: {
+    fontSize: moderateScale(10, 0.2),
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.5)',
+    letterSpacing: 0.3,
+  },
+  sourcePill: {
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(5),
+    borderRadius: scale(10),
+    borderWidth: 1,
+  },
+  sourceText: {
+    fontSize: moderateScale(10, 0.2),
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   shareButton: {
-    position: 'absolute',
-    top: scale(16),
-    right: scale(16),
-    zIndex: 10,
     padding: scale(4),
   },
   cardContent: {
     fontSize: moderateScale(15, 0.2),
-    lineHeight: moderateScale(23, 0.2),
     color: '#ffffff',
-    fontWeight: '500',
-    paddingRight: scale(32),
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(8),
-  },
-  sourceText: {
-    fontSize: moderateScale(11, 0.2),
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.4)',
-    letterSpacing: 0.5,
+    lineHeight: moderateScale(22, 0.2),
+    fontWeight: '400',
   },
   dot: {
-    width: scale(3),
-    height: scale(3),
-    borderRadius: scale(1.5),
+    width: scale(2),
+    height: scale(2),
+    borderRadius: scale(1),
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
+  fireCount: {
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(5),
+    borderRadius: scale(10),
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
   countText: {
-    fontSize: moderateScale(11, 0.2),
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: moderateScale(10, 0.2),
+    color: '#ef4444',
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
 });

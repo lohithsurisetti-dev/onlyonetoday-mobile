@@ -1,6 +1,6 @@
 /**
  * Filter Sheet Modal
- * Comprehensive bottom sheet with all filter options
+ * Premium bottom sheet with cosmic theme matching our app design
  */
 
 import React, { useRef, useEffect } from 'react';
@@ -66,13 +66,13 @@ export default function FilterSheet({
       Animated.parallel([
         Animated.spring(slideAnim, {
           toValue: 0,
-          friction: 9,
-          tension: 65,
+          friction: 10,
+          tension: 50,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 200,
+          duration: 250,
           useNativeDriver: true,
         }),
       ]).start();
@@ -80,12 +80,12 @@ export default function FilterSheet({
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: SCREEN_HEIGHT,
-          duration: 250,
+          duration: 200,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
           toValue: 0,
-          duration: 200,
+          duration: 150,
           useNativeDriver: true,
         }),
       ]).start();
@@ -106,61 +106,67 @@ export default function FilterSheet({
       transparent
       animationType="none"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
-      <View style={styles.modalOverlay}>
+      {/* Backdrop */}
+      <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
         <TouchableOpacity
           style={StyleSheet.absoluteFill}
           activeOpacity={1}
           onPress={onClose}
-        >
-          <Animated.View style={[StyleSheet.absoluteFill, { opacity: fadeAnim, backgroundColor: 'rgba(0, 0, 0, 0.7)' }]} />
-        </TouchableOpacity>
+        />
+      </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.sheetContainer,
-            {
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
-          <BlurView intensity={90} tint="dark" style={styles.sheetBlur}>
-            <LinearGradient
-              colors={['#1a1a2e', '#0a0a1a']}
-              style={styles.sheetGradient}
+      {/* Sheet */}
+      <Animated.View
+        style={[
+          styles.sheetContainer,
+          {
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <BlurView intensity={100} tint="dark" style={styles.sheetBlur}>
+          <LinearGradient
+            colors={['#1a1a2e', '#0a0a1a']}
+            style={styles.sheetGradient}
+          >
+            {/* Handle Bar */}
+            <View style={styles.handleBar} />
+            
+            {/* Header */}
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetTitle}>Filters</Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                  <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </TouchableOpacity>
+            </View>
+
+            {/* Content */}
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
             >
-              {/* Header */}
-              <View style={styles.sheetHeader}>
-                <View style={styles.handleBar} />
-                <View style={styles.headerRow}>
-                  <Text style={styles.sheetTitle}>Filters</Text>
-                  <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                      <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Content */}
-              <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-              >
-                {/* Post Type */}
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Post Type</Text>
-                  <View style={styles.optionsGrid}>
-                    {(['all', 'unique', 'common', 'trending'] as FilterType[]).map((type) => (
-                      <TouchableOpacity
-                        key={type}
-                        style={[
-                          styles.option,
-                          filter === type && styles.optionActive,
-                          filter === type && getFilterActiveStyle(type),
-                        ]}
-                        onPress={() => onFilterChange(type)}
+              {/* Post Type */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>POST TYPE</Text>
+                <View style={styles.optionsRow}>
+                  {(['all', 'unique', 'common', 'trending'] as FilterType[]).map((type) => (
+                    <TouchableOpacity
+                      key={type}
+                      style={[
+                        styles.optionCard,
+                        filter === type && styles.optionCardActive,
+                      ]}
+                      onPress={() => onFilterChange(type)}
+                      activeOpacity={0.7}
+                    >
+                      <LinearGradient
+                        colors={filter === type ? getFilterGradient(type) : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
+                        style={styles.optionCardGradient}
                       >
                         <Text style={styles.optionEmoji}>
                           {type === 'trending' ? '🔥' : type === 'unique' ? '✨' : type === 'common' ? '👥' : '📋'}
@@ -169,31 +175,36 @@ export default function FilterSheet({
                           {type.charAt(0).toUpperCase() + type.slice(1)}
                         </Text>
                         {filter === type && (
-                          <View style={styles.checkmark}>
-                            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                          <View style={styles.checkBadge}>
+                            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
                               <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
                             </Svg>
                           </View>
                         )}
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  ))}
                 </View>
+              </View>
 
-                {/* Content Type */}
-                {filter !== 'trending' && (
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Content Type</Text>
-                    <View style={styles.optionsGrid}>
-                      {(['all', 'action', 'day'] as InputTypeFilter[]).map((type) => (
-                        <TouchableOpacity
-                          key={type}
-                          style={[
-                            styles.option,
-                            inputTypeFilter === type && styles.optionActive,
-                            inputTypeFilter === type && { backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: 'rgba(99, 102, 241, 0.5)' },
-                          ]}
-                          onPress={() => onInputTypeFilterChange(type)}
+              {/* Content Type */}
+              {filter !== 'trending' && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>CONTENT TYPE</Text>
+                  <View style={styles.optionsRow}>
+                    {(['all', 'action', 'day'] as InputTypeFilter[]).map((type) => (
+                      <TouchableOpacity
+                        key={type}
+                        style={[
+                          styles.optionCard,
+                          inputTypeFilter === type && styles.optionCardActive,
+                        ]}
+                        onPress={() => onInputTypeFilterChange(type)}
+                        activeOpacity={0.7}
+                      >
+                        <LinearGradient
+                          colors={inputTypeFilter === type ? ['rgba(99, 102, 241, 0.3)', 'rgba(99, 102, 241, 0.15)'] : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
+                          style={styles.optionCardGradient}
                         >
                           <Text style={styles.optionEmoji}>
                             {type === 'action' ? '⚡' : type === 'day' ? '📅' : '📝'}
@@ -202,130 +213,81 @@ export default function FilterSheet({
                             {type === 'all' ? 'All' : type === 'action' ? 'Actions' : 'Days'}
                           </Text>
                           {inputTypeFilter === type && (
-                            <View style={styles.checkmark}>
-                              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                            <View style={styles.checkBadge}>
+                              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
                                 <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
                               </Svg>
                             </View>
                           )}
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    ))}
                   </View>
-                )}
+                </View>
+              )}
 
-                {/* Location Scope */}
-                {filter !== 'trending' && (
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Location Scope</Text>
-                    <View style={styles.optionsGrid}>
-                      <TouchableOpacity
-                        style={[
-                          styles.option,
-                          scopeFilter === 'city' && styles.optionActive,
-                          scopeFilter === 'city' && { backgroundColor: 'rgba(6, 182, 212, 0.2)', borderColor: 'rgba(6, 182, 212, 0.5)' },
-                          !userLocation?.city && styles.optionDisabled,
-                        ]}
-                        onPress={() => userLocation?.city && onScopeFilterChange('city')}
-                        disabled={!userLocation?.city}
-                      >
-                        <Text style={styles.optionEmoji}>🏙️</Text>
-                        <Text style={[styles.optionText, scopeFilter === 'city' && styles.optionTextActive]}>
-                          {userLocation?.city || 'City'}
-                        </Text>
-                        {scopeFilter === 'city' && (
-                          <View style={styles.checkmark}>
-                            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                              <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                            </Svg>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.option,
-                          scopeFilter === 'state' && styles.optionActive,
-                          scopeFilter === 'state' && { backgroundColor: 'rgba(6, 182, 212, 0.2)', borderColor: 'rgba(6, 182, 212, 0.5)' },
-                          !userLocation?.state && styles.optionDisabled,
-                        ]}
-                        onPress={() => userLocation?.state && onScopeFilterChange('state')}
-                        disabled={!userLocation?.state}
-                      >
-                        <Text style={styles.optionEmoji}>🗺️</Text>
-                        <Text style={[styles.optionText, scopeFilter === 'state' && styles.optionTextActive]}>
-                          {userLocation?.state || 'State'}
-                        </Text>
-                        {scopeFilter === 'state' && (
-                          <View style={styles.checkmark}>
-                            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                              <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                            </Svg>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.option,
-                          scopeFilter === 'country' && styles.optionActive,
-                          scopeFilter === 'country' && { backgroundColor: 'rgba(6, 182, 212, 0.2)', borderColor: 'rgba(6, 182, 212, 0.5)' },
-                          !userLocation?.country && styles.optionDisabled,
-                        ]}
-                        onPress={() => userLocation?.country && onScopeFilterChange('country')}
-                        disabled={!userLocation?.country}
-                      >
-                        <Text style={styles.optionEmoji}>🌍</Text>
-                        <Text style={[styles.optionText, scopeFilter === 'country' && styles.optionTextActive]}>
-                          {userLocation?.country || 'Country'}
-                        </Text>
-                        {scopeFilter === 'country' && (
-                          <View style={styles.checkmark}>
-                            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                              <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                            </Svg>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.option,
-                          scopeFilter === 'world' && styles.optionActive,
-                          scopeFilter === 'world' && { backgroundColor: 'rgba(6, 182, 212, 0.2)', borderColor: 'rgba(6, 182, 212, 0.5)' },
-                        ]}
-                        onPress={() => onScopeFilterChange('world')}
-                      >
-                        <Text style={styles.optionEmoji}>🌐</Text>
-                        <Text style={[styles.optionText, scopeFilter === 'world' && styles.optionTextActive]}>
-                          World
-                        </Text>
-                        {scopeFilter === 'world' && (
-                          <View style={styles.checkmark}>
-                            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                              <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                            </Svg>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-
-                {/* Reactions */}
-                {filter !== 'trending' && (
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Filter by Reactions</Text>
-                    <View style={styles.optionsGrid}>
-                      {(['all', 'funny', 'creative', 'must_try'] as ReactionFilter[]).map((type) => (
+              {/* Location Scope */}
+              {filter !== 'trending' && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>LOCATION SCOPE</Text>
+                  <View style={styles.optionsRow}>
+                    {(['world', 'country', 'state', 'city'] as ScopeFilter[]).map((type) => {
+                      const isDisabled = type !== 'world' && !userLocation?.[type];
+                      return (
                         <TouchableOpacity
                           key={type}
                           style={[
-                            styles.option,
-                            reactionFilter === type && styles.optionActive,
-                            reactionFilter === type && getReactionActiveStyle(type),
+                            styles.optionCard,
+                            scopeFilter === type && styles.optionCardActive,
+                            isDisabled && styles.optionCardDisabled,
                           ]}
-                          onPress={() => onReactionFilterChange(type)}
+                          onPress={() => !isDisabled && onScopeFilterChange(type)}
+                          activeOpacity={0.7}
+                          disabled={isDisabled}
+                        >
+                          <LinearGradient
+                            colors={scopeFilter === type ? ['rgba(6, 182, 212, 0.3)', 'rgba(6, 182, 212, 0.15)'] : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
+                            style={styles.optionCardGradient}
+                          >
+                            <Text style={[styles.optionEmoji, isDisabled && { opacity: 0.3 }]}>
+                              {type === 'world' ? '🌐' : type === 'country' ? '🌍' : type === 'state' ? '🗺️' : '🏙️'}
+                            </Text>
+                            <Text style={[styles.optionText, scopeFilter === type && styles.optionTextActive, isDisabled && { opacity: 0.3 }]}>
+                              {type === 'world' ? 'World' : userLocation?.[type] || type.charAt(0).toUpperCase() + type.slice(1)}
+                            </Text>
+                            {scopeFilter === type && !isDisabled && (
+                              <View style={styles.checkBadge}>
+                                <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                                  <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                                </Svg>
+                              </View>
+                            )}
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+              )}
+
+              {/* Reactions */}
+              {filter !== 'trending' && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>FILTER BY REACTIONS</Text>
+                  <View style={styles.optionsRow}>
+                    {(['all', 'funny', 'creative', 'must_try'] as ReactionFilter[]).map((type) => (
+                      <TouchableOpacity
+                        key={type}
+                        style={[
+                          styles.optionCard,
+                          reactionFilter === type && styles.optionCardActive,
+                        ]}
+                        onPress={() => onReactionFilterChange(type)}
+                        activeOpacity={0.7}
+                      >
+                        <LinearGradient
+                          colors={reactionFilter === type ? getReactionGradient(type) : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
+                          style={styles.optionCardGradient}
                         >
                           <Text style={styles.optionEmoji}>
                             {type === 'funny' ? '😂' : type === 'creative' ? '🎨' : type === 'must_try' ? '🔥' : '✅'}
@@ -334,72 +296,79 @@ export default function FilterSheet({
                             {type === 'all' ? 'All' : type === 'funny' ? 'Funny' : type === 'creative' ? 'Creative' : 'Must Try'}
                           </Text>
                           {reactionFilter === type && (
-                            <View style={styles.checkmark}>
-                              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                            <View style={styles.checkBadge}>
+                              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
                                 <Path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
                               </Svg>
                             </View>
                           )}
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    ))}
                   </View>
-                )}
+                </View>
+              )}
 
-                {/* Clear All Button */}
-                <TouchableOpacity style={styles.clearButton} onPress={handleClearAll}>
-                  <LinearGradient
-                    colors={['#ef4444', '#dc2626']}
-                    style={styles.clearButtonGradient}
-                  >
-                    <Text style={styles.clearButtonText}>Clear All Filters</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </ScrollView>
-            </LinearGradient>
-          </BlurView>
-        </Animated.View>
-      </View>
+              {/* Clear All Button */}
+              <TouchableOpacity style={styles.clearButton} onPress={handleClearAll} activeOpacity={0.8}>
+                <LinearGradient
+                  colors={['#ef4444', '#dc2626']}
+                  style={styles.clearButtonGradient}
+                >
+                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                    <Path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                  <Text style={styles.clearButtonText}>Clear All Filters</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </ScrollView>
+          </LinearGradient>
+        </BlurView>
+      </Animated.View>
     </Modal>
   );
 }
 
 // Helper functions
-function getFilterActiveStyle(type: FilterType) {
+function getFilterGradient(type: FilterType): [string, string] {
   switch (type) {
     case 'trending':
-      return { backgroundColor: 'rgba(251, 146, 60, 0.2)', borderColor: 'rgba(251, 146, 60, 0.5)' };
+      return ['rgba(251, 146, 60, 0.4)', 'rgba(251, 146, 60, 0.2)'];
     case 'unique':
-      return { backgroundColor: 'rgba(139, 92, 246, 0.2)', borderColor: 'rgba(139, 92, 246, 0.5)' };
+      return ['rgba(139, 92, 246, 0.4)', 'rgba(139, 92, 246, 0.2)'];
     case 'common':
-      return { backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 0.5)' };
+      return ['rgba(59, 130, 246, 0.4)', 'rgba(59, 130, 246, 0.2)'];
     default:
-      return { backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.3)' };
+      return ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)'];
   }
 }
 
-function getReactionActiveStyle(type: ReactionFilter) {
+function getReactionGradient(type: ReactionFilter): [string, string] {
   switch (type) {
     case 'funny':
-      return { backgroundColor: 'rgba(234, 179, 8, 0.2)', borderColor: 'rgba(234, 179, 8, 0.5)' };
+      return ['rgba(234, 179, 8, 0.3)', 'rgba(234, 179, 8, 0.15)'];
     case 'creative':
-      return { backgroundColor: 'rgba(168, 85, 247, 0.2)', borderColor: 'rgba(168, 85, 247, 0.5)' };
+      return ['rgba(168, 85, 247, 0.3)', 'rgba(168, 85, 247, 0.15)'];
     case 'must_try':
-      return { backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 0.5)' };
+      return ['rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.15)'];
     default:
-      return { backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.3)' };
+      return ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)'];
   }
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  backdrop: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   sheetContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     maxHeight: SCREEN_HEIGHT * 0.85,
-    borderTopLeftRadius: scale(24),
-    borderTopRightRadius: scale(24),
+    borderTopLeftRadius: scale(28),
+    borderTopRightRadius: scale(28),
     overflow: 'hidden',
   },
   sheetBlur: {
@@ -407,13 +376,7 @@ const styles = StyleSheet.create({
   },
   sheetGradient: {
     flex: 1,
-  },
-  sheetHeader: {
-    paddingTop: scale(12),
-    paddingBottom: scale(16),
-    paddingHorizontal: scale(20),
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    paddingBottom: scale(40),
   },
   handleBar: {
     width: scale(40),
@@ -421,97 +384,115 @@ const styles = StyleSheet.create({
     borderRadius: scale(2),
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     alignSelf: 'center',
-    marginBottom: scale(16),
+    marginTop: scale(12),
+    marginBottom: scale(20),
   },
-  headerRow: {
+  sheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: scale(24),
+    paddingBottom: scale(20),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   sheetTitle: {
-    fontSize: moderateScale(22, 0.3),
-    fontWeight: '700',
+    fontSize: moderateScale(26, 0.3),
+    fontWeight: '800',
     color: '#ffffff',
     letterSpacing: 0.5,
   },
   closeButton: {
-    width: scale(36),
-    height: scale(36),
-    borderRadius: scale(18),
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: scale(20),
-    paddingBottom: scale(40),
+    padding: scale(24),
+    gap: scale(28),
   },
   section: {
-    marginBottom: scale(28),
+    gap: scale(14),
   },
   sectionTitle: {
-    fontSize: moderateScale(14, 0.2),
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginBottom: scale(12),
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    fontSize: moderateScale(12, 0.2),
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.6)',
+    letterSpacing: 1.5,
   },
-  optionsGrid: {
+  optionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: scale(10),
   },
-  option: {
+  optionCard: {
     flex: 1,
     minWidth: '47%',
+    borderRadius: scale(16),
+    overflow: 'hidden',
+  },
+  optionCardActive: {
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  optionCardDisabled: {
+    opacity: 0.3,
+  },
+  optionCardGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(8),
-    padding: scale(14),
-    borderRadius: scale(12),
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    gap: scale(10),
+    padding: scale(16),
+    borderRadius: scale(16),
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  optionActive: {
-    borderWidth: 2,
-  },
-  optionDisabled: {
-    opacity: 0.4,
-  },
   optionEmoji: {
-    fontSize: moderateScale(20, 0.2),
+    fontSize: moderateScale(22, 0.2),
   },
   optionText: {
     flex: 1,
-    fontSize: moderateScale(14, 0.2),
+    fontSize: moderateScale(15, 0.2),
     fontWeight: '600',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   optionTextActive: {
     color: '#ffffff',
+    fontWeight: '700',
   },
-  checkmark: {
-    width: scale(20),
-    height: scale(20),
-    borderRadius: scale(10),
+  checkBadge: {
+    width: scale(24),
+    height: scale(24),
+    borderRadius: scale(12),
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   clearButton: {
-    marginTop: scale(12),
-    borderRadius: scale(14),
+    borderRadius: scale(16),
     overflow: 'hidden',
+    marginTop: scale(8),
   },
   clearButtonGradient: {
-    paddingVertical: scale(16),
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: scale(10),
+    paddingVertical: scale(18),
+    borderWidth: 2,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderRadius: scale(16),
   },
   clearButtonText: {
     fontSize: moderateScale(16, 0.2),
@@ -520,4 +501,3 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 });
-

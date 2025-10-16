@@ -22,13 +22,19 @@ import { BlurView } from 'expo-blur';
 import { useCreatePost } from '../hooks/usePosts';
 import { usePlatformStats } from '@/lib/hooks/useStats';
 import type { InputType, Scope } from '@shared/types/common.types';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/AppNavigator';
 
 // Responsive scaling helper
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size; // Base design on iPhone 12 (375px)
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
-export default function HomeScreenPremium({ navigation }: any) {
+type HomeScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
+};
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [content, setContent] = useState('');
   const [inputType, setInputType] = useState<InputType>('action');
   const [scope, setScope] = useState<Scope>('world');
@@ -71,8 +77,14 @@ export default function HomeScreenPremium({ navigation }: any) {
     createPost(
       { content: content.trim(), inputType, scope },
       {
-        onSuccess: () => {
-          Alert.alert('Success!', 'Your post has been created');
+        onSuccess: (response) => {
+          // Navigate to Response screen with data
+          navigation.navigate('Response', {
+            content: content.trim(),
+            scope,
+            percentile: response.percentile || undefined,
+            postId: response.post?.id,
+          });
           setContent('');
         },
         onError: (error: any) => {
@@ -311,7 +323,7 @@ export default function HomeScreenPremium({ navigation }: any) {
                   style={styles.buttonGradient}
                 >
                   <Text style={styles.buttonText}>
-                    {isPending ? 'Creating...' : 'Discover My Uniqueness'}
+                    {isPending ? 'Creating...' : 'Discover'}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>

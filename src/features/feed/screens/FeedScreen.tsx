@@ -579,9 +579,8 @@ export default function FeedScreen() {
                   </BlurView>
                 </TouchableOpacity>
               )}
-            </ScrollView>
-          )}
-        </View>
+          </ScrollView>
+        )}
         
         {/* Posts */}
         <View style={styles.postsContainer}>

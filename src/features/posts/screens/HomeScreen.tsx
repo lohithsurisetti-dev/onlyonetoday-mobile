@@ -123,9 +123,10 @@ const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
 
 type HomeScreenProps = {
   navigation: any;
+  onTabChange?: (tab: 'trending') => void;
 };
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   // const { stats } = usePlatformStats();
   const stats: any = null;
@@ -203,7 +204,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <LocationLeaderboard userLocation={location} />
 
             {/* Trending Leaderboard */}
-            <TrendingLeaderboard onExploreTrending={() => navigation.navigate('Trending')} />
+            <TrendingLeaderboard onExploreTrending={() => onTabChange?.('trending')} />
           </ScrollView>
         </Animated.View>
       </LinearGradient>

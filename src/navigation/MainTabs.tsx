@@ -61,7 +61,7 @@ export default function MainTabs({ navigation }: MainTabsProps) {
   const renderScreen = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeScreen navigation={navigation} />;
+        return <HomeScreen navigation={navigation} onTabChange={handleTabChange} />;
       case 'feed':
         return <FeedScreen />;
       case 'create':
@@ -71,7 +71,7 @@ export default function MainTabs({ navigation }: MainTabsProps) {
       case 'profile':
         return <ProfileScreen navigation={navigation} />;
       default:
-        return <HomeScreen navigation={navigation} />;
+        return <HomeScreen navigation={navigation} onTabChange={handleTabChange} />;
     }
   };
 

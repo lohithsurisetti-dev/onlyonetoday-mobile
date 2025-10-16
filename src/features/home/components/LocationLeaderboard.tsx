@@ -3,7 +3,7 @@
  * Shows top cities/states/countries by post activity
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -74,6 +75,26 @@ export default function LocationLeaderboard({ userLocation }: LocationLeaderboar
   const [activeTab, setActiveTab] = useState<'cities' | 'states' | 'countries'>('cities');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(SAMPLE_DATA);
+  const [tabContainerWidth, setTabContainerWidth] = useState(0);
+  
+  // Animated value for liquidy tab indicator
+  const tabIndicatorPosition = useRef(new Animated.Value(0)).current;
+  
+  const handleTabChange = (tab: 'cities' | 'states' | 'countries') => {
+    const tabIndex = ['cities', 'states', 'countries'].indexOf(tab);
+    
+    // Liquidy spring animation
+    Animated.spring(tabIndicatorPosition, {
+      toValue: tabIndex,
+      useNativeDriver: true,
+      damping: 20,
+      mass: 0.8,
+      stiffness: 120,
+      overshootClamping: false,
+    }).start();
+    
+    setActiveTab(tab);
+  };
 
   const getRankColor = (rank: number) => {
     if (rank === 1) return '#a78bfa'; // Purple
@@ -111,19 +132,54 @@ export default function LocationLeaderboard({ userLocation }: LocationLeaderboar
           <Text style={styles.sectionTitle}>Global Leaderboard</Text>
           
           {/* Tabs */}
-          <View style={styles.tabs}>
-            {(['cities', 'states', 'countries'] as const).map((tab) => (
-              <TouchableOpacity
-                key={tab}
-                style={[styles.tab, activeTab === tab && styles.tabActive]}
-                onPress={() => setActiveTab(tab)}
-                activeOpacity={0.7}
+          <View 
+            style={styles.tabContainer}
+            onLayout={(e) => setTabContainerWidth(e.nativeEvent.layout.width)}
+          >
+            <View style={styles.tabBackground}>
+              {/* Animated liquidy indicator */}
+              <Animated.View
+                style={[
+                  styles.tabIndicator,
+                  {
+                    transform: [
+                      {
+                        translateX: tabIndicatorPosition.interpolate({
+                          inputRange: [0, 1, 2],
+                          outputRange: [
+                            0,
+                            tabContainerWidth / 3,
+                            (tabContainerWidth * 2) / 3,
+                          ],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
               >
-                <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                <LinearGradient
+                  colors={['rgba(139, 92, 246, 0.4)', 'rgba(168, 85, 247, 0.2)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.tabIndicatorGradient}
+                />
+              </Animated.View>
+            </View>
+            
+            <View style={styles.tabButtons}>
+              {(['cities', 'states', 'countries'] as const).map((tab) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={styles.tab}
+                  onPress={() => handleTabChange(tab)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           {/* Leaderboard */}
@@ -196,24 +252,50 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.4)',
     textAlign: 'center',
   },
-  tabs: {
-    flexDirection: 'row',
-    gap: scale(8),
+  tabContainer: {
     marginBottom: scale(16),
+    position: 'relative',
+    height: scale(40),
+  },
+  tabBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: scale(12),
+    padding: scale(4),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    left: scale(6),
+    top: scale(4),
+    bottom: scale(4),
+    right: '70%', // Width for 1 of 3 tabs with padding
+    borderRadius: scale(10),
+    overflow: 'hidden',
+  },
+  tabIndicatorGradient: {
+    flex: 1,
+    borderRadius: scale(10),
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.4)',
+  },
+  tabButtons: {
+    flexDirection: 'row',
+    position: 'relative',
+    zIndex: 1,
+    height: '100%',
   },
   tab: {
     flex: 1,
     paddingVertical: scale(8),
     paddingHorizontal: scale(12),
-    borderRadius: scale(10),
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
     alignItems: 'center',
-  },
-  tabActive: {
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
-    borderColor: 'rgba(139, 92, 246, 0.3)',
+    justifyContent: 'center',
   },
   tabText: {
     fontSize: moderateScale(11, 0.2),
@@ -222,7 +304,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   tabTextActive: {
-    color: '#a78bfa',
+    color: '#ffffff',
+    fontWeight: '700',
   },
   loadingContainer: {
     paddingVertical: scale(32),

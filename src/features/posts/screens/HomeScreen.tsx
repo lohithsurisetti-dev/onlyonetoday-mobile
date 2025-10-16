@@ -160,16 +160,16 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
         </View>
 
         <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>ONLYONE</Text>
-            <Text style={styles.subtitle}>DISCOVER YOUR UNIQUENESS</Text>
-          </View>
-
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
+            {/* Compact Header */}
+            <View style={styles.header}>
+              <Text style={styles.title}>ONLYONE</Text>
+              <Text style={styles.subtitle}>DISCOVER YOUR UNIQUENESS</Text>
+            </View>
+
             {/* Premium Stats Cards */}
             {/* Global Pulse Stats */}
             <View style={styles.statsRow}>
@@ -243,24 +243,26 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingTop: scale(20),
-    paddingBottom: scale(16),
+    paddingTop: scale(12),
+    paddingBottom: scale(12),
+    marginBottom: scale(8),
   },
   title: {
-    fontSize: moderateScale(24, 0.3),
+    fontSize: moderateScale(20, 0.3),
     fontWeight: '200',
     color: '#ffffff',
-    letterSpacing: scale(4),
+    letterSpacing: scale(3),
   },
   subtitle: {
-    fontSize: moderateScale(10, 0.2),
+    fontSize: moderateScale(9, 0.2),
     color: '#9ca3af',
-    marginTop: scale(6),
+    marginTop: scale(4),
     letterSpacing: scale(2),
     fontWeight: '300',
   },
   scrollContent: {
-    padding: scale(20),
+    paddingHorizontal: scale(20),
+    paddingTop: scale(8),
     paddingBottom: scale(120),
   },
   statsRow: {

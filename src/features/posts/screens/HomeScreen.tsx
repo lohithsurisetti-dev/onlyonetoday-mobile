@@ -456,7 +456,6 @@ const styles = StyleSheet.create({
 
   // Today's Vibe Card
   vibeCardContainer: {
-    paddingHorizontal: scale(20),
     marginBottom: scale(20),
   },
   vibeCardBlur: {

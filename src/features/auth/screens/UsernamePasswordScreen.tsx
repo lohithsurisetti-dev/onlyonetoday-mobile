@@ -16,12 +16,16 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { signUp } from '@/lib/api/auth';
+import { useAuthStore } from '@/lib/stores/authStore';
+import { supabase } from '@/lib/supabase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -147,6 +151,7 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [errors, setErrors] = useState({ username: '', password: '', confirmPassword: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
@@ -180,11 +185,25 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
       clearTimeout(checkUsernameTimeout.current);
     }
 
-    checkUsernameTimeout.current = setTimeout(() => {
-      setTimeout(() => {
-        const isTaken = value.toLowerCase().startsWith('test');
-        setUsernameStatus(isTaken ? 'taken' : 'available');
-      }, 500);
+    checkUsernameTimeout.current = setTimeout(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', value.toLowerCase())
+          .maybeSingle();
+
+        if (error) {
+          console.warn('Username check error:', error);
+          setUsernameStatus('idle');
+          return;
+        }
+
+        setUsernameStatus(data ? 'taken' : 'available');
+      } catch (error) {
+        console.error('Username check failed:', error);
+        setUsernameStatus('idle');
+      }
     }, 500);
   };
 
@@ -200,7 +219,7 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const newErrors = { username: '', password: '', confirmPassword: '' };
     let isValid = true;
 
@@ -237,13 +256,42 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
     setErrors(newErrors);
 
     if (isValid) {
-      navigation.navigate('OTPVerification', {
-        method,
-        contact,
-        firstName,
-        lastName,
-        username,
-      });
+      setIsLoading(true);
+      
+      try {
+        // Sign up with Supabase
+        const result = await signUp({
+          email: contact, // Using contact as email
+          password,
+          firstName,
+          lastName,
+          username,
+          dateOfBirth,
+        });
+
+        // Update auth store
+        useAuthStore.getState().setUser({
+          id: result.user.id,
+          firstName,
+          lastName,
+          username,
+          email: contact,
+          isAnonymous: false,
+        });
+
+        // Navigate to home
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MainTabs' as never }],
+        });
+      } catch (error: any) {
+        Alert.alert(
+          'Signup Failed',
+          error.message || 'Failed to create account. Please try again.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -433,7 +481,11 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
                     end={{ x: 1, y: 0 }}
                     style={styles.continueGradient}
                   >
-                    <Text style={styles.continueText}>Send OTP</Text>
+                    {isLoading ? (
+                      <ActivityIndicator color="#ffffff" />
+                    ) : (
+                      <Text style={styles.continueText}>Create Account</Text>
+                    )}
                   </LinearGradient>
                 </TouchableOpacity>
               </BlurView>

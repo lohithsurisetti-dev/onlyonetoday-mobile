@@ -8,7 +8,7 @@ export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'frida
 export interface DayTheme {
   id: DayOfWeek;
   name: string;
-  icon: 'mask' | 'star' | 'dice' | 'heart' | 'party' | 'sparkle' | 'wave';
+  icon: 'mask' | 'star' | 'dice' | 'heart' | 'calendar' | 'brush' | 'power';
   color: string;
   secondaryColor: string;
   gradient: string[];
@@ -112,7 +112,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   friday: {
     id: 'friday',
     name: 'Weekend Friday',
-    icon: 'party',
+    icon: 'calendar',
     color: '#fb7185',
     secondaryColor: '#fda4af',
     gradient: ['#fb7185', '#f43f5e'],
@@ -129,7 +129,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   saturday: {
     id: 'saturday',
     name: 'Creative Saturday',
-    icon: 'sparkle',
+    icon: 'brush',
     color: '#e879f9',
     secondaryColor: '#f0abfc',
     gradient: ['#e879f9', '#d946ef'],
@@ -146,7 +146,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   sunday: {
     id: 'sunday',
     name: 'Offline Sunday',
-    icon: 'wave',
+    icon: 'power',
     color: '#38bdf8',
     secondaryColor: '#7dd3fc',
     gradient: ['#38bdf8', '#0ea5e9'],

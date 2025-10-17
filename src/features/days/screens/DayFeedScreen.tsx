@@ -130,9 +130,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
 
               <View style={styles.heroCenter}>
                 <View style={styles.heroTitleRow}>
-                  <View style={styles.heroIconContainer}>
-                    <DayIcon icon={dayTheme.icon} size={scale(28)} color={dayTheme.color} />
-                  </View>
+                  <DayIcon icon={dayTheme.icon} size={scale(24)} color={dayTheme.color} />
                   <Text style={styles.heroTitle}>{dayTheme.name}</Text>
                 </View>
                 <Text style={styles.heroSubtitle}>{dayTheme.vibe}</Text>
@@ -547,11 +545,7 @@ const styles = StyleSheet.create({
   heroTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(10),
-  },
-  heroIconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: scale(8),
   },
   heroTitle: {
     fontSize: moderateScale(22, 0.3),

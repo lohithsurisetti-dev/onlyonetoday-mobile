@@ -233,9 +233,7 @@ function DayCard({ day, status, daysUntil, participants, index, onPress }: DayCa
             {/* Header */}
             <View style={styles.cardHeader}>
               <View style={styles.cardHeaderLeft}>
-                <View style={styles.iconContainer}>
-                  <DayIcon icon={day.icon} size={scale(32)} color={day.color} />
-                </View>
+                <DayIcon icon={day.icon} size={scale(28)} color={day.color} />
                 <View style={styles.cardTitleContainer}>
                   <Text style={styles.dayName}>{day.name}</Text>
                   <Text style={styles.dayVibe}>{day.shortDesc}</Text>
@@ -375,14 +373,8 @@ const styles = StyleSheet.create({
   cardHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(12),
+    gap: scale(10),
     flex: 1,
-  },
-  iconContainer: {
-    width: scale(48),
-    height: scale(48),
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   cardTitleContainer: {
     flex: 1,

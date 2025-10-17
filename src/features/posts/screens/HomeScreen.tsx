@@ -132,70 +132,54 @@ const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
 function TodaysVibeCard({ navigation }: { navigation: any }) {
   const currentDay = getCurrentDay();
   const dayTheme = getDayTheme(currentDay);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.97,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  };
 
   return (
-    <Animated.View style={[styles.vibeCardContainer, { transform: [{ scale: scaleAnim }] }]}>
-      <TouchableOpacity
-        onPress={() => navigation.navigate('DaysHub')}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={1}
-      >
-        <BlurView intensity={30} tint="dark" style={styles.vibeCardBlur}>
-          <LinearGradient
-            colors={[`${dayTheme.color}18`, `${dayTheme.color}08`, 'rgba(255, 255, 255, 0.04)']}
-            style={styles.vibeCardGradient}
+    <View style={styles.vibeCardContainer}>
+      <BlurView intensity={30} tint="dark" style={styles.vibeCardBlur}>
+        <LinearGradient
+          colors={[`${dayTheme.color}18`, `${dayTheme.color}08`, 'rgba(255, 255, 255, 0.04)']}
+          style={styles.vibeCardGradient}
+        >
+          {/* Accent Border */}
+          <View style={[styles.vibeCardBorder, { borderColor: dayTheme.color }]} />
+
+          {/* Main Content - Tappable to go to day feed */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('DayFeed', { day: currentDay })}
+            activeOpacity={0.85}
           >
-            {/* Accent Border */}
-            <View style={[styles.vibeCardBorder, { borderColor: dayTheme.color }]} />
-
-            {/* Content */}
             <View style={styles.vibeCardContent}>
-              <View style={styles.vibeCardLeft}>
-                <View style={styles.vibeIconContainer}>
-                  <DayIcon icon={dayTheme.icon} size={scale(40)} color={dayTheme.color} />
+              <View style={styles.vibeCardCenter}>
+                <View style={styles.vibeCardTitleRow}>
+                  <Text style={styles.vibeCardLabel}>Today's Vibe</Text>
+                  <View style={styles.vibeLiveDot} />
                 </View>
-                <View style={styles.vibeCardInfo}>
-                  <View style={styles.vibeCardTitleRow}>
-                    <Text style={styles.vibeCardLabel}>Today's Vibe</Text>
-                    <View style={styles.vibeLiveDot} />
-                  </View>
+                
+                <View style={styles.vibeCardMain}>
+                  <DayIcon icon={dayTheme.icon} size={scale(32)} color={dayTheme.color} />
                   <Text style={styles.vibeCardTitle}>{dayTheme.name}</Text>
-                  <Text style={styles.vibeCardDesc}>{dayTheme.shortDesc}</Text>
                 </View>
+                
+                <Text style={styles.vibeCardDesc}>{dayTheme.shortDesc}</Text>
               </View>
 
-              <View style={styles.vibeCardRight}>
-                <View style={[styles.vibeCardArrow, { backgroundColor: `${dayTheme.color}20`, borderColor: `${dayTheme.color}40` }]}>
-                  <Text style={[styles.vibeCardArrowText, { color: dayTheme.color }]}>→</Text>
-                </View>
+              <View style={[styles.vibeCardArrow, { backgroundColor: `${dayTheme.color}20`, borderColor: `${dayTheme.color}40` }]}>
+                <Text style={[styles.vibeCardArrowText, { color: dayTheme.color }]}>→</Text>
               </View>
             </View>
+          </TouchableOpacity>
 
-            {/* CTA */}
-            <View style={styles.vibeCardCTA}>
-              <View style={[styles.vibeCardDot, { backgroundColor: dayTheme.color }]} />
-              <Text style={styles.vibeCardCTAText}>Tap to explore all 7 daily vibes</Text>
-            </View>
-          </LinearGradient>
-        </BlurView>
-      </TouchableOpacity>
-    </Animated.View>
+          {/* CTA - Subtle button to explore all days */}
+          <TouchableOpacity
+            style={styles.vibeCardCTA}
+            onPress={() => navigation.navigate('DaysHub')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.vibeCardCTAText}>Explore all 7 days</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </BlurView>
+    </View>
   );
 }
 
@@ -483,23 +467,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: scale(14),
+    marginBottom: scale(16),
   },
-  vibeCardLeft: {
-    flexDirection: 'row',
+  vibeCardCenter: {
     alignItems: 'center',
-    gap: scale(14),
+    gap: scale(8),
     flex: 1,
-  },
-  vibeIconContainer: {
-    width: scale(56),
-    height: scale(56),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  vibeCardInfo: {
-    flex: 1,
-    gap: scale(2),
   },
   vibeCardTitleRow: {
     flexDirection: 'row',
@@ -519,8 +492,13 @@ const styles = StyleSheet.create({
     borderRadius: scale(2.5),
     backgroundColor: '#22c55e',
   },
+  vibeCardMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(10),
+  },
   vibeCardTitle: {
-    fontSize: moderateScale(16, 0.3),
+    fontSize: moderateScale(18, 0.3),
     fontWeight: '700',
     color: '#ffffff',
     letterSpacing: 0.3,
@@ -530,10 +508,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.6)',
     fontWeight: '500',
     letterSpacing: 0.2,
-  },
-  vibeCardRight: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    textAlign: 'center',
   },
   vibeCardArrow: {
     width: scale(40),
@@ -548,22 +523,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   vibeCardCTA: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(8),
-    paddingTop: scale(14),
+    paddingVertical: scale(12),
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
-  vibeCardDot: {
-    width: scale(5),
-    height: scale(5),
-    borderRadius: scale(2.5),
-  },
   vibeCardCTAText: {
-    fontSize: moderateScale(11, 0.2),
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: moderateScale(10, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
     fontWeight: '600',
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
 });

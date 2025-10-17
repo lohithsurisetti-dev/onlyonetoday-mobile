@@ -7,7 +7,7 @@ import React from 'react';
 import Svg, { Path, Circle, Rect, Polygon } from 'react-native-svg';
 
 interface DayIconProps {
-  icon: 'mask' | 'star' | 'dice' | 'heart' | 'party' | 'sparkle' | 'wave';
+  icon: 'mask' | 'star' | 'dice' | 'heart' | 'calendar' | 'brush' | 'power';
   size: number;
   color: string;
 }
@@ -87,66 +87,67 @@ export default function DayIcon({ icon, size, color }: DayIconProps) {
         </Svg>
       );
 
-    case 'party':
-      // Party popper for Friday (Free Spirit)
+    case 'calendar':
+      // Calendar for Friday (Weekend Plans)
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <Rect
+            x="3"
+            y="4"
+            width="18"
+            height="18"
+            rx="2"
+            stroke={color}
+            strokeWidth={2}
+          />
+          <Path
+            d="M3 10h18M8 2v4M16 2v4"
+            stroke={color}
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
+          <Circle cx="8" cy="14" r="1" fill={color} />
+          <Circle cx="12" cy="14" r="1" fill={color} />
+          <Circle cx="16" cy="14" r="1" fill={color} />
+          <Circle cx="8" cy="18" r="1" fill={color} />
+          <Circle cx="12" cy="18" r="1" fill={color} />
+        </Svg>
+      );
+
+    case 'brush':
+      // Paint brush for Saturday (Creative)
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
           <Path
-            d="M5.8 11.3L2 22l10.7-3.8"
+            d="M9.06 11.9l8.07-8.06a1.5 1.5 0 012.12 0l.71.71a1.5 1.5 0 010 2.12l-8.06 8.06"
             stroke={color}
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <Path
-            d="M4 3h.01M22 8h.01M15 2h.01M18 5h.01M12 8h.01M16 11h.01M20 14h.01M17 17h.01M14 20h.01"
-            stroke={color}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-          />
-          <Path
-            d="M12 8l-9.7 9.7a2.41 2.41 0 000 3.41v0a2.41 2.41 0 003.41 0L15.3 11.3"
+            d="M9.06 11.9l-5.66 5.66c-.39.39-.39 1.02 0 1.41l2.83 2.83c.39.39 1.02.39 1.41 0l5.66-5.66"
             stroke={color}
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
+            fill={`${color}20`}
           />
         </Svg>
       );
 
-    case 'sparkle':
-      // Sparkle for Saturday (Soul Actions)
+    case 'power':
+      // Power off icon for Sunday (Offline)
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
           <Path
-            d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"
-            stroke={color}
-            strokeWidth={2}
-            strokeLinecap="round"
-          />
-          <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth={2} fill={`${color}30`} />
-        </Svg>
-      );
-
-    case 'wave':
-      // Wave for Sunday (Silent/Peaceful)
-      return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-          <Path
-            d="M2 12c0-2.21 3.13-4 7-4s7 1.79 7 4m-7 4c-3.87 0-7-1.79-7-4s3.13-4 7-4 7 1.79 7 4"
+            d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"
             stroke={color}
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <Path
-            d="M2 16c0 2.21 3.13 4 7 4s7-1.79 7-4m7-4c0-2.21-3.13-4-7-4s-7 1.79-7 4"
-            stroke={color}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity={0.6}
-          />
+          <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth={2} opacity={0.3} />
         </Svg>
       );
 

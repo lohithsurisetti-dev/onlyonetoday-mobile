@@ -8,6 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignupScreen from '@/features/auth/screens/SignupScreen';
 import UserDetailsScreen from '@/features/auth/screens/UserDetailsScreen';
+import UsernamePasswordScreen from '@/features/auth/screens/UsernamePasswordScreen';
 import OTPVerificationScreen from '@/features/auth/screens/OTPVerificationScreen';
 import MainTabs from './MainTabs';
 import ResponseScreen from '@features/posts/screens/ResponseScreen';
@@ -23,6 +24,13 @@ export type RootStackParamList = {
   UserDetails: {
     method: 'phone' | 'email';
     contact: string;
+  };
+  UsernamePassword: {
+    method: 'phone' | 'email';
+    contact: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
   };
   OTPVerification: {
     method: 'phone' | 'email';
@@ -63,6 +71,7 @@ export default function AppNavigator() {
       >
         <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="UserDetails" component={UserDetailsScreen} />
+        <Stack.Screen name="UsernamePassword" component={UsernamePasswordScreen} />
         <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen 

@@ -7,6 +7,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignupScreen from '@/features/auth/screens/SignupScreen';
+import LoginScreen from '@/features/auth/screens/LoginScreen';
 import UserDetailsScreen from '@/features/auth/screens/UserDetailsScreen';
 import UsernamePasswordScreen from '@/features/auth/screens/UsernamePasswordScreen';
 import OTPVerificationScreen from '@/features/auth/screens/OTPVerificationScreen';
@@ -21,6 +22,7 @@ import { DayOfWeek } from '@/features/days/types';
 
 export type RootStackParamList = {
   Signup: undefined;
+  Login: undefined;
   UserDetails: {
     method: 'phone' | 'email';
     contact: string;
@@ -70,6 +72,7 @@ export default function AppNavigator() {
         }}
       >
         <Stack.Screen name="Signup" component={SignupScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="UserDetails" component={UserDetailsScreen} />
         <Stack.Screen name="UsernamePassword" component={UsernamePasswordScreen} />
         <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />

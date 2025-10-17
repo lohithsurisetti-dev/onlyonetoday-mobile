@@ -372,6 +372,14 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
                   <Text style={styles.footerLink}>Privacy Policy</Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Sign In Link */}
+              <View style={styles.signInContainer}>
+                <Text style={styles.signInPrompt}>Already have an account?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                  <Text style={styles.signInLink}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
             </Animated.View>
           </ScrollView>
         </LinearGradient>
@@ -596,6 +604,22 @@ const styles = StyleSheet.create({
     color: '#8b5cf6',
     lineHeight: moderateScale(18, 0.2),
     fontWeight: '600',
+  },
+  signInContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: scale(6),
+    marginTop: scale(20),
+  },
+  signInPrompt: {
+    fontSize: scale(14),
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  signInLink: {
+    fontSize: scale(14),
+    color: '#ec4899',
+    fontWeight: '700',
   },
 });
 

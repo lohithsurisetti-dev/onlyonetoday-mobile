@@ -274,35 +274,42 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
       setIsLoading(true);
       
       try {
-        // Sign up with Supabase
-        const result = await signUp({
-          email: contact, // Using contact as email
-          password,
+        // Send OTP to email
+        console.log('📧 Sending OTP to:', contact);
+        
+        const { data, error } = await supabase.auth.signInWithOtp({
+          email: contact,
+          options: {
+            data: {
+              first_name: firstName,
+              last_name: lastName,
+              username: username,
+              date_of_birth: dateOfBirth,
+            }
+          }
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        console.log('✅ OTP sent successfully');
+
+        // Navigate to OTP verification screen
+        navigation.navigate('OTPVerification', {
+          method: 'email',
+          contact,
           firstName,
           lastName,
           username,
           dateOfBirth,
-        });
-
-        // Update auth store
-        useAuthStore.getState().setUser({
-          id: result.user.id,
-          firstName,
-          lastName,
-          username,
-          email: contact,
-          isAnonymous: false,
-        });
-
-        // Navigate to home
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Main' as never }],
+          password, // Store for profile creation after OTP
         });
       } catch (error: any) {
+        console.error('❌ OTP send failed:', error);
         Alert.alert(
-          'Signup Failed',
-          error.message || 'Failed to create account. Please try again.'
+          'Failed to Send OTP',
+          error.message || 'Failed to send verification code. Please try again.'
         );
       } finally {
         setIsLoading(false);

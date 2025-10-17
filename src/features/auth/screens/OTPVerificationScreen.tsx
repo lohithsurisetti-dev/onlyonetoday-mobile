@@ -13,6 +13,7 @@ import {
   Animated,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +21,7 @@ import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { supabase } from '@/lib/supabase';
 
 // Responsive scaling
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -132,16 +134,18 @@ type OTPVerificationScreenProps = {
       firstName?: string;
       lastName?: string;
       username?: string;
+      dateOfBirth?: string;
     };
   };
 };
 
 export default function OTPVerificationScreen({ navigation, route }: OTPVerificationScreenProps) {
-  const { method, contact, firstName, lastName, username } = route.params;
+  const { method, contact, firstName, lastName, username, dateOfBirth } = route.params;
   const { setUser } = useAuthStore();
   
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(60);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -198,29 +202,80 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
     }
   };
 
-  const handleVerify = (code: string) => {
-    // TODO: Verify OTP with backend and create account
-    console.log('Verifying OTP:', code);
-    console.log('User details:', { firstName, lastName, username, method, contact });
-    
-    // Simulate verification and account creation
-    setTimeout(() => {
-      // Save user to store
-      if (firstName && lastName && username) {
-        setUser({
-          firstName,
-          lastName,
-          username,
-          contact,
-          method,
-          isAnonymous: false,
-        });
-      }
+  const handleVerify = async (code: string) => {
+    try {
+      console.log('🔐 Verifying OTP:', code);
+      console.log('📧 Email:', contact);
       
-      Alert.alert('Success', 'Account created successfully!', [
-        { text: 'Continue', onPress: () => navigation.replace('Main') },
-      ]);
-    }, 500);
+      setIsLoading(true);
+
+      // Verify OTP with Supabase
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: contact,
+        token: code,
+        type: 'email',
+      });
+
+      if (error) {
+        console.error('❌ OTP verification failed:', error);
+        Alert.alert(
+          'Invalid Code',
+          'The code you entered is incorrect or has expired. Please try again.'
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.user) {
+        throw new Error('No user returned after OTP verification');
+      }
+
+      console.log('✅ OTP verified! User ID:', data.user.id);
+
+      // Create profile in database
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          username: username,
+          first_name: firstName,
+          last_name: lastName,
+          date_of_birth: dateOfBirth,
+          signup_source: 'mobile',
+        });
+
+      if (profileError) {
+        console.error('⚠️ Profile creation error:', profileError);
+        // Continue anyway - user is authenticated
+      } else {
+        console.log('✅ Profile created');
+      }
+
+      // Update auth store
+      setUser({
+        id: data.user.id,
+        firstName: firstName || '',
+        lastName: lastName || '',
+        username: username || 'user',
+        email: contact,
+        isAnonymous: false,
+      });
+
+      console.log('✅ User authenticated and profile created!');
+
+      // Navigate to home
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' as never }],
+      });
+    } catch (error: any) {
+      console.error('❌ Verification error:', error);
+      Alert.alert(
+        'Verification Failed',
+        error.message || 'Failed to verify code. Please try again.'
+      );
+      setIsLoading(false);
+    }
   };
 
   const handleResend = () => {
@@ -323,18 +378,22 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
               <TouchableOpacity
                 style={styles.verifyButton}
                 onPress={() => handleVerify(otp.join(''))}
-                disabled={!otp.every(d => d)}
+                disabled={!otp.every(d => d) || isLoading}
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={otp.every(d => d) ? ['#8b5cf6', '#ec4899'] : ['rgba(75, 85, 99, 0.5)', 'rgba(55, 65, 81, 0.5)']}
+                  colors={otp.every(d => d) && !isLoading ? ['#8b5cf6', '#ec4899'] : ['rgba(75, 85, 99, 0.5)', 'rgba(55, 65, 81, 0.5)']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.verifyGradient}
                 >
-                  <Text style={[styles.verifyText, !otp.every(d => d) && styles.verifyTextDisabled]}>
-                    Verify Code
-                  </Text>
+                  {isLoading ? (
+                    <ActivityIndicator color="#ffffff" />
+                  ) : (
+                    <Text style={[styles.verifyText, !otp.every(d => d) && styles.verifyTextDisabled]}>
+                      Verify Code
+                    </Text>
+                  )}
                 </LinearGradient>
               </TouchableOpacity>
             </BlurView>

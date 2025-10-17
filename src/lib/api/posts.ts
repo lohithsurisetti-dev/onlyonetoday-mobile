@@ -87,14 +87,11 @@ export const getFeedPosts = async ({
   offset?: number;
 } = {}): Promise<FeedPost[]> => {
   try {
+    // First get posts
     let query = supabase
       .from('posts')
       .select(`
         *,
-        profiles!posts_user_id_fkey (
-          username,
-          avatar_url
-        ),
         post_reaction_counts (
           funny_count,
           creative_count,
@@ -121,17 +118,36 @@ export const getFeedPosts = async ({
       throw error;
     }
 
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Get unique user IDs
+    const userIds = [...new Set(data.map(post => post.user_id).filter(Boolean))];
+
+    // Fetch profiles for all users
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, avatar_url')
+      .in('id', userIds);
+
+    // Create profile lookup map
+    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
     // Transform data
-    return (data || []).map(post => ({
-      ...post,
-      username: post.profiles?.username,
-      avatar_url: post.profiles?.avatar_url,
-      reactions: {
-        funny: post.post_reaction_counts?.funny_count || 0,
-        creative: post.post_reaction_counts?.creative_count || 0,
-        must_try: post.post_reaction_counts?.must_try_count || 0,
-      },
-    })) as FeedPost[];
+    return data.map(post => {
+      const profile = post.user_id ? profileMap.get(post.user_id) : null;
+      return {
+        ...post,
+        username: profile?.username,
+        avatar_url: profile?.avatar_url,
+        reactions: {
+          funny: post.post_reaction_counts?.funny_count || 0,
+          creative: post.post_reaction_counts?.creative_count || 0,
+          must_try: post.post_reaction_counts?.must_try_count || 0,
+        },
+      };
+    }) as FeedPost[];
   } catch (error) {
     console.error('Get feed error:', error);
     throw error;

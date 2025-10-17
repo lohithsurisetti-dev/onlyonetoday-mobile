@@ -380,19 +380,16 @@ const styles = StyleSheet.create({
     marginBottom: scale(32),
   },
   title: {
-    fontSize: moderateScale(28, 0.3),
-    fontWeight: '900',
+    fontSize: moderateScale(24, 0.3),
+    fontWeight: '300',
     color: '#ffffff',
-    letterSpacing: scale(2),
+    letterSpacing: scale(1),
     marginBottom: scale(12),
-    textShadowColor: 'rgba(139, 92, 246, 0.15)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
   },
   subtitle: {
     fontSize: moderateScale(13, 0.2),
     color: '#9ca3af',
-    letterSpacing: scale(0.5),
+    marginBottom: scale(4),
   },
   card: {
     width: '100%',

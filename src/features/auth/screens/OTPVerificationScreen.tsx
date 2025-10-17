@@ -277,7 +277,7 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
           >
             {/* Header Text */}
             <View style={styles.header}>
-              <Text style={styles.title}>Enter Verification Code</Text>
+              <Text style={styles.title}>ENTER VERIFICATION CODE</Text>
               <Text style={styles.subtitle}>
                 We sent a 6-digit code to
               </Text>

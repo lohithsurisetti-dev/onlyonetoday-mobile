@@ -38,6 +38,107 @@ const CARD_HEIGHT = CARD_WIDTH * 1.4;
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
+// Floating star component
+const FloatingStar = ({ delay = 0, size = 2 }: { delay?: number; size?: number }) => {
+  const translateY = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const starScale = useRef(new Animated.Value(0.5)).current;
+
+  useEffect(() => {
+    const animate = () => {
+      Animated.loop(
+        Animated.parallel([
+          Animated.sequence([
+            Animated.timing(translateY, {
+              toValue: -30,
+              duration: 3000 + Math.random() * 2000,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateY, {
+              toValue: 0,
+              duration: 3000 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(translateX, {
+              toValue: 20,
+              duration: 2500 + Math.random() * 2000,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+              toValue: -20,
+              duration: 2500 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+              toValue: 0,
+              duration: 2500 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(opacity, {
+              toValue: 0.4,
+              duration: 1500,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0.15,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0.4,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(starScale, {
+              toValue: 1,
+              duration: 1500,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(starScale, {
+              toValue: 0.5,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(starScale, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ]),
+        ])
+      ).start();
+    };
+
+    animate();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.star,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          transform: [{ translateY }, { translateX }, { scale: starScale }],
+          opacity,
+        },
+      ]}
+    />
+  );
+};
+
 interface TrendingShareCardProps {
   visible: boolean;
   onClose: () => void;
@@ -52,6 +153,39 @@ export default function TrendingShareCard({ visible, onClose, post }: TrendingSh
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const cardRef = useRef<View>(null);
+
+  // Get brand colors based on source
+  const getBrandColors = (source: string) => {
+    switch(source) {
+      case 'Spotify': 
+        return { 
+          gradient: '#0d3a1a', // Dark Spotify green
+          primary: '#1ed760',  // Spotify green
+        };
+      case 'Reddit': 
+        return { 
+          gradient: '#2e1a0f', // Dark orange
+          primary: '#fb923c',  // Reddit orange
+        };
+      case 'YouTube': 
+        return { 
+          gradient: '#2e1012', // Dark red
+          primary: '#ef4444',  // YouTube red
+        };
+      case 'Sports': 
+        return { 
+          gradient: '#0f1f35', // Dark blue
+          primary: '#3b82f6',  // Sports blue
+        };
+      default: 
+        return { 
+          gradient: '#1a1a2e', 
+          primary: '#8b5cf6',  // Default purple
+        };
+    }
+  };
+
+  const brandColors = getBrandColors(post.source);
 
   useEffect(() => {
     if (visible) {
@@ -121,20 +255,46 @@ export default function TrendingShareCard({ visible, onClose, post }: TrendingSh
         <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} />
         
         <Animated.View style={[styles.cardContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
-          <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0a0a1a' }]}>
-            <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#2d1b4e']} style={styles.cardGradient}>
+          <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0b0b18' }]}>
+            <LinearGradient 
+              colors={['#0b0b18', '#171a2c', brandColors.gradient]}
+              locations={[0, 0.5, 1]}
+              style={styles.cardGradient}
+            >
+              {/* Floating Stars Background */}
+              <View style={styles.starsBackground} pointerEvents="none">
+                {[...Array(15)].map((_, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      top: `${Math.random() * 100}%`,
+                      left: `${Math.random() * 100}%`,
+                    }}
+                  >
+                    <FloatingStar delay={i * 100} size={2 + Math.random() * 2} />
+                  </View>
+                ))}
+              </View>
+
               {/* Header */}
               <View style={styles.cardHeader}>
                 <Text style={styles.brandName}>ONLYONE</Text>
-                <View style={styles.brandDivider} />
+                <View style={[styles.brandDivider, { backgroundColor: brandColors.primary }]} />
                 <Text style={styles.brandTagline}>TODAY</Text>
               </View>
 
               {/* Content */}
               <View style={styles.contentSection}>
                 <Text style={styles.quoteText} numberOfLines={4}>"{post.content}"</Text>
-                <View style={styles.statsRow}>
-                  <Text style={styles.statCount}>{formatCount(post.count)}</Text>
+                <View style={[
+                  styles.statsRow,
+                  {
+                    backgroundColor: `${brandColors.primary}15`,
+                    borderColor: `${brandColors.primary}30`,
+                  }
+                ]}>
+                  <Text style={[styles.statCount, { color: brandColors.primary }]}>{formatCount(post.count)}</Text>
                   <Text style={styles.statLabel}>doing this now</Text>
                 </View>
               </View>
@@ -146,11 +306,11 @@ export default function TrendingShareCard({ visible, onClose, post }: TrendingSh
                 <Text style={styles.ctaUrl}>onlyonetoday.com</Text>
               </View>
 
-              {/* Decorative Corners */}
-              <View style={styles.cornerTL} />
-              <View style={styles.cornerTR} />
-              <View style={styles.cornerBL} />
-              <View style={styles.cornerBR} />
+              {/* Decorative Corners - Brand colored */}
+              <View style={[styles.cornerTL, { borderColor: brandColors.primary }]} />
+              <View style={[styles.cornerTR, { borderColor: brandColors.primary }]} />
+              <View style={[styles.cornerBL, { borderColor: brandColors.primary }]} />
+              <View style={[styles.cornerBR, { borderColor: brandColors.primary }]} />
             </LinearGradient>
           </View>
 
@@ -209,11 +369,27 @@ const styles = StyleSheet.create({
   },
   cardGradient: {
     flex: 1,
+    position: 'relative',
     borderRadius: 24,
     paddingHorizontal: scale(24),
     paddingTop: scale(28),
     paddingBottom: scale(24),
     justifyContent: 'space-between',
+  },
+  starsBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  star: {
+    backgroundColor: '#ffffff',
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
   },
   cardHeader: {
     alignItems: 'center',
@@ -232,7 +408,6 @@ const styles = StyleSheet.create({
     width: scale(50),
     height: 2.5,
     borderRadius: 2,
-    backgroundColor: '#a78bfa',
     opacity: 0.8,
   },
   brandTagline: {
@@ -261,14 +436,11 @@ const styles = StyleSheet.create({
     paddingVertical: scale(16),
     paddingHorizontal: scale(20),
     borderRadius: scale(14),
-    backgroundColor: 'rgba(167, 139, 250, 0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.2)',
   },
   statCount: {
     fontSize: moderateScale(22, 0.3),
     fontWeight: '800',
-    color: '#a78bfa',
     letterSpacing: -0.5,
   },
   statLabel: {
@@ -309,7 +481,6 @@ const styles = StyleSheet.create({
     height: 30,
     borderTopWidth: 2.5,
     borderLeftWidth: 2.5,
-    borderColor: '#a78bfa',
     borderTopLeftRadius: 8,
     opacity: 0.5,
   },
@@ -321,7 +492,6 @@ const styles = StyleSheet.create({
     height: 30,
     borderTopWidth: 2.5,
     borderRightWidth: 2.5,
-    borderColor: '#a78bfa',
     borderTopRightRadius: 8,
     opacity: 0.5,
   },
@@ -333,7 +503,6 @@ const styles = StyleSheet.create({
     height: 30,
     borderBottomWidth: 2.5,
     borderLeftWidth: 2.5,
-    borderColor: '#a78bfa',
     borderBottomLeftRadius: 8,
     opacity: 0.5,
   },
@@ -345,7 +514,6 @@ const styles = StyleSheet.create({
     height: 30,
     borderBottomWidth: 2.5,
     borderRightWidth: 2.5,
-    borderColor: '#a78bfa',
     borderBottomRightRadius: 8,
     opacity: 0.5,
   },

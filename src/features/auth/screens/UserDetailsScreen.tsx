@@ -140,19 +140,11 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
   
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
-  const [errors, setErrors] = useState({ firstName: '', lastName: '', username: '', dateOfBirth: '', password: '', confirmPassword: '' });
+  const [errors, setErrors] = useState({ firstName: '', lastName: '', dateOfBirth: '' });
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
-
-  const checkUsernameTimeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     Animated.parallel([
@@ -170,47 +162,8 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
     ]).start();
   }, []);
 
-  const checkUsernameAvailability = (value: string) => {
-    if (value.length < 3) {
-      setUsernameStatus('idle');
-      return;
-    }
-
-    setUsernameStatus('checking');
-
-    // Debounce API call
-    if (checkUsernameTimeout.current) {
-      clearTimeout(checkUsernameTimeout.current);
-    }
-
-    checkUsernameTimeout.current = setTimeout(() => {
-      // TODO: Check with backend API
-      console.log('Checking username:', value);
-      
-      // Simulate API call
-      setTimeout(() => {
-        // Mock: usernames starting with 'test' are taken
-        const isTaken = value.toLowerCase().startsWith('test');
-        setUsernameStatus(isTaken ? 'taken' : 'available');
-      }, 500);
-    }, 500);
-  };
-
-  const handleUsernameChange = (value: string) => {
-    // Only allow alphanumeric and underscore
-    const cleaned = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
-    setUsername(cleaned);
-    setErrors({ ...errors, username: '' });
-    
-    if (cleaned.length >= 3) {
-      checkUsernameAvailability(cleaned);
-    } else {
-      setUsernameStatus('idle');
-    }
-  };
-
   const handleContinue = () => {
-    const newErrors = { firstName: '', lastName: '', username: '', dateOfBirth: '', password: '', confirmPassword: '' };
+    const newErrors = { firstName: '', lastName: '', dateOfBirth: '' };
     let isValid = true;
 
     if (!firstName.trim()) {
@@ -220,20 +173,6 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
 
     if (!lastName.trim()) {
       newErrors.lastName = 'Last name is required';
-      isValid = false;
-    }
-
-    if (!username.trim()) {
-      newErrors.username = 'Username is required';
-      isValid = false;
-    } else if (username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-      isValid = false;
-    } else if (usernameStatus === 'taken') {
-      newErrors.username = 'Username is already taken';
-      isValid = false;
-    } else if (usernameStatus === 'checking') {
-      newErrors.username = 'Checking username...';
       isValid = false;
     }
 
@@ -249,55 +188,18 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
       }
     }
 
-    if (!password.trim()) {
-      newErrors.password = 'Password is required';
-      isValid = false;
-    } else if (password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-      isValid = false;
-    }
-
-    if (!confirmPassword.trim()) {
-      newErrors.confirmPassword = 'Please confirm your password';
-      isValid = false;
-    } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-      isValid = false;
-    }
-
     setErrors(newErrors);
 
     if (isValid) {
-      // Navigate to OTP verification
-      navigation.navigate('OTPVerification', {
+      // Navigate to username/password screen
+      navigation.navigate('UsernamePassword', {
         method,
         contact,
         firstName,
         lastName,
-        username,
+        dateOfBirth,
       });
     }
-  };
-
-  const getUsernameIcon = () => {
-    if (usernameStatus === 'checking') {
-      return <ActivityIndicator size="small" color="#8b5cf6" />;
-    }
-    if (usernameStatus === 'available') {
-      return (
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-          <Path d="M5 13l4 4L19 7" stroke="#10b981" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      );
-    }
-    if (usernameStatus === 'taken') {
-      return (
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-          <Path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      );
-    }
-    return null;
   };
 
   return (
@@ -393,30 +295,6 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
                   {errors.lastName ? <Text style={styles.errorText}>{errors.lastName}</Text> : null}
                 </View>
 
-                {/* Username */}
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>USERNAME</Text>
-                  <View style={styles.usernameContainer}>
-                    <TextInput
-                      value={username}
-                      onChangeText={handleUsernameChange}
-                      placeholder="johndoe"
-                      placeholderTextColor="rgba(255, 255, 255, 0.3)"
-                      autoCapitalize="none"
-                      style={[styles.input, styles.usernameInput]}
-                    />
-                    <View style={styles.usernameIcon}>
-                      {getUsernameIcon()}
-                    </View>
-                  </View>
-                  {errors.username ? (
-                    <Text style={styles.errorText}>{errors.username}</Text>
-                  ) : usernameStatus === 'available' ? (
-                    <Text style={styles.successText}>Username is available!</Text>
-                  ) : null}
-                  <Text style={styles.hintText}>Only letters, numbers, and underscores</Text>
-                </View>
-
                 {/* Date of Birth */}
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>DATE OF BIRTH</Text>
@@ -437,76 +315,6 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
                     style={styles.input}
                   />
                   {errors.dateOfBirth ? <Text style={styles.errorText}>{errors.dateOfBirth}</Text> : null}
-                </View>
-
-                {/* Password */}
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>PASSWORD</Text>
-                  <View style={styles.usernameContainer}>
-                    <TextInput
-                      value={password}
-                      onChangeText={(value) => {
-                        setPassword(value);
-                        setErrors({ ...errors, password: '' });
-                      }}
-                      placeholder="At least 8 characters"
-                      placeholderTextColor="rgba(255, 255, 255, 0.3)"
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      style={[styles.input, styles.usernameInput]}
-                    />
-                    <TouchableOpacity 
-                      style={styles.usernameIcon}
-                      onPress={() => setShowPassword(!showPassword)}
-                      activeOpacity={0.7}
-                    >
-                      <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24" fill="none">
-                        {showPassword ? (
-                          <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 100-6 3 3 0 000 6z" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                        ) : (
-                          <>
-                            <Path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                          </>
-                        )}
-                      </Svg>
-                    </TouchableOpacity>
-                  </View>
-                  {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
-                </View>
-
-                {/* Confirm Password */}
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>CONFIRM PASSWORD</Text>
-                  <View style={styles.usernameContainer}>
-                    <TextInput
-                      value={confirmPassword}
-                      onChangeText={(value) => {
-                        setConfirmPassword(value);
-                        setErrors({ ...errors, confirmPassword: '' });
-                      }}
-                      placeholder="Re-enter password"
-                      placeholderTextColor="rgba(255, 255, 255, 0.3)"
-                      secureTextEntry={!showConfirmPassword}
-                      autoCapitalize="none"
-                      style={[styles.input, styles.usernameInput]}
-                    />
-                    <TouchableOpacity 
-                      style={styles.usernameIcon}
-                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                      activeOpacity={0.7}
-                    >
-                      <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24" fill="none">
-                        {showConfirmPassword ? (
-                          <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 100-6 3 3 0 000 6z" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                        ) : (
-                          <>
-                            <Path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                          </>
-                        )}
-                      </Svg>
-                    </TouchableOpacity>
-                  </View>
-                  {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
                 </View>
 
                 {/* Continue Button */}

@@ -260,7 +260,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             >
               {/* Header */}
               <View style={styles.header}>
-                <Text style={styles.title}>WELCOME BACK</Text>
+                <Text style={styles.title}>LOGIN</Text>
                 <Text style={styles.subtitle}>Enter your email to continue</Text>
               </View>
 
@@ -361,9 +361,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    padding: scale(24),
     paddingTop: scale(60),
-    paddingBottom: scale(40),
-    paddingHorizontal: scale(24),
   },
   backButton: {
     width: scale(44),
@@ -373,8 +372,7 @@ const styles = StyleSheet.create({
     marginBottom: scale(16),
   },
   content: {
-    flex: 1,
-    justifyContent: 'center',
+    paddingTop: scale(20),
   },
   header: {
     marginBottom: scale(32),

@@ -183,7 +183,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
             <View style={styles.divider} />
             <Text style={styles.subtitle}>TODAY</Text>
           </View>
-          <Text style={styles.tagline}>DISCOVER YOUR UNIQUENESS</Text>
+          <Text style={styles.tagline}>YOUR MOMENTS COUNT</Text>
         </Animated.View>
       </LinearGradient>
     </View>

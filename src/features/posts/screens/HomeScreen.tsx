@@ -274,7 +274,7 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
               </TouchableOpacity>
               
               <Text style={styles.title}>ONLYONE</Text>
-              <Text style={styles.subtitle}>DISCOVER YOUR UNIQUENESS</Text>
+              <Text style={styles.subtitle}>TODAY'S COLLECTIVE</Text>
             </View>
 
             {/* Today's Vibe Card */}

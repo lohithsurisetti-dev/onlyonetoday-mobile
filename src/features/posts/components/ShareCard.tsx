@@ -337,7 +337,7 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
                 <View style={styles.footer}>
                   <View style={styles.footerContent}>
                     <Text style={styles.welcomeMessage}>
-                      Join the community. Share your unique moments.
+                      Join the community. Every moment counts.
                     </Text>
                     <Text style={styles.footerLink}>onlyonetoday.com</Text>
                   </View>

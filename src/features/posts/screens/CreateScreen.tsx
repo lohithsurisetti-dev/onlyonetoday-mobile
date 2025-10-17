@@ -303,7 +303,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>CREATE POST</Text>
-            <Text style={styles.subtitle}>SHARE YOUR UNIQUE MOMENT</Text>
+            <Text style={styles.subtitle}>SHARE YOUR MOMENT</Text>
           </View>
 
           {/* Main Card */}

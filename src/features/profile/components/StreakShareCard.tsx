@@ -333,7 +333,7 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
 
                 {/* Footer with Message & URL */}
                 <View style={styles.footer}>
-                  <Text style={styles.footerMessage}>Join the community. Track your uniqueness.</Text>
+                  <Text style={styles.footerMessage}>Join the community. Track your journey.</Text>
                   <Text style={styles.footerLink}>onlyonetoday.com</Text>
                 </View>
               </View>

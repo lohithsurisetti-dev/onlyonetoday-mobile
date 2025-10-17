@@ -343,9 +343,9 @@ export default function FeedPostShareCard({ visible, onClose, post, tierColors }
 
               {/* Welcoming Footer */}
               <View style={styles.footer}>
-                <Text style={styles.welcomeTitle}>Track your uniqueness</Text>
+                <Text style={styles.welcomeTitle}>Every action counts</Text>
                 <Text style={styles.welcomeMessage}>
-                  Discover what makes you different
+                  See where you fit in today
                 </Text>
                 <View style={styles.ctaContainer}>
                   <Text style={styles.ctaText}>Download now</Text>

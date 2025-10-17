@@ -302,7 +302,7 @@ export default function TrendingShareCard({ visible, onClose, post }: TrendingSh
               {/* Footer */}
               <View style={styles.footer}>
                 <Text style={styles.welcomeTitle}>See what's trending</Text>
-                <Text style={styles.welcomeMessage}>Track your uniqueness</Text>
+                <Text style={styles.welcomeMessage}>Join the conversation</Text>
                 <Text style={styles.ctaUrl}>onlyonetoday.com</Text>
               </View>
 

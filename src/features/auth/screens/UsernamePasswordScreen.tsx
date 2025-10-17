@@ -297,7 +297,7 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
         // Navigate to home
         navigation.reset({
           index: 0,
-          routes: [{ name: 'MainTabs' as never }],
+          routes: [{ name: 'Main' as never }],
         });
       } catch (error: any) {
         Alert.alert(

@@ -1,6 +1,7 @@
 /**
  * Login Screen
- * Premium cosmic-themed login with email/password
+ * Premium cosmic-themed login with OTP authentication
+ * Matches signup screen styling
  */
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -21,15 +22,15 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
-import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 
 // Responsive scaling
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
+const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
-// Floating star component
+// Floating star component (same as signup)
 const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
   const translateY = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
@@ -130,7 +131,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { setUser } = useAuthStore();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string }>({});
+  const [error, setError] = useState('');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
@@ -157,20 +158,17 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
   const handleLogin = async () => {
     // Validation
-    const newErrors: { email?: string } = {};
-    
     if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!validateEmail(email)) {
-      newErrors.email = 'Please enter a valid email';
+      setError('Email is required');
+      return;
     }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
+    
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email');
       return;
     }
 
+    setError('');
     setIsLoading(true);
 
     try {
@@ -210,20 +208,24 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     }
   };
 
-
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={['#0a0a0f', '#1a1a2e', '#16213e']}
-        style={styles.gradient}
-      >
-        {/* Floating Stars */}
-        {[...Array(20)].map((_, i) => (
-          <FloatingStar
-            key={i}
-            delay={i * 200}
-          />
-        ))}
+    <View style={styles.safeArea}>
+      <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#0a0a1a']} style={styles.gradient}>
+        {/* Floating Stars Background */}
+        <View style={styles.starsContainer} pointerEvents="none">
+          {[...Array(20)].map((_, i) => (
+            <View
+              key={i}
+              style={{
+                position: 'absolute',
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+              }}
+            >
+              <FloatingStar delay={i * 100} />
+            </View>
+          ))}
+        </View>
 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -234,6 +236,19 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
+            {/* Back Button */}
+            <Animated.View style={{ opacity: fadeAnim }}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+                activeOpacity={0.7}
+              >
+                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                  <Path d="M15 18l-6-6 6-6" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </TouchableOpacity>
+            </Animated.View>
+
             <Animated.View
               style={[
                 styles.content,
@@ -243,90 +258,69 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
                 },
               ]}
             >
-              {/* Back Button */}
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-              >
-                <Ionicons name="arrow-back" size={scale(24)} color="#ffffff" />
-              </TouchableOpacity>
-
               {/* Header */}
               <View style={styles.header}>
                 <Text style={styles.title}>WELCOME BACK</Text>
-                <Text style={styles.subtitle}>Sign in to continue</Text>
+                <Text style={styles.subtitle}>Enter your email to continue</Text>
               </View>
 
-              {/* Login Form */}
-              <View style={styles.formContainer}>
+              {/* Login Card */}
+              <BlurView intensity={20} tint="dark" style={styles.card}>
                 {/* Email Input */}
-                <BlurView intensity={40} tint="dark" style={styles.inputCard}>
-                  <Text style={styles.label}>EMAIL</Text>
-                  <View style={styles.inputWrapper}>
-                    <Ionicons
-                      name="mail-outline"
-                      size={scale(20)}
-                      color="rgba(255, 255, 255, 0.4)"
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your email"
-                      placeholderTextColor="rgba(255, 255, 255, 0.3)"
-                      value={email}
-                      onChangeText={(text) => {
-                        setEmail(text);
-                        if (errors.email) {
-                          setErrors({ ...errors, email: undefined });
-                        }
-                      }}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      editable={!isLoading}
-                    />
-                  </View>
-                  {errors.email && (
-                    <Text style={styles.errorText}>{errors.email}</Text>
-                  )}
-                </BlurView>
+                <View style={styles.inputSection}>
+                  <Text style={styles.inputLabel}>EMAIL</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your email"
+                    placeholderTextColor="#6b7280"
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (error) setError('');
+                    }}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!isLoading}
+                  />
+                  {error ? (
+                    <Text style={styles.errorText}>{error}</Text>
+                  ) : null}
+                </View>
 
                 {/* Info Text */}
                 <Text style={styles.infoText}>
                   We'll send you a verification code to sign in
                 </Text>
 
-                {/* Login Button */}
+                {/* Continue Button */}
                 <TouchableOpacity
+                  style={styles.continueButton}
                   onPress={handleLogin}
-                  disabled={isLoading}
                   activeOpacity={0.8}
-                  style={styles.loginButton}
+                  disabled={isLoading}
                 >
                   <LinearGradient
-                    colors={isLoading ? ['rgba(75, 85, 99, 0.5)', 'rgba(55, 65, 81, 0.5)'] : ['#8b5cf6', '#ec4899']}
+                    colors={isLoading ? ['rgba(107, 114, 128, 0.5)', 'rgba(107, 114, 128, 0.3)'] : ['#8b5cf6', '#ec4899']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    style={styles.loginGradient}
+                    style={styles.continueGradient}
                   >
                     {isLoading ? (
-                      <ActivityIndicator color="#ffffff" />
+                      <ActivityIndicator size="small" color="#ffffff" />
                     ) : (
-                      <Text style={styles.loginText}>Send OTP</Text>
+                      <Text style={styles.continueText}>Send OTP</Text>
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
+              </BlurView>
 
-                {/* Signup Link */}
-                <View style={styles.signupContainer}>
-                  <Text style={styles.signupPrompt}>Don't have an account?</Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('Signup')}
-                    disabled={isLoading}
-                  >
-                    <Text style={styles.signupLink}>Create Account</Text>
-                  </TouchableOpacity>
-                </View>
+              {/* Signup Link */}
+              <View style={styles.signupContainer}>
+                <Text style={styles.signupPrompt}>Don't have an account?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Signup')} disabled={isLoading}>
+                  <Text style={styles.signupLink}>Create Account</Text>
+                </TouchableOpacity>
               </View>
             </Animated.View>
           </ScrollView>
@@ -337,17 +331,30 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#0a0a0f',
+    backgroundColor: '#0a0a1a',
   },
   gradient: {
     flex: 1,
   },
-  star: {
+  starsContainer: {
     position: 'absolute',
-    top: Math.random() * SCREEN_HEIGHT,
-    left: Math.random() * SCREEN_WIDTH,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  star: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#ffffff',
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
   },
   keyboardView: {
     flex: 1,
@@ -356,113 +363,114 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingTop: scale(60),
     paddingBottom: scale(40),
-  },
-  content: {
-    flex: 1,
     paddingHorizontal: scale(24),
   },
   backButton: {
     width: scale(44),
     height: scale(44),
-    borderRadius: scale(22),
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: scale(32),
+    justifyContent: 'center',
+    marginBottom: scale(16),
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
   },
   header: {
-    marginBottom: scale(40),
+    marginBottom: scale(32),
   },
   title: {
-    fontSize: scale(32),
+    fontSize: moderateScale(28, 0.3),
     fontWeight: '900',
     color: '#ffffff',
-    letterSpacing: 2,
-    marginBottom: scale(8),
-    textShadowColor: 'rgba(139, 92, 246, 0.3)',
+    letterSpacing: scale(2),
+    marginBottom: scale(12),
+    textShadowColor: 'rgba(139, 92, 246, 0.15)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 20,
   },
   subtitle: {
-    fontSize: scale(16),
-    color: 'rgba(255, 255, 255, 0.6)',
-    letterSpacing: 0.5,
+    fontSize: moderateScale(13, 0.2),
+    color: '#9ca3af',
+    letterSpacing: scale(0.5),
   },
-  formContainer: {
-    gap: scale(20),
-  },
-  inputCard: {
-    borderRadius: scale(16),
-    padding: scale(20),
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+  card: {
+    width: '100%',
+    borderRadius: scale(24),
     overflow: 'hidden',
+    backgroundColor: 'rgba(26, 26, 46, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+    padding: scale(24),
   },
-  label: {
-    fontSize: scale(12),
-    fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.7)',
-    letterSpacing: 1.5,
-    marginBottom: scale(12),
+  inputSection: {
+    marginBottom: scale(20),
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  inputIcon: {
-    marginRight: scale(12),
+  inputLabel: {
+    fontSize: moderateScale(10, 0.2),
+    color: '#9ca3af',
+    letterSpacing: scale(1.5),
+    fontWeight: '600',
+    marginBottom: scale(10),
   },
   input: {
-    flex: 1,
-    fontSize: scale(16),
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: scale(12),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(14),
     color: '#ffffff',
-    padding: 0,
+    fontSize: moderateScale(15, 0.2),
   },
   errorText: {
     color: '#ef4444',
-    fontSize: scale(12),
-    marginTop: scale(8),
+    fontSize: moderateScale(11, 0.2),
+    marginTop: scale(6),
+    marginLeft: scale(4),
   },
   infoText: {
-    fontSize: scale(14),
-    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: moderateScale(12, 0.2),
+    color: '#6b7280',
     textAlign: 'center',
-    marginTop: scale(8),
+    marginBottom: scale(24),
+    lineHeight: moderateScale(18, 0.2),
   },
-  loginButton: {
-    marginTop: scale(12),
-    borderRadius: scale(16),
+  continueButton: {
+    width: '100%',
+    borderRadius: scale(12),
     overflow: 'hidden',
+    elevation: 8,
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
   },
-  loginGradient: {
-    paddingVertical: scale(18),
+  continueGradient: {
+    paddingVertical: scale(16),
     alignItems: 'center',
     justifyContent: 'center',
   },
-  loginText: {
-    fontSize: scale(16),
-    fontWeight: '700',
+  continueText: {
     color: '#ffffff',
-    letterSpacing: 1,
+    fontSize: moderateScale(15, 0.2),
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: scale(6),
-    marginTop: scale(20),
+    marginTop: scale(32),
   },
   signupPrompt: {
-    fontSize: scale(14),
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: moderateScale(13, 0.2),
+    color: '#6b7280',
   },
   signupLink: {
-    fontSize: scale(14),
+    fontSize: moderateScale(13, 0.2),
     color: '#ec4899',
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });
-

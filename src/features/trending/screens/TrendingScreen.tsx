@@ -135,7 +135,7 @@ export default function TrendingScreen() {
         <View style={styles.hero}>
           <View style={styles.heroHeader}>
             <View style={styles.heroTitleContainer}>
-              <Text style={styles.heroTitle}>Trending</Text>
+              <Text style={styles.heroTitle}>TRENDING</Text>
               <Text style={styles.heroSubtitle}>What the world is doing now</Text>
             </View>
             
@@ -305,10 +305,13 @@ const styles = StyleSheet.create({
     gap: scale(4),
   },
   heroTitle: {
-    fontSize: moderateScale(32, 0.3),
-    fontWeight: '900',
+    fontSize: moderateScale(20, 0.3),
+    fontWeight: '500',
     color: '#ffffff',
-    letterSpacing: -0.5,
+    letterSpacing: scale(3),
+    textShadowColor: 'rgba(139, 92, 246, 0.4)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   heroSubtitle: {
     fontSize: moderateScale(14, 0.2),

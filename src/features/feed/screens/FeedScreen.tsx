@@ -403,7 +403,7 @@ export default function FeedScreen() {
         <View style={styles.hero}>
           <View style={styles.heroHeader}>
             <View style={styles.heroLeft}>
-              <Text style={styles.heroTitle}>Discover</Text>
+              <Text style={styles.heroTitle}>DISCOVER</Text>
               <Text style={styles.heroSubtitle}>{filteredPosts.length} {showDaySummaries ? 'summaries' : 'actions'}</Text>
             </View>
             
@@ -851,13 +851,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroTitle: {
-    fontSize: moderateScale(28, 0.3),
-    fontWeight: '800',
+    fontSize: moderateScale(20, 0.3),
+    fontWeight: '500',
     color: '#ffffff',
-    letterSpacing: -0.5,
-    textShadowColor: 'rgba(139, 92, 246, 0.3)',
+    letterSpacing: scale(3),
+    textShadowColor: 'rgba(139, 92, 246, 0.4)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 16,
+    textShadowRadius: 8,
   },
   heroSubtitle: {
     fontSize: moderateScale(13, 0.2),

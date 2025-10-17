@@ -187,10 +187,11 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
 
     checkUsernameTimeout.current = setTimeout(async () => {
       try {
-        const { count, error } = await supabase
+        const { data, error } = await supabase
           .from('profiles')
-          .select('username', { count: 'exact', head: true })
-          .eq('username', value.toLowerCase());
+          .select('username')
+          .eq('username', value.toLowerCase())
+          .limit(1);
 
         if (error) {
           console.error('Username check error:', error);
@@ -202,7 +203,8 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
           return;
         }
 
-        setUsernameStatus((count || 0) > 0 ? 'taken' : 'available');
+        // If data array has items, username is taken
+        setUsernameStatus((data && data.length > 0) ? 'taken' : 'available');
       } catch (error) {
         console.error('Username check failed:', error);
         setUsernameStatus('idle');

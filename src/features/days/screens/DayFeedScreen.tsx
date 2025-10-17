@@ -21,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { getDayTheme, getCurrentDay, DayOfWeek, DayPost } from '../types';
+import DayIcon from '../components/DayIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -129,7 +130,9 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
 
               <View style={styles.heroCenter}>
                 <View style={styles.heroTitleRow}>
-                  <Text style={styles.heroEmoji}>{dayTheme.emoji}</Text>
+                  <View style={styles.heroIconContainer}>
+                    <DayIcon icon={dayTheme.icon} size={scale(28)} color={dayTheme.color} />
+                  </View>
                   <Text style={styles.heroTitle}>{dayTheme.name}</Text>
                 </View>
                 <Text style={styles.heroSubtitle}>{dayTheme.vibe}</Text>
@@ -230,7 +233,9 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
 
             {posts.length === 0 && (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyEmoji}>{dayTheme.emoji}</Text>
+                <View style={styles.emptyIcon}>
+                  <DayIcon icon={dayTheme.icon} size={scale(80)} color={dayTheme.color} />
+                </View>
                 <Text style={styles.emptyTitle}>No posts yet</Text>
                 <Text style={styles.emptySubtitle}>
                   {isToday ? 'Be the first to share!' : 'Check back when this day is live'}
@@ -542,10 +547,11 @@ const styles = StyleSheet.create({
   heroTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(8),
+    gap: scale(10),
   },
-  heroEmoji: {
-    fontSize: moderateScale(28, 0.3),
+  heroIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   heroTitle: {
     fontSize: moderateScale(22, 0.3),
@@ -762,10 +768,10 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     paddingVertical: scale(80),
-    gap: scale(12),
+    gap: scale(16),
   },
-  emptyEmoji: {
-    fontSize: moderateScale(64, 0.3),
+  emptyIcon: {
+    opacity: 0.4,
   },
   emptyTitle: {
     fontSize: moderateScale(18, 0.3),

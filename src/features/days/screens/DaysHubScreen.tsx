@@ -18,6 +18,7 @@ import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getCurrentDay, getAllDayThemes, DayOfWeek, DayTheme } from '../types';
+import DayIcon from '../components/DayIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -232,7 +233,9 @@ function DayCard({ day, status, daysUntil, participants, index, onPress }: DayCa
             {/* Header */}
             <View style={styles.cardHeader}>
               <View style={styles.cardHeaderLeft}>
-                <Text style={styles.dayEmoji}>{day.emoji}</Text>
+                <View style={styles.iconContainer}>
+                  <DayIcon icon={day.icon} size={scale(32)} color={day.color} />
+                </View>
                 <View style={styles.cardTitleContainer}>
                   <Text style={styles.dayName}>{day.name}</Text>
                   <Text style={styles.dayVibe}>{day.shortDesc}</Text>
@@ -375,8 +378,11 @@ const styles = StyleSheet.create({
     gap: scale(12),
     flex: 1,
   },
-  dayEmoji: {
-    fontSize: moderateScale(32, 0.3),
+  iconContainer: {
+    width: scale(48),
+    height: scale(48),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardTitleContainer: {
     flex: 1,

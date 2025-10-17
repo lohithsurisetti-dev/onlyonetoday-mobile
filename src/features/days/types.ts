@@ -8,7 +8,7 @@ export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'frida
 export interface DayTheme {
   id: DayOfWeek;
   name: string;
-  emoji: string;
+  icon: 'mask' | 'star' | 'dice' | 'heart' | 'party' | 'sparkle' | 'wave';
   color: string;
   secondaryColor: string;
   gradient: string[];
@@ -44,7 +44,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   monday: {
     id: 'monday',
     name: 'Unpopular Monday',
-    emoji: '🎭',
+    icon: 'mask',
     color: '#a78bfa',
     secondaryColor: '#c4b5fd',
     gradient: ['#a78bfa', '#8b5cf6'],
@@ -53,15 +53,15 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     vibe: 'Rebellious, Funny, Cathartic',
     placeholder: 'Drop your unpopular opinion...',
     reactions: {
-      first: { emoji: '👏', label: 'Agree' },
-      second: { emoji: '🤔', label: 'Hmm' },
+      first: { emoji: '😤', label: 'Agree' },
+      second: { emoji: '🤨', label: 'Hmm' },
       third: { emoji: '🔥', label: 'Spicy' },
     },
   },
   tuesday: {
     id: 'tuesday',
     name: 'Tiny Wins',
-    emoji: '⭐',
+    icon: 'star',
     color: '#fbbf24',
     secondaryColor: '#fcd34d',
     gradient: ['#fbbf24', '#f59e0b'],
@@ -71,14 +71,14 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     placeholder: 'Share your tiny win...',
     reactions: {
       first: { emoji: '🎉', label: 'Proud' },
-      second: { emoji: '💪', label: 'Inspired' },
-      third: { emoji: '✨', label: 'Same' },
+      second: { emoji: '💪', label: 'Strong' },
+      third: { emoji: '⭐', label: 'Star' },
     },
   },
   wednesday: {
     id: 'wednesday',
     name: 'Wildcard',
-    emoji: '🎲',
+    icon: 'dice',
     color: '#22d3ee',
     secondaryColor: '#67e8f9',
     gradient: ['#22d3ee', '#06b6d4'],
@@ -87,15 +87,15 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     vibe: 'Adventurous, Playful, Chaotic',
     placeholder: 'What wild thing did you do?',
     reactions: {
-      first: { emoji: '🎪', label: 'Wild' },
+      first: { emoji: '🎲', label: 'Random' },
       second: { emoji: '🚀', label: 'Go' },
-      third: { emoji: '😂', label: 'Legend' },
+      third: { emoji: '😂', label: 'LOL' },
     },
   },
   thursday: {
     id: 'thursday',
     name: 'Thankful Thoughts',
-    emoji: '💝',
+    icon: 'heart',
     color: '#f472b6',
     secondaryColor: '#f9a8d4',
     gradient: ['#f472b6', '#ec4899'],
@@ -104,15 +104,15 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     vibe: 'Reflective, Grateful, Warm',
     placeholder: 'What are you grateful for?',
     reactions: {
-      first: { emoji: '🫂', label: 'Feel' },
-      second: { emoji: '💗', label: 'Same' },
-      third: { emoji: '🌸', label: 'Beautiful' },
+      first: { emoji: '🙏', label: 'Blessed' },
+      second: { emoji: '💗', label: 'Love' },
+      third: { emoji: '🌸', label: 'Soft' },
     },
   },
   friday: {
     id: 'friday',
     name: 'Free Spirit',
-    emoji: '🎊',
+    icon: 'party',
     color: '#fb7185',
     secondaryColor: '#fda4af',
     gradient: ['#fb7185', '#f43f5e'],
@@ -121,15 +121,15 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     vibe: 'Liberated, Playful, Celebratory',
     placeholder: 'What\'s your weekend vibe?',
     reactions: {
-      first: { emoji: '🎈', label: 'Vibe' },
-      second: { emoji: '😎', label: 'Same' },
-      third: { emoji: '🌟', label: 'Goals' },
+      first: { emoji: '🎊', label: 'Party' },
+      second: { emoji: '😎', label: 'Cool' },
+      third: { emoji: '🌈', label: 'Vibe' },
     },
   },
   saturday: {
     id: 'saturday',
     name: 'Soul Actions',
-    emoji: '💫',
+    icon: 'sparkle',
     color: '#e879f9',
     secondaryColor: '#f0abfc',
     gradient: ['#e879f9', '#d946ef'],
@@ -139,14 +139,14 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     placeholder: 'What feeds your soul today?',
     reactions: {
       first: { emoji: '🎨', label: 'Art' },
-      second: { emoji: '✨', label: 'Inspired' },
-      third: { emoji: '💜', label: 'Beautiful' },
+      second: { emoji: '✨', label: 'Magic' },
+      third: { emoji: '💜', label: 'Soul' },
     },
   },
   sunday: {
     id: 'sunday',
     name: 'Silent Sunday',
-    emoji: '🌊',
+    icon: 'wave',
     color: '#38bdf8',
     secondaryColor: '#7dd3fc',
     gradient: ['#38bdf8', '#0ea5e9'],
@@ -155,9 +155,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     vibe: 'Peaceful, Minimal, Restorative',
     placeholder: 'Share your peaceful moment...',
     reactions: {
-      first: { emoji: '🌊', label: 'Peace' },
+      first: { emoji: '🧘', label: 'Zen' },
       second: { emoji: '😌', label: 'Calm' },
-      third: { emoji: '💙', label: 'Same' },
+      third: { emoji: '🕊️', label: 'Peace' },
     },
   },
 };

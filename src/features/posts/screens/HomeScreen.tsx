@@ -22,6 +22,7 @@ import { useLocation } from '@/lib/hooks/useLocation';
 import LocationLeaderboard from '@/features/home/components/LocationLeaderboard';
 import TrendingLeaderboard from '@/features/home/components/TrendingLeaderboard';
 import { getCurrentDay, getDayTheme } from '@/features/days/types';
+import DayIcon from '@/features/days/components/DayIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -166,7 +167,9 @@ function TodaysVibeCard({ navigation }: { navigation: any }) {
             {/* Content */}
             <View style={styles.vibeCardContent}>
               <View style={styles.vibeCardLeft}>
-                <Text style={styles.vibeEmoji}>{dayTheme.emoji}</Text>
+                <View style={styles.vibeIconContainer}>
+                  <DayIcon icon={dayTheme.icon} size={scale(40)} color={dayTheme.color} />
+                </View>
                 <View style={styles.vibeCardInfo}>
                   <View style={styles.vibeCardTitleRow}>
                     <Text style={styles.vibeCardLabel}>Today's Vibe</Text>
@@ -453,7 +456,7 @@ const styles = StyleSheet.create({
 
   // Today's Vibe Card
   vibeCardContainer: {
-    marginHorizontal: scale(20),
+    paddingHorizontal: scale(20),
     marginBottom: scale(20),
   },
   vibeCardBlur: {
@@ -489,8 +492,11 @@ const styles = StyleSheet.create({
     gap: scale(14),
     flex: 1,
   },
-  vibeEmoji: {
-    fontSize: moderateScale(40, 0.3),
+  vibeIconContainer: {
+    width: scale(56),
+    height: scale(56),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   vibeCardInfo: {
     flex: 1,

@@ -175,7 +175,7 @@ export default function DaySummaryModal({
                     activeOpacity={0.7}
                   >
                     <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                      <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#8b5cf6" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+                      <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#c4b5fd" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
                     </Svg>
                   </TouchableOpacity>
                 </View>

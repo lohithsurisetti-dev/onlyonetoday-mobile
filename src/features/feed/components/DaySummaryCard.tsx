@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: moderateScale(11, 0.2),
-    color: '#8b5cf6',
+    color: '#c4b5fd',
     fontWeight: '700',
     letterSpacing: 0.3,
   },

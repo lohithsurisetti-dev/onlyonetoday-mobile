@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
   },
   userHandle: {
     fontSize: moderateScale(12, 0.2),
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: '#c4b5fd',
     fontWeight: '500',
     textAlign: 'center',
   },

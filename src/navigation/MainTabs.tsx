@@ -24,55 +24,9 @@ type MainTabsProps = {
 
 export default function MainTabs({ navigation }: MainTabsProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'feed' | 'create' | 'trending' | 'profile'>('home');
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handleTabChange = (tab: 'home' | 'feed' | 'create' | 'trending' | 'profile') => {
-    // Ultra-smooth crossfade transition
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setActiveTab(tab);
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 8,
-          tension: 40,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    });
-  };
-
-  const renderScreen = () => {
-    switch (activeTab) {
-      case 'home':
-        return <HomeScreen navigation={navigation} onTabChange={handleTabChange} />;
-      case 'feed':
-        return <FeedScreen />;
-      case 'create':
-        return <CreateScreen navigation={navigation} onBack={() => setActiveTab('home')} />;
-      case 'trending':
-        return <TrendingScreen />;
-      case 'profile':
-        return <ProfileScreen navigation={navigation} />;
-      default:
-        return <HomeScreen navigation={navigation} onTabChange={handleTabChange} />;
-    }
+    setActiveTab(tab);
   };
 
   // Hide footer on Create screen
@@ -80,17 +34,23 @@ export default function MainTabs({ navigation }: MainTabsProps) {
 
   return (
     <View style={styles.container}>
-      <Animated.View 
-        style={[
-          styles.screenContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        {renderScreen()}
-      </Animated.View>
+      {/* Keep all screens mounted, show/hide with display */}
+      <View style={[styles.screenContainer, activeTab !== 'home' && styles.hidden]}>
+        <HomeScreen navigation={navigation} onTabChange={handleTabChange} />
+      </View>
+      <View style={[styles.screenContainer, activeTab !== 'feed' && styles.hidden]}>
+        <FeedScreen />
+      </View>
+      <View style={[styles.screenContainer, activeTab !== 'create' && styles.hidden]}>
+        <CreateScreen navigation={navigation} onBack={() => setActiveTab('home')} />
+      </View>
+      <View style={[styles.screenContainer, activeTab !== 'trending' && styles.hidden]}>
+        <TrendingScreen />
+      </View>
+      <View style={[styles.screenContainer, activeTab !== 'profile' && styles.hidden]}>
+        <ProfileScreen navigation={navigation} />
+      </View>
+      
       {showFooter && <TabBar activeTab={activeTab} onTabChange={handleTabChange} />}
     </View>
   );
@@ -103,6 +63,15 @@ const styles = StyleSheet.create({
   },
   screenContainer: {
     flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  hidden: {
+    opacity: 0,
+    pointerEvents: 'none',
   },
   placeholder: {
     flex: 1,

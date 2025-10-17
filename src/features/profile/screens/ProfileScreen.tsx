@@ -109,7 +109,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                         <View style={styles.statDivider} />
                         <View style={styles.compactStat}>
                           <Text style={styles.compactValue}>{userStats.uniquePosts}</Text>
-                          <Text style={styles.compactLabel}>Unique</Text>
+                          <Text style={styles.compactLabel}>Posts</Text>
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.compactStat}>

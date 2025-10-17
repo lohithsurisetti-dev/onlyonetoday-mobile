@@ -13,20 +13,17 @@ import {
   ScrollView,
   RefreshControl,
   Animated,
-  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FilterSheet from '../components/FilterSheet';
 import FeedPostShareCard from '../components/FeedPostShareCard';
 import DaySummaryCard from '../components/DaySummaryCard';
 import DaySummaryModal from '../components/DaySummaryModal';
 import { getTierColors as getStandardTierColors } from '@/shared/constants/tierColors';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
@@ -48,6 +45,7 @@ interface Post {
   location_state?: string;
   location_country?: string;
   input_type?: 'action' | 'day';
+  username?: string;
   percentile?: {
     percentile: number;
     tier: 'elite' | 'rare' | 'unique' | 'notable' | 'common' | 'popular';
@@ -73,7 +71,7 @@ const SAMPLE_POSTS: Post[] = [
     scope: 'world',
     input_type: 'action',
     username: 'alex_zen',
-    percentile: { percentile: 2.5, tier: 'elite', displayText: 'Top 3%', comparison: 'More unique than 97%' },
+    percentile: { percentile: 2.5, tier: 'elite', displayText: 'Top 3%', comparison: 'Rare action today' },
     funny_count: 12,
     creative_count: 24,
     must_try_count: 45,
@@ -86,7 +84,7 @@ const SAMPLE_POSTS: Post[] = [
     location_city: 'Phoenix',
     input_type: 'day',
     username: 'sarah_codes',
-    percentile: { percentile: 5.2, tier: 'rare', displayText: 'Top 5%', comparison: 'More unique than 95%' },
+    percentile: { percentile: 5.2, tier: 'rare', displayText: 'Top 5%', comparison: 'Uncommon today' },
     funny_count: 8,
     creative_count: 18,
     must_try_count: 32,
@@ -99,7 +97,7 @@ const SAMPLE_POSTS: Post[] = [
     location_state: 'California',
     input_type: 'day',
     username: 'mike_creates',
-    percentile: { percentile: 12.8, tier: 'unique', displayText: 'Top 13%', comparison: 'More unique than 87%' },
+    percentile: { percentile: 12.8, tier: 'unique', displayText: 'Top 13%', comparison: 'Less common' },
     funny_count: 15,
     creative_count: 22,
     must_try_count: 19,
@@ -112,7 +110,7 @@ const SAMPLE_POSTS: Post[] = [
     location_country: 'United States',
     input_type: 'action',
     username: 'dev_explorer',
-    percentile: { percentile: 15, tier: 'unique', displayText: 'Top 15%', comparison: 'More unique than 85%' },
+    percentile: { percentile: 15, tier: 'unique', displayText: 'Top 15%', comparison: 'Notable activity' },
     funny_count: 5,
     creative_count: 18,
     must_try_count: 32,
@@ -124,7 +122,7 @@ const SAMPLE_POSTS: Post[] = [
     scope: 'world',
     username: 'dad_builder',
     input_type: 'action',
-    percentile: { percentile: 8, tier: 'rare', displayText: 'Top 8%', comparison: 'More unique than 92%' },
+    percentile: { percentile: 8, tier: 'rare', displayText: 'Top 8%', comparison: 'Uncommon today' },
     funny_count: 18,
     creative_count: 42,
     must_try_count: 28,
@@ -135,7 +133,7 @@ const SAMPLE_POSTS: Post[] = [
     time: '7h ago',
     scope: 'world',
     input_type: 'action',
-    percentile: { percentile: 22, tier: 'notable', displayText: 'Top 22%', comparison: 'More unique than 78%' },
+    percentile: { percentile: 22, tier: 'notable', displayText: 'Top 22%', comparison: 'Interesting choice' },
     funny_count: 28,
     creative_count: 15,
     must_try_count: 62,
@@ -157,7 +155,7 @@ const SAMPLE_POSTS: Post[] = [
     time: '2d ago',
     scope: 'world',
     input_type: 'action',
-    percentile: { percentile: 78, tier: 'popular', displayText: 'Top 78%', comparison: 'Well loved activity' },
+    percentile: { percentile: 78, tier: 'popular', displayText: 'Top 78%', comparison: 'Popular today' },
     funny_count: 4,
     creative_count: 1,
     must_try_count: 3,
@@ -256,7 +254,7 @@ const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
 // ============================================================================
 
 export default function FeedScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  // const navigation = useNavigation<NativeStackNavigationProp<any>>();
   
   // State
   const [filter, setFilter] = useState<FilterType>('all');
@@ -518,28 +516,6 @@ export default function FeedScreen() {
                 </TouchableOpacity>
               )}
               
-              {inputTypeFilter !== 'all' && (
-                <TouchableOpacity
-                  style={styles.activePill}
-                  onPress={() => setInputTypeFilter('all')}
-                  activeOpacity={0.7}
-                >
-                  <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
-                    <LinearGradient
-                      colors={['rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.2)']}
-                      style={styles.activePillGradient}
-                    >
-                      <Text style={styles.activePillText}>
-                        {inputTypeFilter === 'action' ? 'Actions' : 'Days'}
-                      </Text>
-                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                        <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    </LinearGradient>
-                  </BlurView>
-                </TouchableOpacity>
-              )}
-              
               {scopeFilter !== 'world' && (
                 <TouchableOpacity
                   style={styles.activePill}
@@ -698,7 +674,7 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
     ]).start();
   }, []);
   
-  const isTopTier = post.percentile && ['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier);
+  // const isTopTier = post.percentile && ['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier);
   
   return (
     <Animated.View

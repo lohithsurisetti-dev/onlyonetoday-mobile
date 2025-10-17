@@ -79,7 +79,7 @@ export default function AllPostsScreen({ navigation }: AllPostsScreenProps) {
   const handleShare = async (post: Post) => {
     try {
       await Share.share({
-        message: `Check out my ${post.input_type === 'day' ? 'day summary' : 'action'} on OnlyOne: "${post.content}" - Top ${(100 - post.percentile).toFixed(1)}% uniqueness!`,
+        message: `Check out my ${post.input_type === 'day' ? 'day summary' : 'action'} on OnlyOne: "${post.content}" - Top ${(100 - post.percentile).toFixed(1)}% today!`,
       });
     } catch (error) {
       console.error('Share error:', error);

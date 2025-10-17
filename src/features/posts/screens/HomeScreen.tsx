@@ -301,7 +301,7 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
                   colors={['rgba(236, 72, 153, 0.15)', 'transparent']}
                   style={styles.statGradient}
                 >
-                  <Text style={styles.statLabel}>UNIQUE</Text>
+                  <Text style={styles.statLabel}>POSTED</Text>
                   <Text style={styles.statValue}>
                     {stats?.uniqueActionsToday?.toLocaleString() || '0'}
                   </Text>

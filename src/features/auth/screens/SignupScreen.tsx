@@ -263,7 +263,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
               <View style={styles.header}>
                 <Text style={styles.title}>Welcome to</Text>
                 <Text style={styles.appName}>ONLYONE</Text>
-                <Text style={styles.subtitle}>Discover your uniqueness</Text>
+                <Text style={styles.subtitle}>Track your everyday moments</Text>
               </View>
 
               {/* Main Card */}

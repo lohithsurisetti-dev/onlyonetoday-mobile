@@ -319,7 +319,7 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
             >
               {/* Header */}
               <View style={styles.header}>
-                <Text style={styles.title}>Tell us about yourself</Text>
+                <Text style={styles.title}>TELL US ABOUT YOURSELF</Text>
                 <Text style={styles.subtitle}>We'll send a verification code to</Text>
                 <Text style={styles.contact}>{contact}</Text>
               </View>

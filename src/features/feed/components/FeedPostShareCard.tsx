@@ -330,7 +330,6 @@ export default function FeedPostShareCard({ visible, onClose, post, tierColors }
                       colors={[`${tierColors.primary}40`, `${tierColors.secondary}20`]}
                       style={styles.achievementGradient}
                     >
-                      <View style={[styles.glowDot, { backgroundColor: tierColors.primary }]} />
                       <View>
                         <Text style={[styles.achievementRank, { color: tierColors.primary }]}>
                           {post.percentile.displayText}
@@ -497,33 +496,24 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   achievementGradient: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(12),
     paddingHorizontal: scale(20),
     paddingVertical: scale(14),
     borderRadius: scale(16),
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  glowDot: {
-    width: scale(12),
-    height: scale(12),
-    borderRadius: scale(6),
-    shadowColor: '#ffffff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-  },
   achievementRank: {
     fontSize: moderateScale(15, 0.2),
     fontWeight: '800',
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   achievementDesc: {
     fontSize: moderateScale(11, 0.2),
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: scale(2),
+    textAlign: 'center',
   },
   footer: {
     paddingTop: scale(20),

@@ -232,34 +232,60 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
 
       console.log('✅ OTP verified! User ID:', data.user.id);
 
-      // Create profile in database
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
+      // If signup flow, create profile
+      if (username && firstName && lastName) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            date_of_birth: dateOfBirth,
+            signup_source: 'mobile',
+          });
+
+        if (profileError) {
+          console.error('⚠️ Profile creation error:', profileError);
+          // Continue anyway - user is authenticated
+        } else {
+          console.log('✅ Profile created');
+        }
+
+        // Update auth store with signup data
+        setUser({
           id: data.user.id,
+          firstName: firstName,
+          lastName: lastName,
           username: username,
-          first_name: firstName,
-          last_name: lastName,
-          date_of_birth: dateOfBirth,
-          signup_source: 'mobile',
+          email: contact,
+          isAnonymous: false,
         });
-
-      if (profileError) {
-        console.error('⚠️ Profile creation error:', profileError);
-        // Continue anyway - user is authenticated
       } else {
-        console.log('✅ Profile created');
-      }
+        // Login flow - fetch existing profile
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
 
-      // Update auth store
-      setUser({
-        id: data.user.id,
-        firstName: firstName || '',
-        lastName: lastName || '',
-        username: username || 'user',
-        email: contact,
-        isAnonymous: false,
-      });
+        if (profileError || !profile) {
+          console.error('⚠️ Profile fetch error:', profileError);
+          throw new Error('Failed to load profile');
+        }
+
+        console.log('✅ Profile loaded');
+
+        // Update auth store with profile data
+        setUser({
+          id: data.user.id,
+          firstName: profile.first_name || '',
+          lastName: profile.last_name || '',
+          username: profile.username || 'user',
+          email: contact,
+          isAnonymous: false,
+        });
+      }
 
       console.log('✅ User authenticated and profile created!');
 

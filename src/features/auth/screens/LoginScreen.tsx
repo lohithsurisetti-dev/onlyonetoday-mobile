@@ -129,10 +129,8 @@ type LoginScreenProps = {
 export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { setUser } = useAuthStore();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string }>({});
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
@@ -159,18 +157,12 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
   const handleLogin = async () => {
     // Validation
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string } = {};
     
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(email)) {
       newErrors.email = 'Please enter a valid email';
-    }
-    
-    if (!password.trim()) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
     }
 
     setErrors(newErrors);
@@ -182,61 +174,32 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     setIsLoading(true);
 
     try {
-      console.log('🔐 Logging in with email:', email);
+      console.log('📧 Sending login OTP to:', email);
 
-      // Sign in with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Send OTP for login
+      const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        password,
       });
 
       if (error) {
-        console.error('❌ Login error:', error);
+        console.error('❌ OTP send error:', error);
         Alert.alert(
-          'Login Failed',
-          error.message || 'Invalid email or password. Please try again.'
+          'Failed to Send OTP',
+          error.message || 'Failed to send verification code. Please try again.'
         );
         setIsLoading(false);
         return;
       }
 
-      if (!data.user) {
-        throw new Error('No user returned after login');
-      }
+      console.log('✅ OTP sent successfully');
 
-      console.log('✅ Login successful! User ID:', data.user.id);
-
-      // Fetch user profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileError || !profile) {
-        console.error('⚠️ Profile fetch error:', profileError);
-        // Continue anyway - user is authenticated
-      }
-
-      console.log('✅ Profile loaded:', profile);
-
-      // Update auth store
-      setUser({
-        id: data.user.id,
-        firstName: profile?.first_name || '',
-        lastName: profile?.last_name || '',
-        username: profile?.username || 'user',
-        email: data.user.email || email,
-        isAnonymous: false,
+      // Navigate to OTP verification
+      navigation.navigate('OTPVerification', {
+        method: 'email',
+        contact: email.trim(),
       });
-
-      console.log('✅ User authenticated!');
-
-      // Navigate to home
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' as never }],
-      });
+      
+      setIsLoading(false);
     } catch (error: any) {
       console.error('❌ Login error:', error);
       Alert.alert(
@@ -247,37 +210,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      Alert.alert('Enter Email', 'Please enter your email address to reset password.');
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: 'onlyone://reset-password',
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      Alert.alert(
-        'Check Your Email',
-        'We sent you a password reset link. Please check your inbox.'
-      );
-    } catch (error: any) {
-      Alert.alert(
-        'Error',
-        error.message || 'Failed to send reset email. Please try again.'
-      );
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -359,56 +291,10 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
                   )}
                 </BlurView>
 
-                {/* Password Input */}
-                <BlurView intensity={40} tint="dark" style={styles.inputCard}>
-                  <Text style={styles.label}>PASSWORD</Text>
-                  <View style={styles.inputWrapper}>
-                    <Ionicons
-                      name="lock-closed-outline"
-                      size={scale(20)}
-                      color="rgba(255, 255, 255, 0.4)"
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={[styles.input, styles.passwordInput]}
-                      placeholder="Enter your password"
-                      placeholderTextColor="rgba(255, 255, 255, 0.3)"
-                      value={password}
-                      onChangeText={(text) => {
-                        setPassword(text);
-                        if (errors.password) {
-                          setErrors({ ...errors, password: undefined });
-                        }
-                      }}
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      editable={!isLoading}
-                    />
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}
-                      style={styles.eyeIcon}
-                    >
-                      <Ionicons
-                        name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                        size={scale(20)}
-                        color="rgba(255, 255, 255, 0.6)"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  {errors.password && (
-                    <Text style={styles.errorText}>{errors.password}</Text>
-                  )}
-                </BlurView>
-
-                {/* Forgot Password */}
-                <TouchableOpacity
-                  onPress={handleForgotPassword}
-                  disabled={isLoading}
-                  style={styles.forgotButton}
-                >
-                  <Text style={styles.forgotText}>Forgot Password?</Text>
-                </TouchableOpacity>
+                {/* Info Text */}
+                <Text style={styles.infoText}>
+                  We'll send you a verification code to sign in
+                </Text>
 
                 {/* Login Button */}
                 <TouchableOpacity
@@ -426,7 +312,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
                     {isLoading ? (
                       <ActivityIndicator color="#ffffff" />
                     ) : (
-                      <Text style={styles.loginText}>Sign In</Text>
+                      <Text style={styles.loginText}>Send OTP</Text>
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
@@ -535,27 +421,16 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     padding: 0,
   },
-  passwordInput: {
-    paddingRight: scale(40),
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 0,
-    padding: scale(8),
-  },
   errorText: {
     color: '#ef4444',
     fontSize: scale(12),
     marginTop: scale(8),
   },
-  forgotButton: {
-    alignSelf: 'flex-end',
-    marginTop: scale(-8),
-  },
-  forgotText: {
+  infoText: {
     fontSize: scale(14),
-    color: '#8b5cf6',
-    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.5)',
+    textAlign: 'center',
+    marginTop: scale(8),
   },
   loginButton: {
     marginTop: scale(12),

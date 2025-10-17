@@ -27,17 +27,29 @@ type SettingsScreenProps = {
 };
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
-  const { user, signOut } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(false);
 
-  const handleSignOut = () => {
-    signOut();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Signup' }],
-    });
+  const handleSignOut = async () => {
+    try {
+      // Logout (clears Supabase session + AsyncStorage + auth store)
+      await logout();
+      
+      // Navigate to Login screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Still navigate even if there's an error
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    }
   };
 
   const settingsSections = [

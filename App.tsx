@@ -8,6 +8,7 @@ import { queryClient } from './src/lib/queryClient';
 import { validateEnv } from './src/config/env';
 import AppNavigator from './src/navigation/AppNavigator';
 import SplashScreen from './src/features/splash/SplashScreen';
+import { useAuthStore } from './src/lib/stores/authStore';
 
 // Validate environment variables on startup
 validateEnv();
@@ -16,6 +17,11 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const splashOpacity = useRef(new Animated.Value(1)).current;
   const appOpacity = useRef(new Animated.Value(0)).current;
+
+  // Initialize auth session on app start
+  useEffect(() => {
+    useAuthStore.getState().initialize();
+  }, []);
 
   const handleSplashFinish = () => {
     // Crossfade: fade out splash while fading in app

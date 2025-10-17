@@ -373,11 +373,11 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
                 </TouchableOpacity>
               </View>
 
-              {/* Sign In Link */}
+              {/* Login Link */}
               <View style={styles.signInContainer}>
                 <Text style={styles.signInPrompt}>Already have an account?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                  <Text style={styles.signInLink}>Sign In</Text>
+                  <Text style={styles.signInLink}>Login</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

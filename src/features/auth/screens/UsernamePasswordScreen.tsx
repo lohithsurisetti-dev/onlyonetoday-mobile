@@ -187,30 +187,36 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
 
     checkUsernameTimeout.current = setTimeout(async () => {
       try {
+        console.log('🔍 Checking username:', value.toLowerCase());
+        
         const { data, error } = await supabase
           .from('profiles')
           .select('username')
           .eq('username', value.toLowerCase())
           .limit(1);
 
+        console.log('✅ Username check response:', { data, error, hasData: data && data.length > 0 });
+
         if (error) {
-          console.error('Username check error:', error);
+          console.error('❌ Username check API error:', error);
           setUsernameStatus('idle');
           setErrors(prev => ({
             ...prev,
-            username: 'Unable to check username availability. Please try again.'
+            username: `API Error: ${error.message}`
           }));
           return;
         }
 
         // If data array has items, username is taken
-        setUsernameStatus((data && data.length > 0) ? 'taken' : 'available');
-      } catch (error) {
-        console.error('Username check failed:', error);
+        const isTaken = data && data.length > 0;
+        console.log(`📊 Username '${value}' is ${isTaken ? 'TAKEN' : 'AVAILABLE'}`);
+        setUsernameStatus(isTaken ? 'taken' : 'available');
+      } catch (error: any) {
+        console.error('❌ Username check exception:', error);
         setUsernameStatus('idle');
         setErrors(prev => ({
           ...prev,
-          username: 'Connection error. Please check your internet connection.'
+          username: `Error: ${error.message || 'Connection failed'}`
         }));
       }
     }, 500);

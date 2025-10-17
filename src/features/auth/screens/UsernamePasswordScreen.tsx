@@ -69,7 +69,7 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, slideUpAnim]);
 
   const checkUsernameAvailability = (value: string) => {
     if (value.length < 3) {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     height: scale(44),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: scale(20),
+    marginBottom: scale(16),
   },
   content: {
     flex: 1,

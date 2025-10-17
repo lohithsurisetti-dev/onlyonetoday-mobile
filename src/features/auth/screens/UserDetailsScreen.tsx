@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     height: scale(44),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: scale(20),
+    marginBottom: scale(16),
   },
   content: {
     flex: 1,

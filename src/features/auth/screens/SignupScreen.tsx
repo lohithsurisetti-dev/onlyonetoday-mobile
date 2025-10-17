@@ -340,7 +340,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
                     end={{ x: 1, y: 0 }}
                     style={styles.otpGradient}
                   >
-                    <Text style={styles.otpButtonText}>Send OTP</Text>
+                    <Text style={styles.otpButtonText}>Continue</Text>
                   </LinearGradient>
                 </TouchableOpacity>
 

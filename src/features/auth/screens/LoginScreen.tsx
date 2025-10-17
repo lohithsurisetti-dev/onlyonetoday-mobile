@@ -378,6 +378,7 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: scale(32),
+    alignItems: 'center',
   },
   title: {
     fontSize: moderateScale(24, 0.3),
@@ -385,11 +386,13 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: scale(1),
     marginBottom: scale(12),
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: moderateScale(13, 0.2),
     color: '#9ca3af',
     marginBottom: scale(4),
+    textAlign: 'center',
   },
   card: {
     width: '100%',

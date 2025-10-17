@@ -193,17 +193,23 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
           .eq('username', value.toLowerCase());
 
         if (error) {
-          console.warn('Username check error:', error);
-          // On error, assume available to not block user
-          setUsernameStatus('available');
+          console.error('Username check error:', error);
+          setUsernameStatus('idle');
+          setErrors(prev => ({
+            ...prev,
+            username: 'Unable to check username availability. Please try again.'
+          }));
           return;
         }
 
         setUsernameStatus((count || 0) > 0 ? 'taken' : 'available');
       } catch (error) {
         console.error('Username check failed:', error);
-        // On error, assume available to not block user
-        setUsernameStatus('available');
+        setUsernameStatus('idle');
+        setErrors(prev => ({
+          ...prev,
+          username: 'Connection error. Please check your internet connection.'
+        }));
       }
     }, 500);
   };

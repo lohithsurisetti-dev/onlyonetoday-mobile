@@ -43,7 +43,7 @@ export interface DayPost {
 export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   monday: {
     id: 'monday',
-    name: 'Maverick Monday',
+    name: 'Unpopular Monday',
     icon: 'mask',
     color: '#a78bfa',
     secondaryColor: '#c4b5fd',
@@ -60,7 +60,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   },
   tuesday: {
     id: 'tuesday',
-    name: 'Triumph Tuesday',
+    name: 'Tiny Tuesday',
     icon: 'star',
     color: '#fbbf24',
     secondaryColor: '#fcd34d',
@@ -77,7 +77,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   },
   wednesday: {
     id: 'wednesday',
-    name: 'Wildcard Wednesday',
+    name: 'Random Wednesday',
     icon: 'dice',
     color: '#22d3ee',
     secondaryColor: '#67e8f9',
@@ -111,7 +111,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   },
   friday: {
     id: 'friday',
-    name: 'Freestyle Friday',
+    name: 'Weekend Friday',
     icon: 'party',
     color: '#fb7185',
     secondaryColor: '#fda4af',
@@ -128,7 +128,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   },
   saturday: {
     id: 'saturday',
-    name: 'Soulful Saturday',
+    name: 'Creative Saturday',
     icon: 'sparkle',
     color: '#e879f9',
     secondaryColor: '#f0abfc',
@@ -145,7 +145,7 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
   },
   sunday: {
     id: 'sunday',
-    name: 'Serene Sunday',
+    name: 'Offline Sunday',
     icon: 'wave',
     color: '#38bdf8',
     secondaryColor: '#7dd3fc',

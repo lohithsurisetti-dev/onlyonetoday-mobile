@@ -141,8 +141,13 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
-  const [errors, setErrors] = useState({ firstName: '', lastName: '', username: '' });
+  const [errors, setErrors] = useState({ firstName: '', lastName: '', username: '', dateOfBirth: '', password: '', confirmPassword: '' });
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
@@ -205,7 +210,7 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
   };
 
   const handleContinue = () => {
-    const newErrors = { firstName: '', lastName: '', username: '' };
+    const newErrors = { firstName: '', lastName: '', username: '', dateOfBirth: '', password: '', confirmPassword: '' };
     let isValid = true;
 
     if (!firstName.trim()) {
@@ -229,6 +234,34 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
       isValid = false;
     } else if (usernameStatus === 'checking') {
       newErrors.username = 'Checking username...';
+      isValid = false;
+    }
+
+    if (!dateOfBirth.trim()) {
+      newErrors.dateOfBirth = 'Date of birth is required';
+      isValid = false;
+    } else {
+      // Basic DOB validation (MM/DD/YYYY format)
+      const dobRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/(19|20)\d{2}$/;
+      if (!dobRegex.test(dateOfBirth)) {
+        newErrors.dateOfBirth = 'Invalid format (MM/DD/YYYY)';
+        isValid = false;
+      }
+    }
+
+    if (!password.trim()) {
+      newErrors.password = 'Password is required';
+      isValid = false;
+    } else if (password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+      isValid = false;
+    }
+
+    if (!confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Please confirm your password';
+      isValid = false;
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
       isValid = false;
     }
 
@@ -382,6 +415,98 @@ export default function UserDetailsScreen({ navigation, route }: UserDetailsScre
                     <Text style={styles.successText}>Username is available!</Text>
                   ) : null}
                   <Text style={styles.hintText}>Only letters, numbers, and underscores</Text>
+                </View>
+
+                {/* Date of Birth */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>DATE OF BIRTH</Text>
+                  <TextInput
+                    value={dateOfBirth}
+                    onChangeText={(value) => {
+                      // Auto-format as MM/DD/YYYY
+                      let cleaned = value.replace(/[^0-9]/g, '');
+                      if (cleaned.length >= 2) cleaned = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
+                      if (cleaned.length >= 5) cleaned = cleaned.slice(0, 5) + '/' + cleaned.slice(5, 9);
+                      setDateOfBirth(cleaned);
+                      setErrors({ ...errors, dateOfBirth: '' });
+                    }}
+                    placeholder="MM/DD/YYYY"
+                    placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                    keyboardType="numeric"
+                    maxLength={10}
+                    style={styles.input}
+                  />
+                  {errors.dateOfBirth ? <Text style={styles.errorText}>{errors.dateOfBirth}</Text> : null}
+                </View>
+
+                {/* Password */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>PASSWORD</Text>
+                  <View style={styles.usernameContainer}>
+                    <TextInput
+                      value={password}
+                      onChangeText={(value) => {
+                        setPassword(value);
+                        setErrors({ ...errors, password: '' });
+                      }}
+                      placeholder="At least 8 characters"
+                      placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      style={[styles.input, styles.usernameInput]}
+                    />
+                    <TouchableOpacity 
+                      style={styles.usernameIcon}
+                      onPress={() => setShowPassword(!showPassword)}
+                      activeOpacity={0.7}
+                    >
+                      <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24" fill="none">
+                        {showPassword ? (
+                          <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 100-6 3 3 0 000 6z" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                        ) : (
+                          <>
+                            <Path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                          </>
+                        )}
+                      </Svg>
+                    </TouchableOpacity>
+                  </View>
+                  {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+                </View>
+
+                {/* Confirm Password */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>CONFIRM PASSWORD</Text>
+                  <View style={styles.usernameContainer}>
+                    <TextInput
+                      value={confirmPassword}
+                      onChangeText={(value) => {
+                        setConfirmPassword(value);
+                        setErrors({ ...errors, confirmPassword: '' });
+                      }}
+                      placeholder="Re-enter password"
+                      placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                      secureTextEntry={!showConfirmPassword}
+                      autoCapitalize="none"
+                      style={[styles.input, styles.usernameInput]}
+                    />
+                    <TouchableOpacity 
+                      style={styles.usernameIcon}
+                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                      activeOpacity={0.7}
+                    >
+                      <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24" fill="none">
+                        {showConfirmPassword ? (
+                          <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 100-6 3 3 0 000 6z" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                        ) : (
+                          <>
+                            <Path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" stroke="rgba(255, 255, 255, 0.5)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                          </>
+                        )}
+                      </Svg>
+                    </TouchableOpacity>
+                  </View>
+                  {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
                 </View>
 
                 {/* Continue Button */}

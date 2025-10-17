@@ -3,7 +3,7 @@
  * Discover what others are doing with beautiful animations and filtering
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   ScrollView,
   RefreshControl,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -22,10 +23,39 @@ import FeedPostShareCard from '../components/FeedPostShareCard';
 import DaySummaryCard from '../components/DaySummaryCard';
 import DaySummaryModal from '../components/DaySummaryModal';
 import { getTierColors as getStandardTierColors } from '@/shared/constants/tierColors';
+import { getFeedPosts } from '@/lib/api/posts';
+import type { Post as DBPost } from '@/types/database.types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
+
+// Helper functions
+const getTimeAgo = (timestamp: string): string => {
+  const now = new Date();
+  const postDate = new Date(timestamp);
+  const diffMs = now.getTime() - postDate.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+};
+
+const getComparisonText = (tier: string): string => {
+  const comparisons: Record<string, string> = {
+    elite: 'Rare action today',
+    rare: 'Uncommon today',
+    unique: 'Less common',
+    notable: 'Notable activity',
+    popular: 'Popular today',
+    common: 'Many did this',
+  };
+  return comparisons[tier] || '';
+};
 
 // ============================================================================
 // TYPES
@@ -262,7 +292,8 @@ export default function FeedScreen() {
   const [reactionFilter, setReactionFilter] = useState<ReactionFilter>('all');
   const [showDaySummaries, setShowDaySummaries] = useState(false);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
-  const [posts, setPosts] = useState<Post[]>(SAMPLE_POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userReactions, setUserReactions] = useState<Set<string>>(new Set());
   const [sharePost, setSharePost] = useState<Post | null>(null);
@@ -292,12 +323,59 @@ export default function FeedScreen() {
     extrapolate: 'clamp',
   });
   
+  // Load posts from Supabase
+  const loadPosts = useCallback(async () => {
+    try {
+      const inputTypeFilter = showDaySummaries ? 'day' : 'action';
+      const dbPosts = await getFeedPosts({
+        scope: scopeFilter,
+        inputType: inputTypeFilter as any,
+        limit: 50,
+      });
+
+      // Transform to match local Post type
+      const transformedPosts: Post[] = dbPosts.map(dbPost => ({
+        id: dbPost.id,
+        content: dbPost.content,
+        time: getTimeAgo(dbPost.created_at),
+        scope: dbPost.scope as ScopeFilter,
+        location_city: dbPost.location_city,
+        location_state: dbPost.location_state,
+        location_country: dbPost.location_country,
+        input_type: dbPost.input_type,
+        username: dbPost.username || 'anonymous',
+        percentile: dbPost.tier ? {
+          percentile: dbPost.percentile || 0,
+          tier: dbPost.tier,
+          displayText: dbPost.tier === 'elite' ? `Top ${(dbPost.percentile || 0).toFixed(1)}%` : dbPost.tier,
+          comparison: getComparisonText(dbPost.tier),
+        } : undefined,
+        funny_count: dbPost.reactions?.funny || 0,
+        creative_count: dbPost.reactions?.creative || 0,
+        must_try_count: dbPost.reactions?.must_try || 0,
+      }));
+
+      setPosts(transformedPosts);
+    } catch (error) {
+      console.error('Failed to load posts:', error);
+      // Fallback to sample data on error
+      setPosts(SAMPLE_POSTS);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [scopeFilter, showDaySummaries]);
+
+  // Load posts on mount and when filters change
+  useEffect(() => {
+    loadPosts();
+  }, [loadPosts]);
+
   // Handlers
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadPosts();
     setRefreshing(false);
-  }, []);
+  }, [loadPosts]);
   
   const handleReaction = useCallback((postId: string, reactionType: 'funny' | 'creative' | 'must_try') => {
     const reactionKey = `${postId}-${reactionType}`;
@@ -564,7 +642,12 @@ export default function FeedScreen() {
         
         {/* Posts */}
         <View style={styles.postsContainer}>
-          {filteredPosts.length === 0 ? (
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#8b5cf6" />
+              <Text style={styles.loadingText}>Loading feed...</Text>
+            </View>
+          ) : filteredPosts.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyEmoji}>🌌</Text>
               <Text style={styles.emptyTitle}>No posts found</Text>
@@ -1097,6 +1180,16 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(10, 0.2),
     color: '#ffffff',
     fontWeight: '600',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: scale(80),
+    gap: scale(16),
+  },
+  loadingText: {
+    fontSize: moderateScale(14, 0.2),
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontWeight: '500',
   },
   emptyState: {
     alignItems: 'center',

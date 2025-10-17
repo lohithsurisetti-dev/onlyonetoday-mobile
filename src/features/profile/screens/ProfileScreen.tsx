@@ -77,102 +77,105 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#0a0a1a']} style={styles.gradient}>
         <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-          {/* Settings Icon - Top Right */}
-          <TouchableOpacity 
-            style={styles.settingsButton}
-            onPress={() => navigation.navigate('Settings')}
-            activeOpacity={0.7}
-          >
-            <Svg width={scale(24)} height={scale(24)} viewBox="0 0 24 24" fill="none">
-              <Path 
-                d="M12 15a3 3 0 100-6 3 3 0 000 6z" 
-                stroke="#ffffff" 
-                strokeWidth={1.5} 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-              />
-              <Path 
-                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" 
-                stroke="#ffffff" 
-                strokeWidth={1.5} 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-              />
-            </Svg>
-          </TouchableOpacity>
-
+          
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
             
-            {/* Header Card - Compact & Premium */}
-            <View style={styles.headerCard}>
-              <BlurView intensity={20} tint="dark" style={styles.headerBlur}>
-                <LinearGradient
-                  colors={['rgba(139, 92, 246, 0.08)', 'rgba(236, 72, 153, 0.04)', 'transparent'] as const}
-                  style={styles.headerGradient}
+            {/* Premium Header */}
+            <View style={styles.header}>
+              <View style={styles.headerTop}>
+                <View style={styles.headerLeft}>
+                  <Text style={styles.headerTitle}>PROFILE</Text>
+                  <Text style={styles.headerSubtitle}>Your journey</Text>
+                </View>
+                <TouchableOpacity 
+                  style={styles.settingsButton}
+                  onPress={() => navigation.navigate('Settings')}
+                  activeOpacity={0.7}
                 >
-                  <View style={styles.headerContent}>
-                    {/* Avatar with glow */}
-                    <View style={styles.avatarContainer}>
-                      <View style={styles.avatarGlow} />
-                      <Image
-                        source={{ uri: profilePic }}
-                        style={styles.avatar}
-                      />
-                    </View>
-                    
-                    <View style={styles.profileInfo}>
-                      <Text style={styles.name}>{user?.firstName} {user?.lastName}</Text>
-                      <Text style={styles.username}>@{user?.username}</Text>
+                  <Svg width={scale(24)} height={scale(24)} viewBox="0 0 24 24" fill="none">
+                    <Path 
+                      d="M12 15a3 3 0 100-6 3 3 0 000 6z" 
+                      stroke="#ffffff" 
+                      strokeWidth={1.5} 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                    />
+                    <Path 
+                      d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" 
+                      stroke="#ffffff" 
+                      strokeWidth={1.5} 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                    />
+                  </Svg>
+                </TouchableOpacity>
+              </View>
+            </View>
 
-                      {/* Compact Stats - More Prominent */}
-                      <View style={styles.compactStats}>
-                        <View style={styles.compactStat}>
-                          <Text style={styles.compactValue}>{userStats.totalPosts}</Text>
-                          <Text style={styles.compactLabel}>Posts</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.compactStat}>
-                          <Text style={styles.compactValue}>{userStats.uniquePosts}</Text>
-                          <Text style={styles.compactLabel}>Posts</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.compactStat}>
-                          <Text style={styles.compactValue}>{userStats.topTier}</Text>
-                          <Text style={styles.compactLabel}>Elite</Text>
-                        </View>
-                      </View>
+            {/* Profile Card - Side-by-Side Hero */}
+            <View style={styles.profileCard}>
+              <BlurView intensity={30} tint="dark" style={styles.cardBlur}>
+                <LinearGradient
+                  colors={['rgba(139, 92, 246, 0.12)', 'rgba(236, 72, 153, 0.08)', 'transparent'] as const}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.cardGradient}
+                >
+                  {/* Top: Avatar + Name - Centered */}
+                  <View style={styles.profileTop}>
+                    <Image
+                      source={{ uri: profilePic }}
+                      style={styles.avatar}
+                    />
+                    <Text style={styles.displayName}>{user?.firstName} {user?.lastName}</Text>
+                    <Text style={styles.handle}>@{user?.username}</Text>
+                  </View>
+
+                  {/* Bottom: Stats Row */}
+                  <View style={styles.statsRow}>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statValue}>{userStats.totalPosts}</Text>
+                      <Text style={styles.statLabel}>Posts</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: '#a78bfa' }]}>{userStats.topTier}</Text>
+                      <Text style={styles.statLabel}>Elite</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: '#fbbf24', fontSize: moderateScale(16, 0.3) }]}>Soon</Text>
+                      <Text style={styles.statLabel}>OOT Coins</Text>
                     </View>
                   </View>
                 </LinearGradient>
               </BlurView>
             </View>
 
-            {/* Streak Card - Separate & Special */}
+            {/* Streak Card - Dedicated & Shareable */}
             <TouchableOpacity 
               style={styles.streakCard}
               onPress={() => setShowStreakShare(true)}
               activeOpacity={0.85}
             >
-              <BlurView intensity={15} tint="dark" style={styles.streakBlur}>
+              <BlurView intensity={20} tint="dark" style={styles.streakBlur}>
                 <LinearGradient
-                  colors={['rgba(251, 113, 133, 0.2)', 'rgba(244, 63, 94, 0.12)'] as const}
+                  colors={['rgba(251, 113, 133, 0.2)', 'rgba(244, 63, 94, 0.1)'] as const}
                   style={styles.streakGradient}
                 >
-                  <View style={styles.streakHeader}>
+                  <View style={styles.streakContent}>
                     <View style={styles.streakLeft}>
                       <Svg width={scale(28)} height={scale(28)} viewBox="0 0 24 24" fill="none">
                         <Path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" stroke="#fb7185" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                       </Svg>
                       <View style={styles.streakInfo}>
-                        <Text style={styles.streakDays}>{userStats.streak} Days</Text>
-                        <Text style={styles.streakLabel}>Current OOT Streak</Text>
+                        <Text style={styles.streakNumber}>{userStats.streak} Days</Text>
+                        <Text style={styles.streakLabel}>OOT Streak</Text>
                       </View>
                     </View>
-                    <View style={styles.shareIconContainer}>
-                      <Svg width={scale(18)} height={scale(18)} viewBox="0 0 24 24" fill="none">
-                        <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#fb7185" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    </View>
+                    <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24" fill="none">
+                      <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#fb7185" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
                   </View>
                 </LinearGradient>
               </BlurView>
@@ -263,12 +266,165 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   scroll: { paddingBottom: scale(100) },
   
+  // Header
+  header: {
+    paddingHorizontal: scale(20),
+    paddingTop: scale(20),
+    paddingBottom: scale(16),
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: moderateScale(20, 0.3),
+    fontWeight: '500',
+    color: '#ffffff',
+    letterSpacing: scale(3),
+    marginBottom: scale(4),
+  },
+  headerSubtitle: {
+    fontSize: moderateScale(12, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    letterSpacing: scale(0.5),
+  },
   settingsButton: {
-    position: 'absolute',
-    top: scale(20),
-    right: scale(20),
-    zIndex: 100,
     padding: scale(10),
+  },
+
+  // Profile Card - Vertical Layout
+  profileCard: {
+    marginHorizontal: scale(20),
+    marginBottom: scale(16),
+  },
+  cardBlur: {
+    borderRadius: scale(24),
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
+  },
+  cardGradient: {
+    paddingTop: scale(32),
+    paddingBottom: scale(24),
+    paddingHorizontal: scale(20),
+  },
+  
+  // Top Section - Avatar + Name (Centered)
+  profileTop: {
+    alignItems: 'center',
+    marginBottom: scale(24),
+  },
+  avatar: {
+    width: scale(104),
+    height: scale(104),
+    borderRadius: scale(52),
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: scale(16),
+  },
+  displayName: {
+    fontSize: moderateScale(20, 0.3),
+    fontWeight: '600',
+    color: '#ffffff',
+    marginBottom: scale(6),
+    letterSpacing: scale(0.5),
+  },
+  handle: {
+    fontSize: moderateScale(14, 0.2),
+    color: '#8b5cf6',
+    fontWeight: '600',
+  },
+  
+  // Stats Row - Clean 3-Column
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    paddingTop: scale(20),
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statDivider: {
+    width: 1,
+    height: scale(44),
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  statValue: {
+    fontSize: moderateScale(28, 0.3),
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: scale(4),
+    letterSpacing: scale(0.5),
+  },
+  statLabel: {
+    fontSize: moderateScale(10, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontWeight: '600',
+    letterSpacing: scale(1),
+    textTransform: 'uppercase',
+  },
+  comingSoonPill: {
+    marginTop: scale(6),
+    backgroundColor: 'rgba(251, 191, 36, 0.15)',
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(3),
+    borderRadius: scale(8),
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.3)',
+  },
+  comingSoonText: {
+    fontSize: moderateScale(8, 0.2),
+    color: '#fbbf24',
+    fontWeight: '700',
+    letterSpacing: scale(0.5),
+    textTransform: 'uppercase',
+  },
+  
+  // Streak Card - Dedicated
+  streakCard: {
+    marginHorizontal: scale(20),
+    marginBottom: scale(20),
+  },
+  streakBlur: {
+    borderRadius: scale(20),
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 113, 133, 0.2)',
+  },
+  streakGradient: {
+    padding: scale(20),
+  },
+  streakContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  streakLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(14),
+  },
+  streakInfo: {
+    justifyContent: 'center',
+  },
+  streakNumber: {
+    fontSize: moderateScale(20, 0.3),
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: scale(2),
+    letterSpacing: scale(0.5),
+  },
+  streakLabel: {
+    fontSize: moderateScale(11, 0.2),
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontWeight: '500',
   },
 
   // Anonymous
@@ -277,45 +433,7 @@ const styles = StyleSheet.create({
   guestSubtitle: { fontSize: moderateScale(14, 0.2), color: '#9ca3af', marginBottom: scale(40), textAlign: 'center' },
   guestButton: { paddingHorizontal: scale(48), paddingVertical: scale(16), borderRadius: scale(14) },
   guestButtonText: { color: '#ffffff', fontSize: moderateScale(16, 0.2), fontWeight: '600', letterSpacing: 0.5 },
-
-  // Header Card - Compact & Visual
-  headerCard: { marginHorizontal: scale(20), marginTop: scale(60), marginBottom: scale(16) },
-  headerBlur: { borderRadius: scale(20), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.15)' },
-  headerGradient: { padding: scale(20) },
-  headerContent: { flexDirection: 'row', alignItems: 'center', gap: scale(16) },
-  avatarContainer: { position: 'relative' },
-  avatarGlow: { 
-    position: 'absolute', 
-    width: scale(74), 
-    height: scale(74), 
-    borderRadius: scale(37), 
-    backgroundColor: '#8b5cf6',
-    opacity: 0.15,
-    top: scale(3),
-    left: scale(3),
-  },
-  avatar: { width: scale(74), height: scale(74), borderRadius: scale(37), borderWidth: 2, borderColor: 'rgba(139, 92, 246, 0.4)' },
-  profileInfo: { flex: 1, paddingVertical: scale(4) },
-  initials: { fontSize: moderateScale(34, 0.4), fontWeight: '200', color: '#ffffff', letterSpacing: 3 },
-  name: { fontSize: moderateScale(18, 0.3), fontWeight: '600', color: '#ffffff', letterSpacing: 0.3, marginBottom: scale(2) },
-  username: { fontSize: moderateScale(12, 0.2), color: '#8b5cf6', fontWeight: '600', marginBottom: scale(12) },
-  compactStats: { flexDirection: 'row', alignItems: 'center', gap: scale(12) },
-  compactStat: { alignItems: 'flex-start' },
-  compactValue: { fontSize: moderateScale(18, 0.3), fontWeight: '700', color: '#ffffff', marginBottom: scale(1), letterSpacing: 0.3 },
-  compactLabel: { fontSize: moderateScale(9, 0.2), color: 'rgba(255, 255, 255, 0.5)', fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' },
-  statDivider: { width: 1, height: scale(24), backgroundColor: 'rgba(255, 255, 255, 0.1)' },
-
-  // Streak Card
-  streakCard: { marginHorizontal: scale(20), marginBottom: scale(24) },
-  streakBlur: { borderRadius: scale(20), overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)' },
-  streakGradient: { padding: scale(20) },
-  streakHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  streakLeft: { flexDirection: 'row', alignItems: 'center', gap: scale(14), flex: 1 },
-  streakInfo: { flex: 1 },
-  streakDays: { fontSize: moderateScale(20, 0.3), fontWeight: '700', color: '#ffffff', marginBottom: scale(2) },
-  streakLabel: { fontSize: moderateScale(11, 0.2), color: 'rgba(255, 255, 255, 0.6)', fontWeight: '500', letterSpacing: 0.3 },
-  shareIconContainer: { width: scale(40), height: scale(40), borderRadius: scale(20), backgroundColor: 'rgba(251, 113, 133, 0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(251, 113, 133, 0.3)' },
-
+  
   // Posts Section
   postsSection: { paddingHorizontal: scale(20) },
   postsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: scale(16) },
@@ -346,3 +464,4 @@ const styles = StyleSheet.create({
   scopeTag: { flexDirection: 'row', alignItems: 'center', gap: scale(4), paddingHorizontal: scale(8), paddingVertical: scale(4), borderRadius: scale(8), backgroundColor: 'rgba(107, 114, 128, 0.12)', flex: 0 },
   scopeText: { fontSize: moderateScale(9, 0.2), color: '#9ca3af', fontWeight: '500', maxWidth: scale(100) },
 });
+

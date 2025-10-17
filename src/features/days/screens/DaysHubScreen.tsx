@@ -3,7 +3,7 @@
  * Central hub showing all 7 themed days with premium cosmic design
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, memo } from 'react';
 import {
   View,
   Text,
@@ -106,7 +106,7 @@ export default function DaysHubScreen({ navigation }: DaysHubScreenProps) {
               const participants = getParticipantCount(day.id);
 
               return (
-                <DayCard
+                <MemoizedDayCard
                   key={day.id}
                   day={day}
                   status={status}
@@ -273,6 +273,9 @@ function DayCard({ day, status, daysUntil, participants, index, onPress }: DayCa
     </Animated.View>
   );
 }
+
+// Memoize DayCard to prevent unnecessary re-renders
+const MemoizedDayCard = memo(DayCard);
 
 const styles = StyleSheet.create({
   container: {

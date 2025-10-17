@@ -3,7 +3,7 @@
  * Discover what others are doing with beautiful animations and filtering
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -326,21 +326,24 @@ export default function FeedScreen() {
   }, [userReactions]);
   
   // Filtered posts
-  const filteredPosts = posts.filter(post => {
-    // Filter out ghost/trending posts
-    if (post.isGhost) return false;
-    
-    // Filter by post type (action vs day summary)
-    if (showDaySummaries && post.input_type !== 'day') return false;
-    if (!showDaySummaries && post.input_type !== 'action') return false;
-    
-    // Apply other filters
-    if (filter === 'unique' && post.percentile && !['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier)) return false;
-    if (filter === 'common' && post.percentile && !['common', 'popular'].includes(post.percentile.tier)) return false;
-    if (scopeFilter !== 'world' && post.scope !== scopeFilter) return false;
-    if (reactionFilter !== 'all' && (!post[`${reactionFilter}_count`] || post[`${reactionFilter}_count`] === 0)) return false;
-    return true;
-  });
+  // Memoize filtered posts to prevent recalculation on every render
+  const filteredPosts = useMemo(() => {
+    return posts.filter(post => {
+      // Filter out ghost/trending posts
+      if (post.isGhost) return false;
+      
+      // Filter by post type (action vs day summary)
+      if (showDaySummaries && post.input_type !== 'day') return false;
+      if (!showDaySummaries && post.input_type !== 'action') return false;
+      
+      // Apply other filters
+      if (filter === 'unique' && post.percentile && !['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier)) return false;
+      if (filter === 'common' && post.percentile && !['common', 'popular'].includes(post.percentile.tier)) return false;
+      if (scopeFilter !== 'world' && post.scope !== scopeFilter) return false;
+      if (reactionFilter !== 'all' && (!post[`${reactionFilter}_count`] || post[`${reactionFilter}_count`] === 0)) return false;
+      return true;
+    });
+  }, [posts, showDaySummaries, filter, scopeFilter, reactionFilter]);
   
   const hasActiveFilters = filter !== 'all' || scopeFilter !== 'world' || reactionFilter !== 'all';
   
@@ -607,7 +610,7 @@ export default function FeedScreen() {
                   tierColors={getTierColors(post.percentile?.tier)}
                 />
               ) : (
-                <PostCard
+                <MemoizedPostCard
                   key={post.id}
                   post={post}
                   index={index}
@@ -785,6 +788,9 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
     </Animated.View>
   );
 }
+
+// Memoize PostCard to prevent unnecessary re-renders
+const MemoizedPostCard = React.memo(PostCard);
 
 // ============================================================================
 // STYLES

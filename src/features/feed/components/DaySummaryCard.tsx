@@ -1,9 +1,10 @@
 /**
  * Day Summary Card Component
  * Larger card design for day summaries with more text content
+ * Memoized for performance
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, memo } from 'react';
 import {
   View,
   Text,
@@ -30,7 +31,7 @@ interface DaySummaryCardProps {
   tierColors: any;
 }
 
-export default function DaySummaryCard({ 
+function DaySummaryCard({ 
   post, 
   index, 
   onReact, 
@@ -167,6 +168,9 @@ export default function DaySummaryCard({
     </Animated.View>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export default memo(DaySummaryCard);
 
 const styles = StyleSheet.create({
   container: {

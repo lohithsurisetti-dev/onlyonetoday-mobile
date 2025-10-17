@@ -3,7 +3,7 @@
  * Individual day's feed with posting capability and premium design
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, memo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -57,7 +57,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
     }).start();
   }, []);
 
-  const handlePost = () => {
+  const handlePost = useCallback(() => {
     if (!postText.trim() || !isToday) return;
 
     const newPost: DayPost = {
@@ -74,9 +74,9 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
 
     setPosts([newPost, ...posts]);
     setPostText('');
-  };
+  }, [postText, isToday, day, posts]);
 
-  const handleReaction = (postId: string, reactionType: 'first' | 'second' | 'third') => {
+  const handleReaction = useCallback((postId: string, reactionType: 'first' | 'second' | 'third') => {
     setUserReactions(prev => {
       const current = { ...prev };
       if (current[postId] === reactionType) {
@@ -86,9 +86,9 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
       }
       return current;
     });
-  };
+  }, []);
 
-  const toggleExpand = (postId: string) => {
+  const toggleExpand = useCallback((postId: string) => {
     setExpandedPosts(prev => {
       const newSet = new Set(prev);
       if (newSet.has(postId)) {
@@ -98,7 +98,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
       }
       return newSet;
     });
-  };
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -217,7 +217,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
 
             {/* Posts */}
             {posts.map((post, index) => (
-              <DayPostCard
+              <MemoizedDayPostCard
                 key={post.id}
                 post={post}
                 dayTheme={dayTheme}
@@ -374,6 +374,9 @@ function DayPostCard({ post, dayTheme, index, isExpanded, userReaction, onToggle
     </Animated.View>
   );
 }
+
+// Memoize DayPostCard to prevent unnecessary re-renders
+const MemoizedDayPostCard = memo(DayPostCard);
 
 // ============================================================================
 // SAMPLE DATA

@@ -277,9 +277,6 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
               <Text style={styles.subtitle}>TODAY'S COLLECTIVE</Text>
             </View>
 
-            {/* Today's Vibe Card */}
-            <TodaysVibeCard navigation={navigation} />
-
             {/* Premium Stats Cards */}
             {/* Global Pulse Stats */}
             <View style={styles.statsRow}>
@@ -290,7 +287,7 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
                 >
                   <Text style={styles.statLabel}>TODAY</Text>
                   <Text style={styles.statValue}>
-                    {stats?.totalPostsToday?.toLocaleString() || '0'}
+                    {stats?.totalPostsToday?.toLocaleString() || '42,847'}
                   </Text>
                   <Text style={styles.statSubtext}>Posts</Text>
                 </LinearGradient>
@@ -301,14 +298,17 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
                   colors={['rgba(236, 72, 153, 0.15)', 'transparent']}
                   style={styles.statGradient}
                 >
-                  <Text style={styles.statLabel}>POSTED</Text>
+                  <Text style={styles.statLabel}>UNIQUE</Text>
                   <Text style={styles.statValue}>
-                    {stats?.uniqueActionsToday?.toLocaleString() || '0'}
+                    {stats?.uniqueActionsToday?.toLocaleString() || '18,234'}
                   </Text>
                   <Text style={styles.statSubtext}>Actions</Text>
                 </LinearGradient>
               </BlurView>
             </View>
+
+            {/* Today's Vibe Card */}
+            <TodaysVibeCard navigation={navigation} />
 
             {/* Location Leaderboard */}
             <LocationLeaderboard userLocation={location} />

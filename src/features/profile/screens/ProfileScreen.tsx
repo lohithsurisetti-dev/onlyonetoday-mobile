@@ -77,6 +77,32 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#0a0a1a']} style={styles.gradient}>
         <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+          {/* Settings Icon - Top Right */}
+          <TouchableOpacity 
+            style={styles.settingsButton}
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.7}
+          >
+            <BlurView intensity={20} tint="dark" style={styles.settingsBlur}>
+              <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24" fill="none">
+                <Path 
+                  d="M12 15a3 3 0 100-6 3 3 0 000 6z" 
+                  stroke="#ffffff" 
+                  strokeWidth={1.5} 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                />
+                <Path 
+                  d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" 
+                  stroke="#ffffff" 
+                  strokeWidth={1.5} 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                />
+              </Svg>
+            </BlurView>
+          </TouchableOpacity>
+
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
             
             {/* Header Card - Compact & Premium */}
@@ -238,6 +264,23 @@ const styles = StyleSheet.create({
   gradient: { flex: 1 },
   content: { flex: 1 },
   scroll: { paddingBottom: scale(100) },
+  
+  settingsButton: {
+    position: 'absolute',
+    top: scale(16),
+    right: scale(20),
+    zIndex: 100,
+  },
+  settingsBlur: {
+    width: scale(44),
+    height: scale(44),
+    borderRadius: scale(22),
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
 
   // Anonymous
   anonymousContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(40) },

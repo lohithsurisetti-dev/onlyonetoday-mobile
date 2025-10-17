@@ -13,6 +13,7 @@ import MainTabs from './MainTabs';
 import ResponseScreen from '@features/posts/screens/ResponseScreen';
 import AllPostsScreen from '@/features/profile/screens/AllPostsScreen';
 import NotificationsScreen from '@/features/notifications/screens/NotificationsScreen';
+import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 import DaysHubScreen from '@/features/days/screens/DaysHubScreen';
 import DayFeedScreen from '@/features/days/screens/DayFeedScreen';
 import { DayOfWeek } from '@/features/days/types';
@@ -39,6 +40,7 @@ export type RootStackParamList = {
   };
   AllPosts: undefined;
   Notifications: undefined;
+  Settings: undefined;
   DaysHub: undefined;
   DayFeed: {
     day: DayOfWeek;
@@ -81,6 +83,13 @@ export default function AppNavigator() {
         <Stack.Screen 
           name="Notifications" 
           component={NotificationsScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen 
+          name="Settings" 
+          component={SettingsScreen}
           options={{
             animation: 'slide_from_right',
           }}

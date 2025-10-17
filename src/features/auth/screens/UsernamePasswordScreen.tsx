@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: scale(24),
-    paddingTop: scale(16),
+    paddingTop: scale(60),
   },
   backButton: {
     width: scale(44),

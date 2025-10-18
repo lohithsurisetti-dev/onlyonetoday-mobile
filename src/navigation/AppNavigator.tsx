@@ -47,6 +47,8 @@ export type RootStackParamList = {
     percentile?: any;
     content?: string;
     scope?: string;
+    matchCount?: number;
+    displayText?: string;
   };
   AllPosts: undefined;
   Notifications: undefined;

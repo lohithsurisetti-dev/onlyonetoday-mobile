@@ -31,6 +31,16 @@ const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size
 
 // Tier color schemes - Cosmic/Space themed
 const getTierColors = (tier: string) => {
+  if (!tier) {
+    return {
+      primary: '#a78bfa',    // Default cosmic violet
+      secondary: '#c4b5fd',
+      gradient: ['#a78bfa', '#c4b5fd'],
+      glow: '#a78bfa',
+      background: 'rgba(167, 139, 250, 0.1)',
+      backgroundGradient: '#2d1b4e',
+    };
+  }
   switch (tier.toLowerCase()) {
     case 'elite':
       return {
@@ -254,19 +264,17 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
       value: 1,
       message: 'Top 1%',
       color: '#8b5cf6',
-      emoji: '👑',
       displayText: displayText || 'Top 1%',
-      badge: 'ELITE',
       comparison: 'You are among the most unique people in the world!'
     },
     matchCount: matchCount || 0,
     vibe: 'Unique',
     postId: postId,
     temporal: {
-      week: { comparison: 'Top 1%', matches: 0 },
-      month: { comparison: 'Top 1%', matches: 0 },
-      year: { comparison: 'Top 1%', matches: 0 },
-      allTime: { comparison: 'Top 1%', matches: 0 },
+      week: { comparison: 'Top 1%', matches: 0, total: 100 },
+      month: { comparison: 'Top 1%', matches: 0, total: 1000 },
+      year: { comparison: 'Top 1%', matches: 0, total: 10000 },
+      allTime: { comparison: 'Top 1%', matches: 0, total: 100000 },
       insight: 'You are truly unique!'
     }
   };
@@ -461,11 +469,17 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
                   
                   {/* Center Content */}
                   <View style={styles.ringCenter}>
-                    <Text style={styles.tierEmoji}>{responseData.percentile.badge}</Text>
-                    <Text style={styles.displayText}>{responseData.percentile.displayText}</Text>
-                    <View style={styles.comparisonPill}>
-                      <Text style={styles.comparisonText}>{responseData.percentile.comparison}</Text>
+                    <View style={styles.tierIconContainer}>
+                      <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
+                        <Path 
+                          d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" 
+                          fill={tierColors.primary} 
+                          stroke={tierColors.primary}
+                          strokeWidth={1.5}
+                        />
+                      </Svg>
                     </View>
+                    <Text style={styles.displayText}>{responseData.percentile.displayText}</Text>
                     <View style={[
                       styles.tierPill,
                       {
@@ -473,15 +487,20 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
                         borderColor: `${tierColors.primary}80`,
                       }
                     ]}>
-                      <Text style={styles.tierText}>{responseData.percentile.tier.toUpperCase()}</Text>
+                      <Text style={styles.tierText}>{responseData.percentile.tier?.toUpperCase() || 'UNKNOWN'}</Text>
                     </View>
                   </View>
                 </View>
 
                 {/* Content */}
                 <View style={styles.contentSection}>
-                  <Text style={styles.contentLabel}>{responseData.inputType === 'day' ? 'YOUR DAY SUMMARY' : 'YOUR ACTION'}</Text>
+                  <Text style={styles.contentLabel}>YOUR ACTION</Text>
                   <Text style={styles.contentText}>"{responseData.content}"</Text>
+                  
+                  {/* Comparison Text - Below Content */}
+                  <View style={styles.comparisonContainer}>
+                    <Text style={styles.comparisonText}>{responseData.percentile.comparison}</Text>
+                  </View>
                 </View>
               </LinearGradient>
 
@@ -612,7 +631,11 @@ const styles = StyleSheet.create({
     opacity: 0.08,
   },
   ringCenter: { position: 'absolute', alignItems: 'center' },
-  tierEmoji: { fontSize: moderateScale(30, 0.4), marginBottom: scale(6) },
+  tierIconContainer: { 
+    marginBottom: scale(6),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   displayText: {
     fontSize: moderateScale(26, 0.4),
     fontWeight: '900',
@@ -622,16 +645,18 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
-  comparisonPill: {
-    marginTop: scale(6),
-    paddingHorizontal: scale(10),
-    paddingVertical: scale(4),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: scale(12),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  comparisonText: { fontSize: moderateScale(9, 0.2), color: '#ffffff', fontWeight: '700' },
+   comparisonContainer: {
+     marginTop: scale(16),
+     alignItems: 'center',
+   },
+   comparisonText: { 
+     fontSize: moderateScale(14, 0.3), 
+     color: '#ffffff', 
+     fontWeight: '600',
+     textAlign: 'center',
+     opacity: 0.9,
+     lineHeight: moderateScale(20, 0.3),
+   },
   tierPill: {
     marginTop: scale(4),
     paddingHorizontal: scale(8),

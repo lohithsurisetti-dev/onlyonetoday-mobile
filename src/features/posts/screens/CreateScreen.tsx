@@ -149,9 +149,8 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
   const [tabContainerWidth, setTabContainerWidth] = useState(0);
   const [scopeContainerWidth, setScopeContainerWidth] = useState(0);
 
-  // const { mutate: createPost, isPending } = useCreatePost();
+  const { mutate: createPost, isPending } = useCreatePost();
   // const { stats } = usePlatformStats();
-  const isPending = false;
   const stats = null;
 
   // Animation values
@@ -182,32 +181,38 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
       }),
     ]).start();
 
-    // For demo: Navigate directly to Response screen
-    // TODO: Connect to real API when backend is ready
-    navigation.navigate('Response', {
-      content: content.trim(),
-      scope,
-    });
-    setContent('');
-
-    // Uncomment when API is ready:
-    // createPost(
-    //   { content: content.trim(), inputType, scope },
-    //   {
-    //     onSuccess: (response) => {
-    //       navigation.navigate('Response', {
-    //         content: content.trim(),
-    //         scope,
-    //         percentile: response.percentile || undefined,
-    //         postId: response.post?.id,
-    //       });
-    //       setContent('');
-    //     },
-    //     onError: (error: any) => {
-    //       Alert.alert('Error', error?.message || 'Failed to create post');
-    //     },
-    //   }
-    // );
+    // Create post with real API
+    createPost(
+      { 
+        content: content.trim(), 
+        inputType, 
+        scope,
+        location: location ? {
+          city: location.city,
+          state: location.state,
+          country: location.country,
+        } : undefined,
+      },
+      {
+        onSuccess: (response) => {
+          console.log('✅ Post created successfully:', response);
+          navigation.navigate('Response', {
+            content: content.trim(),
+            scope,
+            percentile: response.percentile || undefined,
+            postId: response.post?.id,
+            matchCount: response.matchCount,
+            displayText: response.displayText,
+            analytics: response.analytics,
+          });
+          setContent('');
+        },
+        onError: (error: any) => {
+          console.error('❌ Post creation failed:', error);
+          Alert.alert('Error', error?.message || 'Failed to create post');
+        },
+      }
+    );
   };
 
   const handleTypeChange = (type: InputType) => {

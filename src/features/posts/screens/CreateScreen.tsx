@@ -194,15 +194,19 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
       {
         onSuccess: (response) => {
           console.log('✅ Post created successfully:', response);
-          navigation.navigate('Response', {
+          
+          const navigationParams = {
             content: content.trim(),
             scope,
             percentile: response.post?.percentile || response.percentile || undefined,
             postId: response.post?.id,
             matchCount: response.matchCount,
-            displayText: response.percentile?.displayText,
+            displayText: (response as any).displayText,
             tier: (response as any).tier,
-          });
+          };
+          
+          console.log('🚀 Navigating to Response with params:', navigationParams);
+          navigation.navigate('Response', navigationParams);
           setContent('');
         },
         onError: (error: any) => {

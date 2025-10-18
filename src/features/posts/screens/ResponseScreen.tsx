@@ -254,6 +254,17 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
   // Get real data from route params
   const { content, scope, percentile, postId, matchCount, displayText, tier } = route.params;
   
+  // Debug logging
+  console.log('🔍 ResponseScreen route params:', {
+    content,
+    scope,
+    percentile,
+    postId,
+    matchCount,
+    displayText,
+    tier
+  });
+  
   // Generate comparison text based on matchCount
   const generateComparisonText = (matchCount: number, displayText: string) => {
     if (matchCount === 0) {

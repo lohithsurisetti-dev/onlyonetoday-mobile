@@ -689,19 +689,21 @@ const styles = StyleSheet.create({
   },
   tierText: { fontSize: moderateScale(8, 0.2), color: '#ffffff', fontWeight: '800', letterSpacing: scale(1) },
   
-  contentSection: { width: '100%', marginBottom: scale(4) },
+  contentSection: { width: '100%', marginBottom: scale(4), alignItems: 'center' },
   contentLabel: {
     fontSize: moderateScale(10, 0.2),
     color: 'rgba(255, 255, 255, 0.5)',
     letterSpacing: scale(1.5),
     fontWeight: '600',
     marginBottom: scale(6),
+    textAlign: 'center',
   },
   contentText: {
     fontSize: moderateScale(17, 0.3),
     fontWeight: '700',
     color: '#ffffff',
     lineHeight: moderateScale(24, 0.3),
+    textAlign: 'center',
   },
   
   messageSection: {

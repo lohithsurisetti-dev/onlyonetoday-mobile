@@ -252,7 +252,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export default function ResponseScreen({ navigation, route }: ResponseScreenProps) {
   // Get real data from route params
-  const { content, scope, percentile, postId, matchCount, displayText } = route.params;
+  const { content, scope, percentile, postId, matchCount, displayText, tier } = route.params;
   
   // Create response data from real API response
   const responseData = {
@@ -260,12 +260,12 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
     scope: scope || 'world',
     inputType: 'action' as const,
     percentile: {
-      tier: percentile?.tier || 'elite',
-      value: percentile?.value || 1,
-      message: percentile?.message || 'Top 1%',
-      color: percentile?.color || '#8b5cf6',
+      tier: tier || 'elite',
+      value: percentile || 1,
+      message: 'Top 1%',
+      color: '#8b5cf6',
       displayText: displayText || 'Top 1%',
-      comparison: percentile?.comparison || 'You are among the most unique people in the world!'
+      comparison: 'You are among the most unique people in the world!'
     },
     matchCount: matchCount || 0,
     vibe: 'Unique',

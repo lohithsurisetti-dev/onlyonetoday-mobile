@@ -49,6 +49,7 @@ export type RootStackParamList = {
     scope?: string;
     matchCount?: number;
     displayText?: string;
+    tier?: string;
   };
   AllPosts: undefined;
   Notifications: undefined;

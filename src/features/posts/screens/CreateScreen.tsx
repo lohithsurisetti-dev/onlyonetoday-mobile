@@ -197,10 +197,11 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
           navigation.navigate('Response', {
             content: content.trim(),
             scope,
-            percentile: response.percentile || undefined,
+            percentile: response.post?.percentile || response.percentile || undefined,
             postId: response.post?.id,
             matchCount: response.matchCount,
-            displayText: response.percentile?.displayText,
+            displayText: response.displayText,
+            tier: response.post?.tier,
           });
           setContent('');
         },

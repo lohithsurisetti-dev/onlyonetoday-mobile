@@ -321,7 +321,7 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
                       backgroundColor: `${tierColors.primary}30`,
                       borderColor: `${tierColors.primary}80`,
                     }]}>
-                      <Text style={styles.centerTierText}>{data.percentile.tier.toUpperCase()}</Text>
+                      <Text style={styles.centerTierText}>{data.percentile.tier?.toUpperCase() || 'UNKNOWN'}</Text>
                     </View>
                   </View>
                 </View>

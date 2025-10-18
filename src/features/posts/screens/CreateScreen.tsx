@@ -187,11 +187,9 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
         content: content.trim(), 
         inputType, 
         scope,
-        location: location ? {
-          city: location.city,
-          state: location.state,
-          country: location.country,
-        } : undefined,
+        locationCity: location?.city || null,
+        locationState: location?.state || null,
+        locationCountry: location?.country || null,
       },
       {
         onSuccess: (response) => {
@@ -202,8 +200,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
             percentile: response.percentile || undefined,
             postId: response.post?.id,
             matchCount: response.matchCount,
-            displayText: response.displayText,
-            analytics: response.analytics,
+            displayText: response.percentile?.displayText,
           });
           setContent('');
         },

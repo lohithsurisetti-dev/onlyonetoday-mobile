@@ -18,13 +18,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import Svg, { Circle, Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/AppNavigator';
 import ShareCard from '../components/ShareCard';
 
-type ResponseScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Response'>;
-};
+type ResponseScreenProps = NativeStackScreenProps<RootStackParamList, 'Response'>;
 
 // Responsive scaling
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -242,7 +240,37 @@ const SAMPLE_DATA = {
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export default function ResponseScreen({ navigation }: ResponseScreenProps) {
+export default function ResponseScreen({ navigation, route }: ResponseScreenProps) {
+  // Get real data from route params
+  const { content, scope, percentile, postId, matchCount, displayText } = route.params;
+  
+  // Create response data from real API response
+  const responseData = {
+    content: content || 'Sample content',
+    scope: scope || 'world',
+    inputType: 'action' as const,
+    percentile: percentile || {
+      tier: 'elite',
+      value: 1,
+      message: 'Top 1%',
+      color: '#8b5cf6',
+      emoji: '👑',
+      displayText: displayText || 'Top 1%',
+      badge: 'ELITE',
+      comparison: 'You are among the most unique people in the world!'
+    },
+    matchCount: matchCount || 0,
+    vibe: 'Unique',
+    postId: postId,
+    temporal: {
+      week: { comparison: 'Top 1%', matches: 0 },
+      month: { comparison: 'Top 1%', matches: 0 },
+      year: { comparison: 'Top 1%', matches: 0 },
+      allTime: { comparison: 'Top 1%', matches: 0 },
+      insight: 'You are truly unique!'
+    }
+  };
+
   // Native driver animations (transform, opacity)
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(40)).current;
@@ -254,14 +282,14 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
   // Share card state
   const [showShareCard, setShowShareCard] = useState(false);
 
-  const isTopTier = ['elite', 'rare', 'unique', 'notable'].includes(SAMPLE_DATA.percentile.tier);
+  const isTopTier = ['elite', 'rare', 'unique', 'notable'].includes(responseData.percentile.tier);
   const radius = 85;
   const strokeWidth = 5;
   const circumference = 2 * Math.PI * radius;
 
   // Get dynamic colors based on tier and input type
-  const tierColors = getTierColors(SAMPLE_DATA.percentile.tier);
-  const inputTypeColors = getInputTypeColors(SAMPLE_DATA.inputType);
+  const tierColors = getTierColors(responseData.percentile.tier);
+  const inputTypeColors = getInputTypeColors(responseData.inputType);
 
   useEffect(() => {
     // Entrance
@@ -282,7 +310,7 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
     // Ring (non-native driver for SVG)
     setTimeout(() => {
       Animated.timing(ringProgressValue, {
-        toValue: 1 - SAMPLE_DATA.percentile.value / 100,
+        toValue: 1 - responseData.percentile.value / 100,
         duration: 1500,
         useNativeDriver: false,
       }).start();
@@ -367,7 +395,7 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
               >
                 {/* Badges Row */}
                 <View style={styles.badgesRow}>
-                  {SAMPLE_DATA.vibe && (
+                  {responseData.vibe && (
                     <View style={[
                       styles.vibeBadge,
                       {
@@ -375,7 +403,7 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
                         borderColor: `${tierColors.primary}80`,
                       }
                     ]}>
-                      <Text style={styles.vibeBadgeText}>{SAMPLE_DATA.vibe}</Text>
+                      <Text style={styles.vibeBadgeText}>{responseData.vibe}</Text>
                     </View>
                   )}
                   <View style={[
@@ -389,7 +417,7 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
                       <Circle cx="12" cy="12" r="10" stroke={tierColors.primary} strokeWidth={2} />
                       <Path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" stroke={tierColors.primary} strokeWidth={2} />
                     </Svg>
-                    <Text style={styles.scopeText}>{SAMPLE_DATA.scope}</Text>
+                    <Text style={styles.scopeText}>{responseData.scope}</Text>
                   </View>
                 </View>
 
@@ -433,10 +461,10 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
                   
                   {/* Center Content */}
                   <View style={styles.ringCenter}>
-                    <Text style={styles.tierEmoji}>{SAMPLE_DATA.percentile.badge}</Text>
-                    <Text style={styles.displayText}>{SAMPLE_DATA.percentile.displayText}</Text>
+                    <Text style={styles.tierEmoji}>{responseData.percentile.badge}</Text>
+                    <Text style={styles.displayText}>{responseData.percentile.displayText}</Text>
                     <View style={styles.comparisonPill}>
-                      <Text style={styles.comparisonText}>{SAMPLE_DATA.percentile.comparison}</Text>
+                      <Text style={styles.comparisonText}>{responseData.percentile.comparison}</Text>
                     </View>
                     <View style={[
                       styles.tierPill,
@@ -445,21 +473,21 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
                         borderColor: `${tierColors.primary}80`,
                       }
                     ]}>
-                      <Text style={styles.tierText}>{SAMPLE_DATA.percentile.tier.toUpperCase()}</Text>
+                      <Text style={styles.tierText}>{responseData.percentile.tier.toUpperCase()}</Text>
                     </View>
                   </View>
                 </View>
 
                 {/* Content */}
                 <View style={styles.contentSection}>
-                  <Text style={styles.contentLabel}>{SAMPLE_DATA.inputType === 'day' ? 'YOUR DAY SUMMARY' : 'YOUR ACTION'}</Text>
-                  <Text style={styles.contentText}>"{SAMPLE_DATA.content}"</Text>
+                  <Text style={styles.contentLabel}>{responseData.inputType === 'day' ? 'YOUR DAY SUMMARY' : 'YOUR ACTION'}</Text>
+                  <Text style={styles.contentText}>"{responseData.content}"</Text>
                 </View>
               </LinearGradient>
 
               {/* Message */}
               <View style={styles.messageSection}>
-                <Text style={styles.messageText}>"{SAMPLE_DATA.percentile.message}"</Text>
+                <Text style={styles.messageText}>"{responseData.percentile.message}"</Text>
               </View>
 
               {/* Temporal Stats - Compact */}
@@ -473,10 +501,10 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
 
                 <View style={styles.temporalGrid}>
                   {[
-                    { label: 'This Week', data: SAMPLE_DATA.temporal.week },
-                    { label: 'This Month', data: SAMPLE_DATA.temporal.month },
-                    { label: 'This Year', data: SAMPLE_DATA.temporal.year },
-                    { label: 'All Time', data: SAMPLE_DATA.temporal.allTime },
+                    { label: 'This Week', data: responseData.temporal.week },
+                    { label: 'This Month', data: responseData.temporal.month },
+                    { label: 'This Year', data: responseData.temporal.year },
+                    { label: 'All Time', data: responseData.temporal.allTime },
                   ].map((item, idx) => (
                     <View key={idx} style={styles.temporalCard}>
                       <Text style={styles.temporalLabel}>{item.label}</Text>
@@ -490,8 +518,8 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
                   ))}
                 </View>
 
-                {SAMPLE_DATA.temporal.insight && (
-                  <Text style={styles.insightText}>{SAMPLE_DATA.temporal.insight}</Text>
+                {responseData.temporal.insight && (
+                  <Text style={styles.insightText}>{responseData.temporal.insight}</Text>
                 )}
               </View>
             </BlurView>
@@ -503,7 +531,7 @@ export default function ResponseScreen({ navigation }: ResponseScreenProps) {
       <ShareCard
         visible={showShareCard}
         onClose={() => setShowShareCard(false)}
-        data={SAMPLE_DATA}
+        data={responseData}
         tierColors={tierColors}
       />
     </View>

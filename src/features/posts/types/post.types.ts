@@ -81,6 +81,29 @@ export interface CreatePostResponse {
   activities?: string[]
   activityCount?: number
   isDaySummary?: boolean
+  temporal?: {
+    week: {
+      matches: number;
+      total: number;
+      comparison: string;
+    };
+    month: {
+      matches: number;
+      total: number;
+      comparison: string;
+    };
+    year: {
+      matches: number;
+      total: number;
+      comparison: string;
+    };
+    allTime: {
+      matches: number;
+      total: number;
+      comparison: string;
+    };
+    insight: string;
+  };
 }
 
 export interface GetPostsRequest {

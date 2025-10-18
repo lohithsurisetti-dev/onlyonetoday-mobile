@@ -202,7 +202,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
             postId: response.post?.id,
             matchCount: response.matchCount,
             displayText: (response as any).displayText,
-            tier: response.post?.tier,
+            tier: response.percentile?.tier,
             temporal: response.temporal,
           };
           

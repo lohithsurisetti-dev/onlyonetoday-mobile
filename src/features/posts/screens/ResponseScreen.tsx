@@ -254,6 +254,17 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
   // Get real data from route params
   const { content, scope, percentile, postId, matchCount, displayText, tier } = route.params;
   
+  // Generate comparison text based on matchCount
+  const generateComparisonText = (matchCount: number, displayText: string) => {
+    if (matchCount === 0) {
+      return "Only you did this!";
+    } else if (matchCount === 1) {
+      return "1 other person did this";
+    } else {
+      return `${matchCount} other people did this`;
+    }
+  };
+
   // Create response data from real API response
   const responseData = {
     content: content || 'Sample content',
@@ -262,20 +273,21 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
     percentile: {
       tier: tier || 'elite',
       value: percentile || 1,
-      message: 'Top 1%',
+      message: displayText || 'Top 1%',
       color: '#8b5cf6',
       displayText: displayText || 'Top 1%',
-      comparison: 'You are among the most unique people in the world!'
+      comparison: generateComparisonText(matchCount || 0, displayText || 'Top 1%'),
+      badge: '⭐'
     },
     matchCount: matchCount || 0,
     vibe: 'Unique',
     postId: postId,
     temporal: {
-      week: { comparison: 'Top 1%', matches: 0, total: 100 },
-      month: { comparison: 'Top 1%', matches: 0, total: 1000 },
-      year: { comparison: 'Top 1%', matches: 0, total: 10000 },
-      allTime: { comparison: 'Top 1%', matches: 0, total: 100000 },
-      insight: 'You are truly unique!'
+      week: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 10}`, matches: matchCount || 0, total: (matchCount || 0) * 10 + 10 },
+      month: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 50}`, matches: matchCount || 0, total: (matchCount || 0) * 50 + 50 },
+      year: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 200}`, matches: matchCount || 0, total: (matchCount || 0) * 200 + 200 },
+      allTime: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 1000}`, matches: matchCount || 0, total: (matchCount || 0) * 1000 + 1000 },
+      insight: (matchCount || 0) === 0 ? 'You are truly unique!' : 'You are part of a select group!'
     }
   };
 

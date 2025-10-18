@@ -200,8 +200,8 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
             percentile: response.post?.percentile || response.percentile || undefined,
             postId: response.post?.id,
             matchCount: response.matchCount,
-            displayText: response.displayText,
-            tier: response.post?.tier,
+            displayText: response.percentile?.displayText,
+            tier: (response as any).tier,
           });
           setContent('');
         },

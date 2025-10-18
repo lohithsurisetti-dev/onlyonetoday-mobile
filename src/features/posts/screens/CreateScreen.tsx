@@ -203,6 +203,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
             matchCount: response.matchCount,
             displayText: (response as any).displayText,
             tier: response.post?.tier,
+            temporal: response.temporal,
           };
           
           console.log('🚀 Navigating to Response with params:', navigationParams);

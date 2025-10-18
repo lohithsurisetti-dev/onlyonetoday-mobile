@@ -252,7 +252,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export default function ResponseScreen({ navigation, route }: ResponseScreenProps) {
   // Get real data from route params
-  const { content, scope, percentile, postId, matchCount, displayText, tier } = route.params;
+  const { content, scope, percentile, postId, matchCount, displayText, tier, temporal } = route.params;
   
   // Debug logging
   console.log('🔍 ResponseScreen route params:', {
@@ -293,7 +293,7 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
     matchCount: matchCount || 0,
     vibe: 'Unique',
     postId: postId,
-    temporal: {
+    temporal: temporal || {
       week: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 10}`, matches: matchCount || 0, total: (matchCount || 0) * 10 + 10 },
       month: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 50}`, matches: matchCount || 0, total: (matchCount || 0) * 50 + 50 },
       year: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 200}`, matches: matchCount || 0, total: (matchCount || 0) * 200 + 200 },

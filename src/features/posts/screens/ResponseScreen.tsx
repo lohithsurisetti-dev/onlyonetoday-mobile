@@ -259,13 +259,13 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
     content: content || 'Sample content',
     scope: scope || 'world',
     inputType: 'action' as const,
-    percentile: percentile || {
-      tier: 'elite',
-      value: 1,
-      message: 'Top 1%',
-      color: '#8b5cf6',
+    percentile: {
+      tier: percentile?.tier || 'elite',
+      value: percentile?.value || 1,
+      message: percentile?.message || 'Top 1%',
+      color: percentile?.color || '#8b5cf6',
       displayText: displayText || 'Top 1%',
-      comparison: 'You are among the most unique people in the world!'
+      comparison: percentile?.comparison || 'You are among the most unique people in the world!'
     },
     matchCount: matchCount || 0,
     vibe: 'Unique',

@@ -78,14 +78,14 @@ const getTierColors = (tier: string) => {
         background: 'rgba(249, 115, 22, 0.1)',
         backgroundGradient: '#3a2a1e', // Deep amber space
       };
-    case 'common':
+    case 'beloved':
       return {
-        primary: '#9ca3af',    // Stardust Gray
-        secondary: '#d1d5db',
-        gradient: ['#9ca3af', '#d1d5db'],
-        glow: '#9ca3af',
-        background: 'rgba(156, 163, 175, 0.1)',
-        backgroundGradient: '#2a2a3e', // Deep gray space
+        primary: '#f472b6',    // Beloved Pink - Warm and cherished
+        secondary: '#fb7185',
+        gradient: ['#f472b6', '#fb7185'],
+        glow: '#f472b6',
+        background: 'rgba(244, 114, 182, 0.1)',
+        backgroundGradient: '#4a1f2e', // Deep pink space
       };
     case 'popular':
       return {
@@ -267,12 +267,10 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
   
   // Generate comparison text based on matchCount
   const generateComparisonText = (matchCount: number, displayText: string) => {
-    if (matchCount === 0) {
-      return "Only you did this!";
-    } else if (matchCount === 1) {
-      return "1 other person did this";
+    if (matchCount <= 1) {
+      return "You're the first to share this!";
     } else {
-      return `${matchCount} other people did this`;
+      return `You're connected to ${matchCount - 1} others`;
     }
   };
 
@@ -283,22 +281,44 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
     inputType: 'action' as const,
     percentile: {
       tier: tier || 'elite',
-      value: percentile || 1,
-      message: displayText || 'Top 1%',
-      color: '#8b5cf6',
-      displayText: displayText || 'Top 1%',
-      comparison: generateComparisonText(matchCount || 0, displayText || 'Top 1%'),
-      badge: '⭐'
+      value: percentile?.value || percentile || 1,
+      message: percentile?.message || displayText || 'Top 1%',
+      color: percentile?.color || '#8b5cf6',
+      displayText: percentile?.displayText || displayText || 'Top 1%',
+      comparison: percentile?.comparison || generateComparisonText(matchCount || 0, percentile?.displayText || displayText || 'Top 1%'),
+      badge: percentile?.emoji || percentile?.badge || '⭐'
     },
     matchCount: matchCount || 0,
     vibe: 'Unique',
     postId: postId,
-    temporal: temporal || {
-      week: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 10}`, matches: matchCount || 0, total: (matchCount || 0) * 10 + 10 },
-      month: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 50}`, matches: matchCount || 0, total: (matchCount || 0) * 50 + 50 },
-      year: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 200}`, matches: matchCount || 0, total: (matchCount || 0) * 200 + 200 },
-      allTime: { comparison: (matchCount || 0) === 0 ? 'Only you!' : `${(matchCount || 0) + 1} of ${((matchCount || 0) + 1) * 1000}`, matches: matchCount || 0, total: (matchCount || 0) * 1000 + 1000 },
-      insight: (matchCount || 0) === 0 ? 'You are truly unique!' : 'You are part of a select group!'
+    temporal: temporal ? {
+      week: { 
+        comparison: temporal.week?.comparison || `${temporal.week?.matching || 0} of ${temporal.week?.total || 1}`, 
+        matches: temporal.week?.matching || 0, 
+        total: temporal.week?.total || 1 
+      },
+      month: { 
+        comparison: temporal.month?.comparison || `${temporal.month?.matching || 0} of ${temporal.month?.total || 1}`, 
+        matches: temporal.month?.matching || 0, 
+        total: temporal.month?.total || 1 
+      },
+      year: { 
+        comparison: temporal.year?.comparison || `${temporal.year?.matching || 0} of ${temporal.year?.total || 1}`, 
+        matches: temporal.year?.matching || 0, 
+        total: temporal.year?.total || 1 
+      },
+      allTime: { 
+        comparison: temporal.allTime?.comparison || `${temporal.allTime?.matching || 0} of ${temporal.allTime?.total || 1}`, 
+        matches: temporal.allTime?.matching || 0, 
+        total: temporal.allTime?.total || 1 
+      },
+      insight: (matchCount || 0) <= 1 ? 'You are the first to share this!' : 'You are part of a community!'
+    } : {
+      week: { comparison: 'Only you!', matches: 0, total: 1 },
+      month: { comparison: 'Only you!', matches: 0, total: 1 },
+      year: { comparison: 'Only you!', matches: 0, total: 1 },
+      allTime: { comparison: 'Only you!', matches: 0, total: 1 },
+      insight: 'You are the first to share this!'
     }
   };
 
@@ -502,7 +522,7 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
                         />
                       </Svg>
                     </View>
-                    <Text style={styles.displayText}>{responseData.percentile.displayText}</Text>
+                    <Text style={styles.displayText}>{responseData.percentile.displayText || `${responseData.percentile.value}%`}</Text>
                     <View style={[
                       styles.tierPill,
                       {
@@ -522,7 +542,11 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
                   
                   {/* Comparison Text - Below Content */}
                   <View style={styles.comparisonContainer}>
-                    <Text style={styles.comparisonText}>{responseData.percentile.comparison}</Text>
+                    <Text style={styles.comparisonText}>
+                      {responseData.percentile.comparison || 
+                       (temporal?.allTime ? `${temporal.allTime.matches} of ${temporal.allTime.total}` : 
+                        generateComparisonText(matchCount || 0, responseData.percentile.displayText || 'Top 1%'))}
+                    </Text>
                   </View>
                 </View>
               </LinearGradient>
@@ -551,10 +575,10 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
                     <View key={idx} style={styles.temporalCard}>
                       <Text style={styles.temporalLabel}>{item.label}</Text>
                       <View style={styles.temporalValueContainer}>
-                        <Text style={styles.temporalValue}>{item.data.comparison}</Text>
+                        <Text style={styles.temporalValue}>{item.data.comparison || 'N/A'}</Text>
                       </View>
                       <Text style={styles.temporalSubtext}>
-                        {item.data.matches === 0 ? 'Only you!' : `${item.data.matches} others`}
+                        {item.data.matches <= 1 ? 'Only you!' : `${item.data.matches - 1} others`}
                       </Text>
                     </View>
                   ))}

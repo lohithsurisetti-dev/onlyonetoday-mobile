@@ -21,8 +21,11 @@ export const getProfile = async (userId: string): Promise<Profile | null> => {
     }
 
     return data;
-  } catch (error) {
-    console.error('Get profile error:', error);
+  } catch (error: any) {
+    // Only log error if it's not a "no rows" error (expected when no profile exists)
+    if (error?.code !== 'PGRST116') {
+      console.error('Get profile error:', error);
+    }
     return null;
   }
 };

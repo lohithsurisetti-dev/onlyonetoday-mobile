@@ -146,6 +146,7 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(60);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -199,6 +200,62 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
   const handleKeyPress = (e: any, index: number) => {
     if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleResendCode = async () => {
+    try {
+      setIsResending(true);
+      console.log('📧 Resending OTP to:', contact);
+
+      // Send OTP again - handle both signup and login flows
+      const otpOptions: any = {};
+      
+      // Only include user metadata if we're in signup flow
+      if (firstName && lastName && username) {
+        otpOptions.data = {
+          first_name: firstName,
+          last_name: lastName,
+          username: username,
+          date_of_birth: dateOfBirth,
+        };
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email: contact,
+        options: otpOptions
+      });
+
+      if (error) {
+        console.error('❌ Resend OTP error:', error);
+        Alert.alert(
+          'Failed to Resend Code',
+          error.message || 'Failed to resend verification code. Please try again.'
+        );
+        return;
+      }
+
+      console.log('✅ OTP resent successfully');
+      
+      // Reset timer and OTP inputs
+      setTimer(60);
+      setOtp(['', '', '', '', '', '']);
+      
+      // Focus first input
+      setTimeout(() => inputRefs.current[0]?.focus(), 300);
+      
+      Alert.alert(
+        'Code Sent',
+        'A new verification code has been sent to your email.'
+      );
+    } catch (error: any) {
+      console.error('❌ Resend error:', error);
+      Alert.alert(
+        'Failed to Resend Code',
+        'Something went wrong. Please try again.'
+      );
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -262,7 +319,7 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
           isAnonymous: false,
         });
       } else {
-        // Login flow - fetch existing profile
+        // Login flow - fetch existing profile or create one if it doesn't exist
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -270,21 +327,43 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
           .single();
 
         if (profileError || !profile) {
-          console.error('⚠️ Profile fetch error:', profileError);
-          throw new Error('Failed to load profile');
+          console.log('⚠️ Profile not found - user needs to sign up first');
+          
+          // Sign out the user since they don't have a profile
+          await supabase.auth.signOut();
+          
+          Alert.alert(
+            'Account Not Found',
+            'No account found with this email. It looks like you\'re trying to log in, but you need to create an account first.',
+            [
+              {
+                text: 'Create Account',
+                onPress: () => navigation.navigate('Signup'),
+                style: 'default'
+              },
+              {
+                text: 'Try Different Email',
+                onPress: () => navigation.goBack(),
+                style: 'cancel'
+              }
+            ]
+          );
+          
+          setIsLoading(false);
+          return;
+        } else {
+          console.log('✅ Profile loaded');
+
+          // Update auth store with profile data
+          setUser({
+            id: data.user.id,
+            firstName: profile.first_name || '',
+            lastName: profile.last_name || '',
+            username: profile.username || 'user',
+            email: contact,
+            isAnonymous: false,
+          });
         }
-
-        console.log('✅ Profile loaded');
-
-        // Update auth store with profile data
-        setUser({
-          id: data.user.id,
-          firstName: profile.first_name || '',
-          lastName: profile.last_name || '',
-          username: profile.username || 'user',
-          email: contact,
-          isAnonymous: false,
-        });
       }
 
       console.log('✅ User authenticated and profile created!');
@@ -306,12 +385,7 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
 
   const handleResend = () => {
     if (timer > 0) return;
-    
-    // TODO: Resend OTP
-    console.log('Resending OTP to:', contact);
-    setTimer(60);
-    setOtp(['', '', '', '', '', '']);
-    inputRefs.current[0]?.focus();
+    handleResendCode();
   };
 
   return (
@@ -392,8 +466,20 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
                 {timer > 0 ? (
                   <Text style={styles.timerText}>Resend code in {timer}s</Text>
                 ) : (
-                  <TouchableOpacity onPress={handleResend} activeOpacity={0.7}>
-                    <Text style={styles.resendText}>Resend Code</Text>
+                  <TouchableOpacity 
+                    onPress={handleResend} 
+                    activeOpacity={0.7}
+                    disabled={isResending}
+                    style={styles.resendButton}
+                  >
+                    {isResending ? (
+                      <View style={styles.resendLoadingContainer}>
+                        <ActivityIndicator size="small" color="#8b5cf6" />
+                        <Text style={[styles.resendText, { marginLeft: 8 }]}>Sending...</Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.resendText}>Resend Code</Text>
+                    )}
                   </TouchableOpacity>
                 )}
               </View>
@@ -466,7 +552,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
   },
   topBar: {
-    paddingTop: scale(8),
+    paddingTop: scale(60),
     paddingBottom: scale(12),
   },
   backButton: {
@@ -474,6 +560,7 @@ const styles = StyleSheet.create({
     height: scale(44),
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: scale(16),
   },
   content: {
     flex: 1,
@@ -572,6 +659,15 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(13, 0.2),
     color: '#8b5cf6',
     fontWeight: '600',
+  },
+  resendButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  resendLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   helpText: {
     fontSize: moderateScale(12, 0.2),

@@ -63,6 +63,11 @@ export const createPost = async (params: CreatePostParams): Promise<CreatePostRe
       throw new Error(error.message || 'Failed to create post');
     }
 
+    // Check if the response indicates a business logic error (moderation failure)
+    if (data && data.success === false) {
+      throw new Error(data.error || 'Post creation failed');
+    }
+
     return data as CreatePostResponse;
   } catch (error) {
     console.error('Create post error:', error);
@@ -71,83 +76,93 @@ export const createPost = async (params: CreatePostParams): Promise<CreatePostRe
 };
 
 /**
- * Get feed posts with filters
+ * Get feed posts with real-time calculations (via Edge Function)
  */
 export const getFeedPosts = async ({
-  scope,
+  scope = 'world',
   tier,
-  inputType,
-  limit = 20,
-  offset = 0,
+  inputType = 'all',
+  limit = 10,
+  page = 1,
+  reactionFilter = 'all',
+  sortBy = 'newest',
+  location,
 }: {
   scope?: ScopeType;
   tier?: TierType;
-  inputType?: PostType;
+  inputType?: PostType | 'all';
   limit?: number;
-  offset?: number;
-} = {}): Promise<FeedPost[]> => {
+  page?: number;
+  reactionFilter?: 'all' | 'funny' | 'creative' | 'must_try';
+  sortBy?: 'newest' | 'tier';
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+} = {}): Promise<{
+  success: boolean;
+  posts: FeedPost[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+  error?: string;
+}> => {
   try {
-    // First get posts
-    let query = supabase
-      .from('posts')
-      .select(`
-        *,
-        post_reaction_counts (
-          funny_count,
-          creative_count,
-          must_try_count
-        )
-      `)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    // Build query parameters
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      inputType,
+      scope,
+      sortBy,
+    });
 
-    // Apply filters
-    if (scope) {
-      query = query.eq('scope', scope);
+    if (tier && tier !== 'all') {
+      params.append('tier', tier);
     }
-    if (tier) {
-      query = query.eq('tier', tier);
+    if (reactionFilter && reactionFilter !== 'all') {
+      params.append('reactionFilter', reactionFilter);
     }
-    if (inputType) {
-      query = query.eq('input_type', inputType);
+    if (location?.city) {
+      params.append('locationCity', location.city);
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw error;
+    if (location?.state) {
+      params.append('locationState', location.state);
+    }
+    if (location?.country) {
+      params.append('locationCountry', location.country);
     }
 
-    if (!data || data.length === 0) {
-      return [];
+    // Call Edge Function with query parameters
+    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+    const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/fetch-posts?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'x-application-name': 'onlyone-mobile',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    // Get unique user IDs
-    const userIds = [...new Set(data.map(post => post.user_id).filter(Boolean))];
+    const data = await response.json();
 
-    // Fetch profiles for all users
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, username, avatar_url')
-      .in('id', userIds);
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to fetch posts');
+    }
 
-    // Create profile lookup map
-    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
-
-    // Transform data
-    return data.map(post => {
-      const profile = post.user_id ? profileMap.get(post.user_id) : null;
-      return {
-        ...post,
-        username: profile?.username,
-        avatar_url: profile?.avatar_url,
-        reactions: {
-          funny: post.post_reaction_counts?.funny_count || 0,
-          creative: post.post_reaction_counts?.creative_count || 0,
-          must_try: post.post_reaction_counts?.must_try_count || 0,
-        },
-      };
-    }) as FeedPost[];
+    return data;
   } catch (error) {
     console.error('Get feed error:', error);
     throw error;

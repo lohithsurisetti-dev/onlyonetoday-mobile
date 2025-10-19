@@ -42,7 +42,7 @@ export const PostResponseSchema = z.object({
   totalPostsInScope: z.number().int().nonnegative(),
   percentile: z
     .object({
-      tier: z.enum(['elite', 'rare', 'unique', 'notable', 'common', 'popular']),
+      tier: z.enum(['elite', 'rare', 'unique', 'notable', 'beloved', 'popular']),
       value: z.number().min(0).max(100),
       message: z.string(),
       color: z.string(),
@@ -71,7 +71,7 @@ export interface CreatePostResponse {
   uniquenessScore: number
   percentile?: {
     percentile: number
-    tier: 'elite' | 'rare' | 'unique' | 'notable' | 'common' | 'popular'
+    tier: 'elite' | 'rare' | 'unique' | 'notable' | 'beloved' | 'popular'
     displayText: string
     badge: string
     message: string

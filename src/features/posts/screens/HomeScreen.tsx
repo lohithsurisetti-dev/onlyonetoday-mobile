@@ -209,8 +209,7 @@ type HomeScreenProps = {
 
 export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  // const { stats } = usePlatformStats();
-  const stats: any = null;
+  const { stats } = usePlatformStats();
   const { location } = useLocation();
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true); // Mock unread state
 
@@ -298,11 +297,11 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
                   colors={['rgba(236, 72, 153, 0.15)', 'transparent']}
                   style={styles.statGradient}
                 >
-                  <Text style={styles.statLabel}>UNIQUE</Text>
+                  <Text style={styles.statLabel}>SHARED</Text>
                   <Text style={styles.statValue}>
-                    {stats?.uniqueActionsToday?.toLocaleString() || '18,234'}
+                    {stats?.sharedExperiencesToday?.toLocaleString() || '12,847'}
                   </Text>
-                  <Text style={styles.statSubtext}>Actions</Text>
+                  <Text style={styles.statSubtext}>Experiences</Text>
                 </LinearGradient>
               </BlurView>
             </View>

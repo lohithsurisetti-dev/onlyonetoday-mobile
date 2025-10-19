@@ -22,7 +22,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
-type FilterType = 'all' | 'unique' | 'common';
+type FilterType = 'all' | 'unique' | 'beloved';
 type ScopeFilter = 'world' | 'city' | 'state' | 'country';
 type ReactionFilter = 'all' | 'funny' | 'creative' | 'must_try';
 type InputTypeFilter = 'all' | 'action' | 'day';
@@ -154,7 +154,7 @@ export default function FilterSheet({
                   <Text style={styles.sectionTitle}>Post Type</Text>
                 </View>
                 <View style={styles.optionsGrid}>
-                  {(['all', 'unique', 'common'] as FilterType[]).map((type) => {
+                  {(['all', 'unique', 'beloved'] as FilterType[]).map((type) => {
                     const isActive = filter === type;
                     return (
                       <TouchableOpacity
@@ -293,8 +293,8 @@ function getFilterGradient(type: FilterType): [string, string] {
   switch (type) {
     case 'unique':
       return ['rgba(139, 92, 246, 0.5)', 'rgba(139, 92, 246, 0.25)'];
-    case 'common':
-      return ['rgba(59, 130, 246, 0.5)', 'rgba(59, 130, 246, 0.25)'];
+    case 'beloved':
+      return ['rgba(244, 114, 182, 0.5)', 'rgba(244, 114, 182, 0.25)'];
     default:
       return ['rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 0.12)'];
   }

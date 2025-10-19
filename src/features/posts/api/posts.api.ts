@@ -17,22 +17,71 @@ import type {
  */
 export async function createPost(data: CreatePostRequest): Promise<CreatePostResponse> {
   try {
+    console.log('🚀 Mobile app: Starting post creation...');
+    console.log('📝 Mobile app: Request data:', {
+      content: data.content,
+      inputType: data.inputType || 'action',
+      scope: data.scope || 'world',
+      isAnonymous: false,
+      locationCity: data.locationCity,
+      locationState: data.locationState,
+      locationCountry: data.locationCountry,
+    });
+
     // Call Supabase Edge Function (with vector embeddings!)
     const { data: result, error } = await supabase.functions.invoke('create-post', {
       body: {
         content: data.content,
         inputType: data.inputType || 'action',
         scope: data.scope || 'world',
-        location: data.location,
+        isAnonymous: false,
+        locationCity: data.locationCity,
+        locationState: data.locationState,
+        locationCountry: data.locationCountry,
       },
     });
 
+    console.log('📡 Mobile app: API response received');
+    console.log('✅ Mobile app: Result:', result);
+    console.log('❌ Mobile app: Error:', error);
+
     if (error) {
+      console.error('❌ Mobile app: API error:', error);
+      console.error('❌ Mobile app: Error details:', {
+        name: error.name,
+        message: error.message,
+        context: error.context,
+        details: error.details
+      });
+      
+      // Try to extract the actual error message from the server response
+      let actualErrorMessage = '';
+      if (error.context && error.context.body) {
+        try {
+          const errorBody = JSON.parse(error.context.body);
+          actualErrorMessage = errorBody.error || '';
+        } catch (e) {
+          console.log('Could not parse error body');
+        }
+      }
+      
+      // Use the actual error message from the server if available
+      if (actualErrorMessage) {
+        throw new Error(actualErrorMessage);
+      }
+      
       throw new Error(error.message || 'Failed to create post');
     }
 
     if (!result || !result.success) {
-      throw new Error('Post creation failed');
+      console.error('❌ Mobile app: Result error:', result);
+      
+      // Check if this is a moderation rejection from the result - use the actual funny message
+      if (result.error && result.error.includes('Content rejected')) {
+        throw new Error(result.error || 'Your content was rejected by our moderation system. Please try different content.');
+      }
+      
+      throw new Error(result.error || 'Post creation failed');
     }
 
     // Transform to match expected response format
@@ -41,18 +90,44 @@ export async function createPost(data: CreatePostRequest): Promise<CreatePostRes
       post: {
         id: result.post.id,
         content: result.post.content,
-        tier: result.post.tier,
-        percentile: result.post.percentile,
-        scope: data.scope || 'world',
-        created_at: result.post.createdAt,
+        normalizedContent: result.post.content, // Use same content for now
+        inputType: result.post.inputType,
+        scope: result.post.scope,
+        locationCity: data.locationCity,
+        locationState: data.locationState,
+        locationCountry: data.locationCountry,
+        peopleWhoDidThis: result.post.matchCount,
+        totalPostsInScope: result.post.matchCount + 1, // Approximate
+        percentile: {
+          tier: result.temporal?.allTime?.tier || result.post.tier,
+          value: result.temporal?.allTime?.percentile || result.post.percentile,
+          message: result.post.message,
+          color: '#8b5cf6', // Default color
+          emoji: result.post.badge,
+        },
+        createdAt: result.post.created_at,
+        updatedAt: result.post.created_at,
       },
-      percentile: result.post.percentile,
       matchCount: result.post.matchCount,
-      displayText: result.post.displayText,
-      analytics: result.analytics,
+      uniquenessScore: result.post.percentile,
+      percentile: {
+        percentile: result.post.percentile, // Use main post percentile for consistency
+        tier: result.post.tier, // Use main post tier for consistency
+        displayText: result.post.displayText, // Always use the main post displayText
+        badge: result.post.badge,
+        message: result.post.message,
+        comparison: result.post.comparison,
+      },
+      activities: result.post.activities,
+      activityCount: result.post.activityCount,
+      isDaySummary: data.inputType === 'day',
+      temporal: result.temporal,
     };
   } catch (error: any) {
-    console.error('Create post error:', error);
+    console.error('❌ Mobile app: Create post error:', error);
+    console.error('❌ Mobile app: Error type:', typeof error);
+    console.error('❌ Mobile app: Error message:', error.message);
+    console.error('❌ Mobile app: Error stack:', error.stack);
     throw error;
   }
 }

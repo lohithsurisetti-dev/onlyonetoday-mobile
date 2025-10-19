@@ -11,7 +11,7 @@
 
 export type PostType = 'action' | 'day';
 export type ScopeType = 'city' | 'state' | 'country' | 'world';
-export type TierType = 'elite' | 'rare' | 'unique' | 'notable' | 'popular' | 'common';
+export type TierType = 'elite' | 'rare' | 'unique' | 'notable' | 'popular' | 'beloved';
 export type ReactionType = 'funny' | 'creative' | 'must_try';
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 export type NotificationType = 'achievement' | 'social' | 'system' | 'update';

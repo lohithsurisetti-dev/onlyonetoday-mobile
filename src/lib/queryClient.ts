@@ -25,9 +25,8 @@ export const queryClient = new QueryClient({
       throwOnError: false, // Don't throw errors, handle in UI
     },
     mutations: {
-      // Retry failed mutations once
-      retry: 1,
-      retryDelay: 1000,
+      // Don't retry failed mutations (especially for moderation rejections)
+      retry: false,
     },
   },
 })

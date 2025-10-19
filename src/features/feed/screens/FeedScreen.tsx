@@ -52,7 +52,7 @@ const getComparisonText = (tier: string): string => {
     unique: 'Less common',
     notable: 'Notable activity',
     popular: 'Popular today',
-    common: 'Many did this',
+    beloved: 'Beloved choice',
   };
   return comparisons[tier] || '';
 };
@@ -61,7 +61,7 @@ const getComparisonText = (tier: string): string => {
 // TYPES
 // ============================================================================
 
-export type FilterType = 'all' | 'unique' | 'common';
+export type FilterType = 'all' | 'unique' | 'beloved';
 export type ScopeFilter = 'world' | 'city' | 'state' | 'country';
 export type ReactionFilter = 'all' | 'funny' | 'creative' | 'must_try';
 export type InputTypeFilter = 'all' | 'action' | 'day';
@@ -78,7 +78,7 @@ interface Post {
   username?: string;
   percentile?: {
     percentile: number;
-    tier: 'elite' | 'rare' | 'unique' | 'notable' | 'common' | 'popular';
+    tier: 'elite' | 'rare' | 'unique' | 'notable' | 'beloved' | 'popular';
     displayText: string;
     comparison: string;
   };
@@ -174,7 +174,7 @@ const SAMPLE_POSTS: Post[] = [
     time: '1d ago',
     scope: 'world',
     input_type: 'action',
-    percentile: { percentile: 65, tier: 'common', displayText: 'Top 65%', comparison: 'Popular choice' },
+    percentile: { percentile: 65, tier: 'beloved', displayText: 'Top 65%', comparison: 'Beloved choice' },
     funny_count: 2,
     creative_count: 3,
     must_try_count: 8,
@@ -198,15 +198,15 @@ const SAMPLE_POSTS: Post[] = [
 
 // Use centralized tier colors
 function getTierColors(tier?: string) {
-  return getStandardTierColors(tier || 'common');
+  return getStandardTierColors(tier || 'beloved');
 }
 
 function getFilterPillColors(filter: FilterType): [string, string] {
   switch (filter) {
     case 'unique':
       return ['rgba(139, 92, 246, 0.5)', 'rgba(139, 92, 246, 0.25)'];
-    case 'common':
-      return ['rgba(59, 130, 246, 0.5)', 'rgba(59, 130, 246, 0.25)'];
+    case 'beloved':
+      return ['rgba(244, 114, 182, 0.5)', 'rgba(244, 114, 182, 0.25)'];
     default:
       return ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)'];
   }
@@ -414,7 +414,7 @@ export default function FeedScreen() {
       
       // Apply other filters
       if (filter === 'unique' && post.percentile && !['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier)) return false;
-      if (filter === 'common' && post.percentile && !['common', 'popular'].includes(post.percentile.tier)) return false;
+      if (filter === 'beloved' && post.percentile && !['beloved', 'popular'].includes(post.percentile.tier)) return false;
       if (scopeFilter !== 'world' && post.scope !== scopeFilter) return false;
       if (reactionFilter !== 'all' && (!post[`${reactionFilter}_count`] || post[`${reactionFilter}_count`] === 0)) return false;
       return true;

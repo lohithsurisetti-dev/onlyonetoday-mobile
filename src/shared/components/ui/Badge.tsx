@@ -26,8 +26,8 @@ export default function Badge({ children, variant = 'default', color, style }: B
     if (text.includes('unique')) return getTierColors('unique').primary;
     if (text.includes('notable')) return getTierColors('notable').primary;
     if (text.includes('popular')) return getTierColors('popular').primary;
-    if (text.includes('common')) return getTierColors('common').primary;
-    return getTierColors('common').primary; // fallback
+    if (text.includes('beloved')) return getTierColors('beloved').primary;
+    return getTierColors('beloved').primary; // fallback
   };
 
   const badgeColor = variant === 'tier' ? getColorForTier() : color || '#8347eb';

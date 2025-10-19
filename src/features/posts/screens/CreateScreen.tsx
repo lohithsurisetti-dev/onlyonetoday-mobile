@@ -148,8 +148,13 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
   const [isFocused, setIsFocused] = useState(false);
   const [tabContainerWidth, setTabContainerWidth] = useState(0);
   const [scopeContainerWidth, setScopeContainerWidth] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutate: createPost, isPending } = useCreatePost();
+  
+  // Error animation
+  const errorOpacityAnim = useRef(new Animated.Value(0)).current;
+  const errorScaleAnim = useRef(new Animated.Value(0.8)).current;
   // const { stats } = usePlatformStats();
   const stats = null;
 
@@ -159,12 +164,50 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
   const inputBorderAnim = useRef(new Animated.Value(0)).current;
   const buttonScaleAnim = useRef(new Animated.Value(1)).current;
 
+  // Animate error appearance
+  useEffect(() => {
+    if (error) {
+      Animated.parallel([
+        Animated.timing(errorOpacityAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(errorScaleAnim, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(errorOpacityAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(errorScaleAnim, {
+          toValue: 0.8,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [error]);
+
   const handleSubmit = () => {
     if (content.trim().length < 3) {
       setError('Please enter at least 3 characters');
       return;
     }
 
+    // Prevent double submission
+    if (isSubmitting || isPending) {
+      return;
+    }
+
+    setIsSubmitting(true);
     setError('');
     
     // Button press animation
@@ -201,7 +244,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
             percentile: response.post?.percentile || response.percentile || undefined,
             postId: response.post?.id,
             matchCount: response.matchCount,
-            displayText: (response as any).displayText,
+            displayText: response.percentile?.displayText,
             tier: response.percentile?.tier,
             temporal: response.temporal,
           };
@@ -209,10 +252,12 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
           console.log('🚀 Navigating to Response with params:', navigationParams);
           navigation.navigate('Response', navigationParams);
           setContent('');
+          setIsSubmitting(false);
         },
         onError: (error: any) => {
           console.error('❌ Post creation failed:', error);
-          Alert.alert('Error', error?.message || 'Failed to create post');
+          setError(error?.message || 'Failed to create post');
+          setIsSubmitting(false);
         },
       }
     );
@@ -374,7 +419,10 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
             >
               <TextInput
                 value={content}
-                onChangeText={setContent}
+                onChangeText={(text) => {
+                  setContent(text);
+                  if (error) setError(''); // Clear error when user starts typing
+                }}
                 placeholder="I discovered a hidden rooftop garden..."
                 placeholderTextColor="rgba(255, 255, 255, 0.3)"
                 multiline
@@ -384,10 +432,33 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
                 onBlur={handleBlur}
               />
               <View style={styles.inputFooter}>
-                {error ? <Text style={styles.errorText}>{error}</Text> : <View />}
                 <Text style={styles.charCount}>{content.length}/500</Text>
               </View>
             </Animated.View>
+            
+            {/* Error message below input box */}
+            {error ? (
+              <Animated.View 
+                style={[
+                  styles.errorContainer,
+                  {
+                    opacity: errorOpacityAnim,
+                    transform: [{ scale: errorScaleAnim }]
+                  }
+                ]}
+              >
+                <View style={styles.errorContent}>
+                  <Text style={styles.errorText}>{error}</Text>
+                  <TouchableOpacity 
+                    style={styles.errorCloseButton}
+                    onPress={() => setError('')}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Text style={styles.errorCloseText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
+            ) : null}
 
             {/* Scope Selector */}
             <View style={styles.scopeContainer}>
@@ -468,7 +539,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
               <TouchableOpacity
                 style={styles.submitButton}
                 onPress={handleSubmit}
-                disabled={isPending}
+                disabled={isPending || isSubmitting}
                 activeOpacity={0.8}
               >
                 <LinearGradient
@@ -755,5 +826,43 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16, 0.2),
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+  errorContainer: {
+    marginTop: scale(8),
+    marginHorizontal: scale(16),
+    marginBottom: scale(4),
+  },
+  errorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scale(6),
+    paddingHorizontal: scale(12),
+    backgroundColor: 'rgba(255, 107, 107, 0.08)',
+    borderRadius: scale(20),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.2)',
+  },
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: moderateScale(12, 0.2),
+    fontWeight: '500',
+    textAlign: 'center',
+    flex: 1,
+  },
+  errorCloseButton: {
+    marginLeft: scale(8),
+    width: scale(16),
+    height: scale(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: scale(8),
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+  },
+  errorCloseText: {
+    color: '#ff6b6b',
+    fontSize: moderateScale(14, 0.2),
+    fontWeight: '600',
+    lineHeight: moderateScale(14, 0.2),
   },
 });

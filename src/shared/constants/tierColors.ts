@@ -1,6 +1,6 @@
 /**
  * Centralized Tier Color System
- * Used consistently across all screens for tiers: elite, rare, unique, notable, popular, common
+ * Used consistently across all screens for tiers: elite, rare, unique, notable, popular, beloved
  */
 
 export interface TierColors {
@@ -121,14 +121,14 @@ export const getTierColors = (tier: string): TierColors => {
         background: 'rgba(251, 191, 36, 0.1)',
         backgroundGradient: '#3e3a1e',
       };
-    case 'common':
+    case 'beloved':
       return {
-        primary: '#94a3b8',    // Asteroid Gray - Space rock
-        secondary: '#cbd5e1',
-        gradient: ['#94a3b8', '#cbd5e1'],
-        glow: '#94a3b8',
-        background: 'rgba(148, 163, 184, 0.1)',
-        backgroundGradient: '#2a2f3e',
+        primary: '#f472b6',    // Beloved Pink - Warm and cherished
+        secondary: '#fb7185',
+        gradient: ['#f472b6', '#fb7185'],
+        glow: '#f472b6',
+        background: 'rgba(244, 114, 182, 0.1)',
+        backgroundGradient: '#4a1f2e',
       };
     default:
       return {

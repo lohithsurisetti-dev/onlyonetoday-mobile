@@ -165,15 +165,15 @@ export default function FeedPostShareCard({ visible, onClose, post, tierColors }
 
   // Get subtle gradient color based on tier - matching StreakShareCard approach
   const getSubtleGradientColor = () => {
-    const tier = post.percentile?.tier?.toLowerCase() || 'common';
+    const tier = post.percentile?.tier?.toLowerCase() || 'beloved';
     switch (tier) {
       case 'elite': return '#2a1a2e'; // Aurora magenta dark
       case 'rare': return '#221a2e'; // Deep violet dark
       case 'unique': return '#1a2530'; // Comet blue dark
       case 'notable': return '#2a1220'; // Supernova pink dark (same as streak)
       case 'popular': return '#2e2a1a'; // Solar gold dark
-      case 'common': return '#1f2028'; // Asteroid gray dark
-      default: return '#1f2028';
+      case 'beloved': return '#2a1220'; // Beloved pink dark
+      default: return '#2a1220';
     }
   };
 

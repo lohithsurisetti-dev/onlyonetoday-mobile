@@ -7,7 +7,7 @@ export type Scope = 'city' | 'state' | 'country' | 'world'
 
 export type InputType = 'action' | 'day'
 
-export type PercentileTier = 'elite' | 'rare' | 'unique' | 'notable' | 'common' | 'popular'
+export type PercentileTier = 'elite' | 'rare' | 'unique' | 'notable' | 'beloved' | 'popular'
 
 export interface Location {
   city?: string | null
@@ -42,7 +42,7 @@ export interface Post {
 
 export interface Stats {
   totalPostsToday: number
-  uniqueActionsToday: number
+  sharedExperiencesToday: number
   totalPosts: number
   moderationStats?: {
     totalChecked: number

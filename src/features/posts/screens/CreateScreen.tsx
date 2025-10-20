@@ -149,6 +149,8 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
   const [tabContainerWidth, setTabContainerWidth] = useState(0);
   const [scopeContainerWidth, setScopeContainerWidth] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState('');
 
   const { mutate: createPost, isPending } = useCreatePost();
   
@@ -163,6 +165,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
   const scopeSlideAnim = useRef(new Animated.Value(0)).current;
   const inputBorderAnim = useRef(new Animated.Value(0)).current;
   const buttonScaleAnim = useRef(new Animated.Value(1)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   // Animate error appearance
   useEffect(() => {
@@ -196,6 +199,41 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
     }
   }, [error]);
 
+  // Simulate loading progress
+  const simulateLoadingProgress = () => {
+    const steps = [
+      { step: 1, message: 'Analyzing your content...', duration: 800 },
+      { step: 2, message: 'Checking for similar posts...', duration: 1200 },
+      { step: 3, message: 'Calculating uniqueness...', duration: 1000 },
+      { step: 4, message: 'Finalizing results...', duration: 600 },
+    ];
+
+    let currentStep = 0;
+    const totalSteps = steps.length;
+
+    const runStep = () => {
+      if (currentStep < totalSteps) {
+        const { step, message, duration } = steps[currentStep];
+        setLoadingStep(step);
+        setLoadingMessage(message);
+        
+        // Animate progress
+        Animated.timing(progressAnim, {
+          toValue: step / totalSteps,
+          duration: duration,
+          useNativeDriver: false,
+        }).start();
+
+        setTimeout(() => {
+          currentStep++;
+          runStep();
+        }, duration);
+      }
+    };
+
+    runStep();
+  };
+
   const handleSubmit = () => {
     if (content.trim().length < 3) {
       setError('Please enter at least 3 characters');
@@ -209,6 +247,12 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
 
     setIsSubmitting(true);
     setError('');
+    setLoadingStep(0);
+    setLoadingMessage('');
+    progressAnim.setValue(0);
+    
+    // Start loading progress simulation
+    simulateLoadingProgress();
     
     // Button press animation
     Animated.sequence([
@@ -238,26 +282,39 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
         onSuccess: (response) => {
           console.log('✅ Post created successfully:', response);
           
-          const navigationParams = {
-            content: content.trim(),
-            scope,
-            percentile: response.post?.percentile || response.percentile || undefined,
-            postId: response.post?.id,
-            matchCount: response.matchCount,
-            displayText: response.percentile?.displayText,
-            tier: response.percentile?.tier,
-            temporal: response.temporal,
-          };
-          
-          console.log('🚀 Navigating to Response with params:', navigationParams);
-          navigation.navigate('Response', navigationParams);
-          setContent('');
-          setIsSubmitting(false);
+          // Complete the progress animation
+          Animated.timing(progressAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
+          }).start(() => {
+            const navigationParams = {
+              content: content.trim(),
+              scope,
+              percentile: response.post?.percentile || response.percentile || undefined,
+              postId: response.post?.id,
+              matchCount: response.matchCount,
+              displayText: response.percentile?.displayText,
+              tier: response.percentile?.tier,
+              temporal: response.temporal,
+            };
+            
+            console.log('🚀 Navigating to Response with params:', navigationParams);
+            navigation.navigate('Response', navigationParams);
+            setContent('');
+            setIsSubmitting(false);
+            setLoadingStep(0);
+            setLoadingMessage('');
+            progressAnim.setValue(0);
+          });
         },
         onError: (error: any) => {
           console.error('❌ Post creation failed:', error);
           setError(error?.message || 'Failed to create post');
           setIsSubmitting(false);
+          setLoadingStep(0);
+          setLoadingMessage('');
+          progressAnim.setValue(0);
         },
       }
     );
@@ -548,9 +605,31 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
                   end={{ x: 1, y: 0 }}
                   style={styles.buttonGradient}
                 >
-                  <Text style={styles.buttonText}>
-                    {isPending ? 'Creating...' : 'Discover'}
-                  </Text>
+                  {isPending || isSubmitting ? (
+                    <View style={styles.loadingContainer}>
+                      <View style={styles.progressBarContainer}>
+                        <Animated.View 
+                          style={[
+                            styles.progressBar,
+                            {
+                              width: progressAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ['0%', '100%'],
+                              }),
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.loadingText}>
+                        {loadingMessage || 'Processing...'}
+                      </Text>
+                      <Text style={styles.loadingStepText}>
+                        Step {loadingStep} of 4
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.buttonText}>Discover</Text>
+                  )}
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>
@@ -864,5 +943,39 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14, 0.2),
     fontWeight: '600',
     lineHeight: moderateScale(14, 0.2),
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: scale(4),
+  },
+  progressBarContainer: {
+    width: '80%',
+    height: scale(3),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: scale(2),
+    overflow: 'hidden',
+    marginBottom: scale(8),
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: scale(2),
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+  },
+  loadingText: {
+    color: '#ffffff',
+    fontSize: moderateScale(14, 0.2),
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: scale(2),
+  },
+  loadingStepText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: moderateScale(10, 0.2),
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });

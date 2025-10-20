@@ -268,9 +268,32 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
   // Generate comparison text based on matchCount
   const generateComparisonText = (matchCount: number, displayText: string) => {
     if (matchCount <= 1) {
-      return "You're the first to share this!";
+      const firstTimeMessages = [
+        "You're the first to share this!",
+        "You're a trailblazer!",
+        "You're the pioneer!",
+        "You're leading the way!",
+        "You're the innovator!"
+      ];
+      return firstTimeMessages[Math.floor(Math.random() * firstTimeMessages.length)];
     } else {
       return `You're connected to ${matchCount - 1} others`;
+    }
+  };
+
+  // Generate varied temporal messages for first-time posts
+  const generateTemporalMessage = (timeframe: string, matchCount: number) => {
+    if (matchCount <= 1) {
+      const messages = {
+        week: ["First this week!", "Week's pioneer", "Leading the week"],
+        month: ["First this month!", "Month's trailblazer", "Monthly first"],
+        year: ["First this year!", "Year's innovator", "Annual pioneer"],
+        allTime: ["First ever!", "Trailblazer", "Pioneer"]
+      };
+      const options = messages[timeframe as keyof typeof messages] || ["First!"];
+      return options[Math.floor(Math.random() * options.length)];
+    } else {
+      return `${matchCount} of ${matchCount}`;
     }
   };
 
@@ -293,32 +316,34 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
     postId: postId,
     temporal: temporal ? {
       week: { 
-        comparison: temporal.week?.comparison || `${temporal.week?.matching || 0} of ${temporal.week?.total || 1}`, 
+        comparison: temporal.week?.comparison || generateTemporalMessage('week', temporal.week?.matching || 0), 
         matches: temporal.week?.matching || 0, 
         total: temporal.week?.total || 1 
       },
       month: { 
-        comparison: temporal.month?.comparison || `${temporal.month?.matching || 0} of ${temporal.month?.total || 1}`, 
+        comparison: temporal.month?.comparison || generateTemporalMessage('month', temporal.month?.matching || 0), 
         matches: temporal.month?.matching || 0, 
         total: temporal.month?.total || 1 
       },
       year: { 
-        comparison: temporal.year?.comparison || `${temporal.year?.matching || 0} of ${temporal.year?.total || 1}`, 
+        comparison: temporal.year?.comparison || generateTemporalMessage('year', temporal.year?.matching || 0), 
         matches: temporal.year?.matching || 0, 
         total: temporal.year?.total || 1 
       },
       allTime: { 
-        comparison: temporal.allTime?.comparison || `${temporal.allTime?.matching || 0} of ${temporal.allTime?.total || 1}`, 
+        comparison: temporal.allTime?.comparison || generateTemporalMessage('allTime', temporal.allTime?.matching || 0), 
         matches: temporal.allTime?.matching || 0, 
         total: temporal.allTime?.total || 1 
       },
-      insight: (matchCount || 0) <= 1 ? 'You are the first to share this!' : 'You are part of a community!'
+      insight: (matchCount || 0) <= 1 ? 
+        ['You are the first to share this!', 'You are a trailblazer!', 'You are the pioneer!', 'You are leading the way!'][Math.floor(Math.random() * 4)] : 
+        'You are part of a community!'
     } : {
-      week: { comparison: 'Only you!', matches: 0, total: 1 },
-      month: { comparison: 'Only you!', matches: 0, total: 1 },
-      year: { comparison: 'Only you!', matches: 0, total: 1 },
-      allTime: { comparison: 'Only you!', matches: 0, total: 1 },
-      insight: 'You are the first to share this!'
+      week: { comparison: generateTemporalMessage('week', 0), matches: 0, total: 1 },
+      month: { comparison: generateTemporalMessage('month', 0), matches: 0, total: 1 },
+      year: { comparison: generateTemporalMessage('year', 0), matches: 0, total: 1 },
+      allTime: { comparison: generateTemporalMessage('allTime', 0), matches: 0, total: 1 },
+      insight: ['You are the first to share this!', 'You are a trailblazer!', 'You are the pioneer!', 'You are leading the way!'][Math.floor(Math.random() * 4)]
     }
   };
 
@@ -329,11 +354,82 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
   
   // Non-native animations (for SVG strokeDashoffset)
   const ringProgressValue = useRef(new Animated.Value(0)).current;
+  
+  // Get tier-specific icon
+  const getTierIcon = (tier: string) => {
+    switch (tier?.toLowerCase()) {
+      case 'elite':
+        return (
+          <Path 
+            d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" 
+            fill={tierColors.primary} 
+            stroke={tierColors.primary}
+            strokeWidth={1.5}
+          />
+        );
+      case 'rare':
+        return (
+          <Path 
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" 
+            fill={tierColors.primary} 
+            stroke={tierColors.primary}
+            strokeWidth={1.5}
+          />
+        );
+      case 'unique':
+        return (
+          <Path 
+            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
+            fill={tierColors.primary} 
+            stroke={tierColors.primary}
+            strokeWidth={1.5}
+          />
+        );
+      case 'notable':
+        return (
+          <Path 
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" 
+            fill={tierColors.primary} 
+            stroke={tierColors.primary}
+            strokeWidth={1.5}
+          />
+        );
+      case 'beloved':
+        return (
+          <Path 
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+            fill={tierColors.primary} 
+            stroke={tierColors.primary}
+            strokeWidth={1.5}
+          />
+        );
+      case 'popular':
+        return (
+          <Path 
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" 
+            fill={tierColors.primary} 
+            stroke={tierColors.primary}
+            strokeWidth={1.5}
+          />
+        );
+      default:
+        return (
+          <Path 
+            d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" 
+            fill={tierColors.primary} 
+            stroke={tierColors.primary}
+            strokeWidth={1.5}
+          />
+        );
+    }
+  };
 
   // Share card state
   const [showShareCard, setShowShareCard] = useState(false);
 
   const isTopTier = ['elite', 'rare', 'unique', 'notable'].includes(responseData.percentile.tier);
+  const isEliteTier = responseData.percentile.tier === 'elite';
+  const isVeryLowPercentile = responseData.percentile.value <= 5; // For percentiles 5% and below
   const radius = 85;
   const strokeWidth = 5;
   const circumference = 2 * Math.PI * radius;
@@ -358,10 +454,10 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
       }),
     ]).start();
 
-    // Ring (non-native driver for SVG)
+    // Ring (non-native driver for SVG) - Show actual percentile as filled portion
     setTimeout(() => {
       Animated.timing(ringProgressValue, {
-        toValue: 1 - responseData.percentile.value / 100,
+        toValue: responseData.percentile.value / 100, // Direct percentile representation
         duration: 1500,
         useNativeDriver: false,
       }).start();
@@ -495,31 +591,44 @@ export default function ResponseScreen({ navigation, route }: ResponseScreenProp
                       fill="transparent"
                     />
                     {/* Progress circle - thinner, elegant */}
-                    <AnimatedCircle
-                      cx={scale(104)}
-                      cy={scale(104)}
-                      r={scale(radius)}
-                      stroke="url(#grad)"
-                      strokeWidth={scale(strokeWidth)}
-                      fill="transparent"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      rotation="-90"
-                      origin={`${scale(104)}, ${scale(104)}`}
-                    />
+                    {isVeryLowPercentile ? (
+                      // For very low percentiles, show a "burst" effect instead of progress
+                      <Circle
+                        cx={scale(104)}
+                        cy={scale(104)}
+                        r={scale(radius)}
+                        stroke="url(#grad)"
+                        strokeWidth={scale(strokeWidth)}
+                        fill="transparent"
+                        strokeDasharray={`${circumference * 0.1} ${circumference * 0.9}`}
+                        strokeDashoffset={0}
+                        strokeLinecap="round"
+                        rotation="-90"
+                        origin={`${scale(104)}, ${scale(104)}`}
+                      />
+                    ) : (
+                      // Normal progress ring for higher percentiles
+                      <AnimatedCircle
+                        cx={scale(104)}
+                        cy={scale(104)}
+                        r={scale(radius)}
+                        stroke="url(#grad)"
+                        strokeWidth={scale(strokeWidth)}
+                        fill="transparent"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        rotation="-90"
+                        origin={`${scale(104)}, ${scale(104)}`}
+                      />
+                    )}
                   </Svg>
                   
                   {/* Center Content */}
                   <View style={styles.ringCenter}>
                     <View style={styles.tierIconContainer}>
                       <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
-                        <Path 
-                          d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" 
-                          fill={tierColors.primary} 
-                          stroke={tierColors.primary}
-                          strokeWidth={1.5}
-                        />
+                        {getTierIcon(responseData.percentile.tier)}
                       </Svg>
                     </View>
                     <Text style={styles.displayText}>{responseData.percentile.displayText || `${responseData.percentile.value}%`}</Text>

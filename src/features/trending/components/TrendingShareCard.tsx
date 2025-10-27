@@ -254,6 +254,17 @@ export default function TrendingShareCard({ visible, onClose, post }: TrendingSh
       <View style={styles.modalOverlay}>
         <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} />
         
+        {/* Close Button - Top Right */}
+        <TouchableOpacity 
+          style={styles.closeButtonTopRight}
+          onPress={onClose}
+          activeOpacity={0.7}
+        >
+          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+            <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        </TouchableOpacity>
+        
         <Animated.View style={[styles.cardContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
           <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0b0b18' }]}>
             <LinearGradient 
@@ -315,14 +326,6 @@ export default function TrendingShareCard({ visible, onClose, post }: TrendingSh
           </View>
 
           {/* Actions */}
-          <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
-            <BlurView intensity={60} tint="dark" style={styles.closeButtonBlur}>
-              <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </BlurView>
-          </TouchableOpacity>
-
           <View style={styles.actionButtons}>
             <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={handleShare}>
               <View style={styles.actionButtonOutline}>
@@ -517,19 +520,12 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 8,
     opacity: 0.5,
   },
-  closeButton: {
-    marginTop: scale(20),
-    borderRadius: scale(28),
-    overflow: 'hidden',
-  },
-  closeButtonBlur: {
-    width: scale(56),
-    height: scale(56),
-    borderRadius: scale(28),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+  closeButtonTopRight: {
+    position: 'absolute',
+    top: scale(50),
+    right: scale(20),
+    padding: scale(12),
+    zIndex: 1000,
   },
   actionButtons: {
     flexDirection: 'row',

@@ -511,7 +511,15 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
                     onPress={() => setError('')}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Text style={styles.errorCloseText}>×</Text>
+                    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+                      <Path 
+                        d="M18 6L6 18M6 6l12 12" 
+                        stroke="#ff6b6b" 
+                        strokeWidth={2.5} 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
                   </TouchableOpacity>
                 </View>
               </Animated.View>
@@ -605,34 +613,52 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
                   end={{ x: 1, y: 0 }}
                   style={styles.buttonGradient}
                 >
-                  {isPending || isSubmitting ? (
-                    <View style={styles.loadingContainer}>
-                      <View style={styles.progressBarContainer}>
-                        <Animated.View 
-                          style={[
-                            styles.progressBar,
-                            {
-                              width: progressAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: ['0%', '100%'],
-                              }),
-                            },
-                          ]}
-                        />
-                      </View>
-                      <Text style={styles.loadingText}>
-                        {loadingMessage || 'Processing...'}
-                      </Text>
-                      <Text style={styles.loadingStepText}>
-                        Step {loadingStep} of 4
-                      </Text>
-                    </View>
-                  ) : (
-                    <Text style={styles.buttonText}>Discover</Text>
-                  )}
+                  <Text style={styles.buttonText}>
+                    {isPending || isSubmitting ? 'Processing...' : 'Discover'}
+                  </Text>
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>
+
+            {/* Loading Progress (Below Button) */}
+            {(isPending || isSubmitting) && (
+              <Animated.View 
+                style={[
+                  styles.loadingProgressContainer,
+                  {
+                    opacity: progressAnim.interpolate({
+                      inputRange: [0, 0.1],
+                      outputRange: [0, 1],
+                    }),
+                  },
+                ]}
+              >
+                {/* Progress Bar */}
+                <View style={styles.progressBarContainer}>
+                  <Animated.View 
+                    style={[
+                      styles.progressBar,
+                      {
+                        width: progressAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0%', '100%'],
+                        }),
+                      },
+                    ]}
+                  />
+                </View>
+
+                {/* Loading Message and Step */}
+                <View style={styles.loadingTextContainer}>
+                  <Text style={styles.loadingMessage}>
+                    {loadingMessage || 'Processing...'}
+                  </Text>
+                  <Text style={styles.loadingStep}>
+                    Step {loadingStep} of 4
+                  </Text>
+                </View>
+              </Animated.View>
+            )}
           </BlurView>
         </Animated.ScrollView>
       </LinearGradient>
@@ -931,50 +957,49 @@ const styles = StyleSheet.create({
   },
   errorCloseButton: {
     marginLeft: scale(8),
-    width: scale(16),
-    height: scale(16),
+    width: scale(18),
+    height: scale(18),
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: scale(8),
+    borderRadius: scale(9),
     backgroundColor: 'rgba(255, 107, 107, 0.15)',
   },
-  errorCloseText: {
-    color: '#ff6b6b',
-    fontSize: moderateScale(14, 0.2),
-    fontWeight: '600',
-    lineHeight: moderateScale(14, 0.2),
-  },
-  loadingContainer: {
+  loadingProgressContainer: {
+    marginTop: scale(20),
+    paddingHorizontal: scale(20),
     alignItems: 'center',
-    paddingVertical: scale(4),
   },
   progressBarContainer: {
-    width: '80%',
-    height: scale(3),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: scale(2),
+    width: '100%',
+    height: scale(4),
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    borderRadius: scale(8),
     overflow: 'hidden',
-    marginBottom: scale(8),
+    marginBottom: scale(12),
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#ffffff',
-    borderRadius: scale(2),
-    shadowColor: '#ffffff',
+    backgroundColor: '#8b5cf6',
+    borderRadius: scale(8),
+    shadowColor: '#8b5cf6',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 4,
+    shadowRadius: 8,
   },
-  loadingText: {
-    color: '#ffffff',
-    fontSize: moderateScale(14, 0.2),
+  loadingTextContainer: {
+    alignItems: 'center',
+    gap: scale(4),
+  },
+  loadingMessage: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: moderateScale(13, 0.2),
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: scale(2),
+    letterSpacing: 0.3,
   },
-  loadingStepText: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: moderateScale(10, 0.2),
+  loadingStep: {
+    color: 'rgba(139, 92, 246, 0.8)',
+    fontSize: moderateScale(11, 0.2),
     fontWeight: '500',
     textAlign: 'center',
   },

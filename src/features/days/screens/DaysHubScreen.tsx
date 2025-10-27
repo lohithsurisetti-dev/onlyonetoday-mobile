@@ -329,6 +329,7 @@ const styles = StyleSheet.create({
   // Scroll Content
   scrollContent: {
     paddingHorizontal: scale(20),
+    paddingTop: scale(12), // Added top padding to prevent pulsating cards from being cut
     paddingBottom: scale(100),
     gap: scale(14),
   },

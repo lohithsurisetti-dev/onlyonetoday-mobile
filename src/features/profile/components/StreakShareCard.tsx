@@ -245,6 +245,17 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
+        {/* Close Button - Top Right */}
+        <TouchableOpacity 
+          style={styles.closeButtonTopRight}
+          onPress={onClose}
+          activeOpacity={0.7}
+        >
+          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+            <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        </TouchableOpacity>
+        
         <Animated.View
           style={[
             styles.cardContainer,
@@ -345,19 +356,6 @@ export default function StreakShareCard({ visible, onClose, streak, username, fi
               <View style={styles.cornerBR} />
             </LinearGradient>
           </View>
-
-          {/* Close Button below card */}
-          <TouchableOpacity 
-            style={styles.closeButton}
-            onPress={onClose}
-            activeOpacity={0.7}
-          >
-            <BlurView intensity={60} tint="dark" style={styles.closeButtonBlur}>
-              <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-              </Svg>
-            </BlurView>
-          </TouchableOpacity>
 
           {/* Action Buttons matching ShareCard layout */}
           <View style={[styles.actionButtons, { width: CARD_WIDTH }]}>
@@ -592,12 +590,19 @@ const styles = StyleSheet.create({
     borderColor: '#fb7185',
     borderRadius: 8,
   },
-  closeButton: {
+  closeButtonTopRight: {
+    position: 'absolute',
+    top: scale(50),
+    right: scale(20),
+    padding: scale(12),
+    zIndex: 1000,
+  },
+  closeButton_unused: {
     marginTop: scale(20),
     borderRadius: scale(28),
     overflow: 'hidden',
   },
-  closeButtonBlur: {
+  closeButtonBlur_unused: {
     width: scale(56),
     height: scale(56),
     borderRadius: scale(28),

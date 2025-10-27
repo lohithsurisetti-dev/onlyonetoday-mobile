@@ -23,6 +23,7 @@ import LocationLeaderboard from '@/features/home/components/LocationLeaderboard'
 import TrendingLeaderboard from '@/features/home/components/TrendingLeaderboard';
 import { getCurrentDay, getDayTheme } from '@/features/days/types';
 import DayIcon from '@/features/days/components/DayIcon';
+import DreamCard from '@/features/dreams/components/DreamCard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -308,6 +309,9 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
 
             {/* Today's Vibe Card */}
             <TodaysVibeCard navigation={navigation} />
+
+            {/* Dreams Card */}
+            <DreamCard onPress={() => navigation.navigate('CreateDream')} />
 
             {/* Location Leaderboard */}
             <LocationLeaderboard userLocation={location} />

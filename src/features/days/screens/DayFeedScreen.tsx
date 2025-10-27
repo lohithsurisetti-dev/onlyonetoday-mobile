@@ -16,12 +16,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { getDayTheme, getCurrentDay, DayOfWeek, DayPost } from '../types';
 import DayIcon from '../components/DayIcon';
+import DayShareCard from '../components/DayShareCard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -48,6 +50,8 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
   const [refreshing, setRefreshing] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
   const [userReactions, setUserReactions] = useState<Record<string, 'first' | 'second' | 'third'>>({});
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<DayPost | null>(null);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -107,6 +111,11 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
     setRefreshing(false);
   };
 
+  const handleShare = useCallback((post: DayPost) => {
+    setSelectedPost(post);
+    setShareModalVisible(true);
+  }, []);
+
   return (
     <KeyboardAvoidingView 
       style={styles.container} 
@@ -114,10 +123,10 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
     >
       <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#0a0a1a']} style={styles.gradient}>
         <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-          {/* Hero Header */}
+          {/* Fixed Hero Header */}
           <LinearGradient
             colors={[`${dayTheme.color}20`, `${dayTheme.color}05`, 'transparent']}
-            style={styles.hero}
+            style={styles.heroFixed}
           >
             <View style={styles.heroContent}>
               <TouchableOpacity
@@ -134,12 +143,6 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
                   <Text style={styles.heroTitle}>{dayTheme.name}</Text>
                 </View>
                 <Text style={styles.heroSubtitle}>{dayTheme.vibe}</Text>
-                {isToday && (
-                  <View style={styles.liveIndicator}>
-                    <View style={styles.liveDotPulse} />
-                    <Text style={styles.liveText}>LIVE NOW</Text>
-                  </View>
-                )}
                 {!isToday && (
                   <Text style={styles.closedText}>
                     {day === getCurrentDay() ? 'Opens today' : `Opens ${getDaysUntilText(day)}`}
@@ -149,55 +152,12 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
 
               <View style={styles.backButton} />
             </View>
-
-            <Text style={styles.heroDescription}>{dayTheme.description}</Text>
           </LinearGradient>
 
-          {/* Post Input (only if today) */}
-          {isToday && (
-            <View style={styles.postInputContainer}>
-              <BlurView intensity={25} tint="dark" style={styles.inputBlur}>
-                <LinearGradient
-                  colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
-                  style={styles.inputGradient}
-                >
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder={dayTheme.placeholder}
-                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
-                    value={postText}
-                    onChangeText={setPostText}
-                    multiline
-                    maxLength={500}
-                  />
-                  <View style={styles.inputFooter}>
-                    <Text style={styles.charCount}>{postText.length}/500</Text>
-                    <TouchableOpacity
-                      style={[
-                        styles.postButton,
-                        { backgroundColor: postText.trim() ? `${dayTheme.color}` : 'rgba(255, 255, 255, 0.1)' }
-                      ]}
-                      onPress={handlePost}
-                      disabled={!postText.trim()}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={[
-                        styles.postButtonText,
-                        { opacity: postText.trim() ? 1 : 0.4 }
-                      ]}>
-                        Share
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </LinearGradient>
-              </BlurView>
-            </View>
-          )}
-
-          {/* Feed */}
+          {/* Scrollable Content */}
           <ScrollView
-            style={styles.feed}
-            contentContainerStyle={styles.feedContent}
+            style={styles.scrollableContent}
+            contentContainerStyle={styles.scrollableContentContainer}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
@@ -207,11 +167,65 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
               />
             }
           >
+            {/* Description */}
+            <Text style={styles.heroDescription}>{dayTheme.description}</Text>
+
+            {/* Post Input (only if today) */}
+            {isToday && (
+              <View style={styles.postInputContainer}>
+                <BlurView intensity={25} tint="dark" style={styles.inputBlur}>
+                  <LinearGradient
+                    colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
+                    style={styles.inputGradient}
+                  >
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder={dayTheme.placeholder}
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                      value={postText}
+                      onChangeText={setPostText}
+                      multiline
+                      maxLength={500}
+                    />
+                    <View style={styles.inputFooter}>
+                      <Text style={styles.charCount}>{postText.length}/500</Text>
+                      <TouchableOpacity
+                        style={[
+                          styles.postButton,
+                          { backgroundColor: postText.trim() ? `${dayTheme.color}` : 'rgba(255, 255, 255, 0.1)' }
+                        ]}
+                        onPress={handlePost}
+                        disabled={!postText.trim()}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[
+                          styles.postButtonText,
+                          { opacity: postText.trim() ? 1 : 0.4 }
+                        ]}>
+                          Share
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </LinearGradient>
+                </BlurView>
+              </View>
+            )}
+
+            {/* Feed Posts */}
+            <View style={styles.feedContent}>
             {/* Section Header */}
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                {isToday ? 'Sharing Today' : 'From This Week'}
-              </Text>
+              <View style={styles.sectionTitleRow}>
+                <Text style={styles.sectionTitle}>
+                  {isToday ? 'Sharing Today' : 'From This Week'}
+                </Text>
+                {isToday && (
+                  <View style={styles.liveIndicatorSmall}>
+                    <View style={styles.liveDotSmall} />
+                    <Text style={styles.liveTextSmall}>LIVE</Text>
+                  </View>
+                )}
+              </View>
               <Text style={styles.sectionCount}>{posts.length} posts</Text>
             </View>
 
@@ -226,6 +240,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
                 userReaction={userReactions[post.id]}
                 onToggleExpand={() => toggleExpand(post.id)}
                 onReact={handleReaction}
+                onShare={handleShare}
               />
             ))}
 
@@ -240,8 +255,19 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
                 </Text>
               </View>
             )}
+            </View>
           </ScrollView>
         </Animated.View>
+
+        {/* Share Modal */}
+        {selectedPost && (
+          <DayShareCard
+            visible={shareModalVisible}
+            post={selectedPost}
+            dayTheme={dayTheme}
+            onClose={() => setShareModalVisible(false)}
+          />
+        )}
       </LinearGradient>
     </KeyboardAvoidingView>
   );
@@ -259,9 +285,10 @@ interface DayPostCardProps {
   userReaction?: 'first' | 'second' | 'third';
   onToggleExpand: () => void;
   onReact: (postId: string, reactionType: 'first' | 'second' | 'third') => void;
+  onShare: (post: DayPost) => void;
 }
 
-function DayPostCard({ post, dayTheme, index, isExpanded, userReaction, onToggleExpand, onReact }: DayPostCardProps) {
+function DayPostCard({ post, dayTheme, index, isExpanded, userReaction, onToggleExpand, onReact, onShare }: DayPostCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
 
@@ -308,6 +335,21 @@ function DayPostCard({ post, dayTheme, index, isExpanded, userReaction, onToggle
             </Text>
             <View style={{ flex: 1 }} />
             <Text style={styles.postTime}>{post.timeAgo}</Text>
+            <TouchableOpacity
+              style={styles.shareButton}
+              onPress={() => onShare(post)}
+              activeOpacity={0.7}
+            >
+              <Svg width={scale(18)} height={scale(18)} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  stroke="rgba(255, 255, 255, 0.6)"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </TouchableOpacity>
           </View>
 
           {/* Content - Expandable */}
@@ -520,15 +562,20 @@ const styles = StyleSheet.create({
 
   // Hero Header
   hero: {
-    paddingTop: scale(60),
-    paddingBottom: scale(20),
+    paddingTop: scale(50),
+    paddingBottom: scale(16),
+    paddingHorizontal: scale(20),
+  },
+  heroFixed: {
+    paddingTop: scale(50),
+    paddingBottom: scale(16),
     paddingHorizontal: scale(20),
   },
   heroContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: scale(12),
+    marginBottom: scale(10),
   },
   backButton: {
     width: scale(40),
@@ -599,31 +646,41 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: moderateScale(18, 0.2),
     fontWeight: '400',
+    paddingHorizontal: scale(20),
+    marginBottom: scale(16),
+  },
+
+  // Scrollable Content
+  scrollableContent: {
+    flex: 1,
+  },
+  scrollableContentContainer: {
+    paddingBottom: scale(40),
   },
 
   // Post Input
   postInputContainer: {
     paddingHorizontal: scale(20),
-    marginBottom: scale(20),
+    marginBottom: scale(16),
   },
   inputBlur: {
-    borderRadius: scale(18),
+    borderRadius: scale(16),
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   inputGradient: {
-    padding: scale(16),
+    padding: scale(14),
   },
   textInput: {
     fontSize: moderateScale(14, 0.2),
     color: '#ffffff',
-    minHeight: scale(80),
-    maxHeight: scale(160),
+    minHeight: scale(60),
+    maxHeight: scale(120),
     textAlignVertical: 'top',
     fontWeight: '400',
     lineHeight: moderateScale(20, 0.2),
-    marginBottom: scale(12),
+    marginBottom: scale(10),
   },
   inputFooter: {
     flexDirection: 'row',
@@ -653,13 +710,17 @@ const styles = StyleSheet.create({
   },
   feedContent: {
     paddingHorizontal: scale(20),
-    paddingBottom: scale(100),
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: scale(16),
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
   },
   sectionTitle: {
     fontSize: moderateScale(12, 0.2),
@@ -673,25 +734,48 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
     fontWeight: '600',
   },
+  liveIndicatorSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    paddingHorizontal: scale(6),
+    paddingVertical: scale(3),
+    borderRadius: scale(6),
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.4)',
+  },
+  liveDotSmall: {
+    width: scale(4),
+    height: scale(4),
+    borderRadius: scale(2),
+    backgroundColor: '#22c55e',
+  },
+  liveTextSmall: {
+    fontSize: moderateScale(8, 0.2),
+    fontWeight: '700',
+    color: '#22c55e',
+    letterSpacing: 0.5,
+  },
 
   // Post Card
   postCard: {
-    marginBottom: scale(14),
+    marginBottom: scale(12),
   },
   postBlur: {
-    borderRadius: scale(16),
+    borderRadius: scale(14),
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   postGradient: {
-    padding: scale(16),
+    padding: scale(14),
   },
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
-    marginBottom: scale(12),
+    marginBottom: scale(10),
   },
   postUsername: {
     fontSize: moderateScale(11, 0.2),
@@ -703,10 +787,14 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '500',
   },
+  shareButton: {
+    padding: scale(6),
+    marginLeft: scale(8),
+  },
   postContent: {
-    fontSize: moderateScale(14, 0.2),
+    fontSize: moderateScale(13, 0.2),
     color: '#ffffff',
-    lineHeight: moderateScale(21, 0.2),
+    lineHeight: moderateScale(19, 0.2),
     fontWeight: '400',
     marginBottom: scale(8),
   },

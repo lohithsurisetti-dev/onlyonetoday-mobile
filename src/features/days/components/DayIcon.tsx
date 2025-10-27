@@ -137,17 +137,24 @@ export default function DayIcon({ icon, size, color }: DayIconProps) {
       );
 
     case 'power':
-      // Power off icon for Sunday (Offline)
+      // Sun icon for Sunday (Rest/Offline)
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-          <Path
-            d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"
-            stroke={color}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          {/* Sun rays */}
+          <Path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" 
+            stroke={color} 
+            strokeWidth={2} 
+            strokeLinecap="round" 
           />
-          <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth={2} opacity={0.3} />
+          {/* Sun circle */}
+          <Circle 
+            cx="12" 
+            cy="12" 
+            r="5" 
+            stroke={color} 
+            strokeWidth={2}
+            fill={`${color}30`}
+          />
         </Svg>
       );
 

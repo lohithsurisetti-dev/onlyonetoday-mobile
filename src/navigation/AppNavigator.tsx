@@ -18,6 +18,7 @@ import NotificationsScreen from '@/features/notifications/screens/NotificationsS
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 import DaysHubScreen from '@/features/days/screens/DaysHubScreen';
 import DayFeedScreen from '@/features/days/screens/DayFeedScreen';
+import CreateDreamScreen from '@/features/dreams/screens/CreateDreamScreen';
 import { DayOfWeek } from '@/features/days/types';
 
 export type RootStackParamList = {
@@ -81,6 +82,7 @@ export type RootStackParamList = {
   DayFeed: {
     day: DayOfWeek;
   };
+  CreateDream: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -144,6 +146,14 @@ export default function AppNavigator() {
           component={DayFeedScreen}
           options={{
             animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen 
+          name="CreateDream" 
+          component={CreateDreamScreen}
+          options={{
+            animation: 'slide_from_bottom',
+            presentation: 'modal',
           }}
         />
       </Stack.Navigator>

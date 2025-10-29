@@ -24,6 +24,8 @@ import Svg, { Path, Circle } from 'react-native-svg';
 import { getDayTheme, getCurrentDay, DayOfWeek, DayPost } from '../types';
 import DayIcon from '../components/DayIcon';
 import DayShareCard from '../components/DayShareCard';
+import { DayPostCardSkeleton } from '@/shared/components/SkeletonLoader';
+import { fetchDayPosts, createDayPost, reactToDayPost } from '@/lib/api/days';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -47,6 +49,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [postText, setPostText] = useState('');
   const [posts, setPosts] = useState<DayPost[]>(SAMPLE_POSTS[day] || []);
+  const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
   const [userReactions, setUserReactions] = useState<Record<string, 'first' | 'second' | 'third'>>({});
@@ -59,38 +62,105 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
       duration: 600,
       useNativeDriver: true,
     }).start();
-  }, []);
+    
+    // Load real posts
+    loadPosts();
+  }, [day]);
 
-  const handlePost = useCallback(() => {
+  const loadPosts = async () => {
+    setIsLoading(true);
+    try {
+      const result = await fetchDayPosts(day, isToday);
+      if (result.success) {
+        setPosts(result.posts);
+      } else {
+        console.error('Failed to load day posts:', result.error);
+        setPosts([]);
+      }
+    } catch (error) {
+      console.error('Error loading day posts:', error);
+      setPosts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePost = useCallback(async () => {
     if (!postText.trim() || !isToday) return;
 
-    const newPost: DayPost = {
-      id: Date.now().toString(),
-      content: postText,
-      username: 'you',
-      day,
-      timestamp: Date.now(),
-      timeAgo: 'Just now',
-      reactionCounts: { first: 0, second: 0, third: 0 },
-      weekNumber: Math.ceil(Date.now() / (7 * 24 * 60 * 60 * 1000)),
-      scope: 'world',
-    };
+    try {
+      const result = await createDayPost(postText, day);
+      if (result.success) {
+        // Reload posts to get the new one
+        await loadPosts();
+        setPostText('');
+      } else {
+        // Show error (you could add a toast/alert here)
+        console.error('Failed to create post:', result.error);
+        alert(result.error || 'Failed to create post');
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Failed to create post');
+    }
+  }, [postText, isToday, day]);
 
-    setPosts([newPost, ...posts]);
-    setPostText('');
-  }, [postText, isToday, day, posts]);
-
-  const handleReaction = useCallback((postId: string, reactionType: 'first' | 'second' | 'third') => {
+  const handleReaction = useCallback(async (postId: string, reactionType: 'first' | 'second' | 'third') => {
+    // Optimistic update
+    const previousReaction = userReactions[postId];
+    const isRemoving = previousReaction === reactionType;
+    
     setUserReactions(prev => {
       const current = { ...prev };
-      if (current[postId] === reactionType) {
+      if (isRemoving) {
         delete current[postId];
       } else {
         current[postId] = reactionType;
       }
       return current;
     });
-  }, []);
+
+    // Update post counts optimistically
+    setPosts(prevPosts => 
+      prevPosts.map(post => {
+        if (post.id !== postId) return post;
+        
+        const newCounts = { ...post.reactionCounts };
+        
+        // Remove previous reaction count if exists
+        if (previousReaction) {
+          newCounts[previousReaction] = Math.max(0, (newCounts[previousReaction] || 0) - 1);
+        }
+        
+        // Add new reaction count (unless removing)
+        if (!isRemoving) {
+          newCounts[reactionType] = (newCounts[reactionType] || 0) + 1;
+        }
+        
+        return { ...post, reactionCounts: newCounts };
+      })
+    );
+
+    // Call backend API
+    if (!isRemoving) {
+      const result = await reactToDayPost(postId, reactionType);
+      if (!result.success) {
+        console.error('Failed to react to post:', result.error);
+        // Revert optimistic update on error
+        setUserReactions(prev => {
+          const current = { ...prev };
+          if (previousReaction) {
+            current[postId] = previousReaction;
+          } else {
+            delete current[postId];
+          }
+          return current;
+        });
+        // Reload posts to get correct counts
+        await loadPosts();
+      }
+    }
+  }, [userReactions, loadPosts]);
 
   const toggleExpand = useCallback((postId: string) => {
     setExpandedPosts(prev => {
@@ -106,8 +176,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadPosts();
     setRefreshing(false);
   };
 
@@ -230,21 +299,31 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
             </View>
 
             {/* Posts */}
-            {posts.map((post, index) => (
-              <MemoizedDayPostCard
-                key={post.id}
-                post={post}
-                dayTheme={dayTheme}
-                index={index}
-                isExpanded={expandedPosts.has(post.id)}
-                userReaction={userReactions[post.id]}
-                onToggleExpand={() => toggleExpand(post.id)}
-                onReact={handleReaction}
-                onShare={handleShare}
-              />
-            ))}
+            {isLoading ? (
+              <>
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <DayPostCardSkeleton key={`skeleton-${index}`} index={index} />
+                ))}
+              </>
+            ) : (
+              <>
+                {posts.map((post, index) => (
+                  <MemoizedDayPostCard
+                    key={post.id}
+                    post={post}
+                    dayTheme={dayTheme}
+                    index={index}
+                    isExpanded={expandedPosts.has(post.id)}
+                    userReaction={userReactions[post.id]}
+                    onToggleExpand={() => toggleExpand(post.id)}
+                    onReact={handleReaction}
+                    onShare={handleShare}
+                  />
+                ))}
+              </>
+            )}
 
-            {posts.length === 0 && (
+            {!isLoading && posts.length === 0 && (
               <View style={styles.emptyState}>
                 <View style={styles.emptyIcon}>
                   <DayIcon icon={dayTheme.icon} size={scale(80)} color={dayTheme.color} />
@@ -342,7 +421,7 @@ function DayPostCard({ post, dayTheme, index, isExpanded, userReaction, onToggle
             >
               <Svg width={scale(18)} height={scale(18)} viewBox="0 0 24 24" fill="none">
                 <Path
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"
                   stroke="rgba(255, 255, 255, 0.6)"
                   strokeWidth={1.5}
                   strokeLinecap="round"

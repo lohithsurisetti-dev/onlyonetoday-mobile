@@ -12,6 +12,7 @@ import {
   Dimensions,
   ScrollView,
   Image,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +21,7 @@ import Svg, { Path, Circle } from 'react-native-svg';
 import { useAuthStore } from '@/lib/stores/authStore';
 import StreakShareCard from '../components/StreakShareCard';
 import { getTierColors } from '@/shared/constants/tierColors';
+import { getProfile, getUserStats } from '@/lib/api/profile';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -34,13 +36,15 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const isAnonymous = !isAuthenticated || !user;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [showStreakShare, setShowStreakShare] = useState(false);
-
-  const userStats = {
-    totalPosts: 42,
-    uniquePosts: 28,
-    streak: 7,
-    topTier: 12,
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [userStats, setUserStats] = useState({
+    totalPosts: 0,
+    uniquePosts: 0,
+    streak: 0,
+    topTier: 0,
+  });
 
   // Random profile picture
   const [profilePic] = useState(`https://i.pravatar.cc/300?u=${user?.username || 'default'}`);
@@ -53,7 +57,54 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
-  }, []);
+    
+    // Load profile data
+    if (user?.id) {
+      loadProfileData();
+    }
+  }, [user?.id]);
+
+  const loadProfileData = async () => {
+    if (!user?.id) {
+      console.log('⚠️ No user ID found, skipping profile load');
+      return;
+    }
+    
+    console.log('🔍 Loading profile for user:', user.id);
+    
+    try {
+      setIsLoading(true);
+      
+      // Fetch profile and stats in parallel
+      const [profile, stats] = await Promise.all([
+        getProfile(user.id),
+        getUserStats(user.id)
+      ]);
+      
+      console.log('📊 Profile data:', JSON.stringify(profile, null, 2));
+      console.log('📈 User stats:', JSON.stringify(stats, null, 2));
+      
+      setProfileData(profile);
+      setUserStats({
+        totalPosts: stats?.total_posts || 0,
+        uniquePosts: stats?.total_posts || 0, // Can calculate unique later
+        streak: stats?.current_streak || 0,
+        topTier: stats?.elite_posts || 0,
+      });
+      
+      console.log('✅ Profile loaded - Total Posts:', stats?.total_posts || 0);
+    } catch (error) {
+      console.error('❌ Failed to load profile data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadProfileData();
+    setRefreshing(false);
+  };
 
   if (isAnonymous) {
     return (
@@ -78,7 +129,18 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       <LinearGradient colors={['#0a0a1a', '#1a1a2e', '#0a0a1a']} style={styles.gradient}>
         <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
           
-          <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            contentContainerStyle={styles.scroll} 
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#8b5cf6"
+                colors={['#8b5cf6']}
+              />
+            }
+          >
             
             {/* Premium Header */}
             <View style={styles.header}>

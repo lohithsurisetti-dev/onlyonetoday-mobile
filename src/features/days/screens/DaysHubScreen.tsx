@@ -19,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getCurrentDay, getAllDayThemes, DayOfWeek, DayTheme } from '../types';
 import DayIcon from '../components/DayIcon';
+import { getDayStats } from '@/lib/api/days';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -32,6 +33,15 @@ export default function DaysHubScreen({ navigation }: DaysHubScreenProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const currentDay = getCurrentDay();
   const allDays = getAllDayThemes();
+  const [participantCounts, setParticipantCounts] = useState<Record<DayOfWeek, number>>({
+    monday: 0,
+    tuesday: 0,
+    wednesday: 0,
+    thursday: 0,
+    friday: 0,
+    saturday: 0,
+    sunday: 0,
+  });
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -39,7 +49,17 @@ export default function DaysHubScreen({ navigation }: DaysHubScreenProps) {
       duration: 600,
       useNativeDriver: true,
     }).start();
+    
+    // Load participant counts
+    loadStats();
   }, []);
+
+  const loadStats = async () => {
+    const result = await getDayStats();
+    if (result.success && result.stats) {
+      setParticipantCounts(result.stats.dayCounts as Record<DayOfWeek, number>);
+    }
+  };
 
   const getDayStatus = (day: DayOfWeek): 'current' | 'past' | 'future' => {
     const dayOrder: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -62,17 +82,7 @@ export default function DaysHubScreen({ navigation }: DaysHubScreenProps) {
   };
 
   const getParticipantCount = (day: DayOfWeek): number => {
-    // Mock data - will be replaced with API
-    const counts: Record<DayOfWeek, number> = {
-      monday: 2431,
-      tuesday: 1892,
-      wednesday: 2156,
-      thursday: 1543,
-      friday: 2789,
-      saturday: 1678,
-      sunday: 1234,
-    };
-    return counts[day];
+    return participantCounts[day] || 0;
   };
 
   return (

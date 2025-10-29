@@ -13,6 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -183,23 +184,29 @@ export default function DreamCard({ onPress }: DreamCardProps) {
         activeOpacity={1}
       >
         <View style={styles.dreamCardWrapper}>
-          <LinearGradient
-            colors={['#1e1456', '#2a1b5c', '#1a1447', '#251a5a']}
-            locations={[0, 0.4, 0.7, 1]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.dreamCardGradient}
-          >
-            {/* Radial gradient overlay for depth */}
-            <View style={styles.radialOverlay}>
-              <LinearGradient
-                colors={['rgba(139, 92, 246, 0.15)', 'transparent', 'rgba(45, 27, 105, 0.3)']}
-                locations={[0, 0.5, 1]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.radialGradient}
-              />
-            </View>
+          <BlurView intensity={30} tint="dark" style={styles.dreamCardBlur}>
+            <LinearGradient
+              colors={[
+                'rgba(139, 92, 246, 0.15)',
+                'rgba(75, 43, 150, 0.12)',
+                'rgba(94, 53, 177, 0.10)',
+                'rgba(45, 27, 105, 0.15)'
+              ]}
+              locations={[0, 0.3, 0.7, 1]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.dreamCardGradient}
+            >
+              {/* Radial gradient overlay for depth */}
+              <View style={styles.radialOverlay}>
+                <LinearGradient
+                  colors={['rgba(139, 92, 246, 0.08)', 'transparent', 'rgba(45, 27, 105, 0.12)']}
+                  locations={[0, 0.5, 1]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.radialGradient}
+                />
+              </View>
 
             {/* Twinkling stars background */}
             <View style={styles.starsContainer} pointerEvents="none">
@@ -278,12 +285,13 @@ export default function DreamCard({ onPress }: DreamCardProps) {
 
             {/* Mist overlay at bottom */}
             <LinearGradient
-              colors={['transparent', 'rgba(26, 20, 71, 0.8)', 'rgba(26, 20, 71, 0.95)']}
+              colors={['transparent', 'rgba(26, 20, 71, 0.3)', 'rgba(26, 20, 71, 0.5)']}
               locations={[0, 0.5, 1]}
               style={styles.mistOverlay}
               pointerEvents="none"
             />
           </LinearGradient>
+          </BlurView>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -298,8 +306,12 @@ const styles = StyleSheet.create({
     borderRadius: scale(20),
     overflow: 'hidden',
     position: 'relative',
+  },
+  dreamCardBlur: {
+    borderRadius: scale(20),
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.2)',
+    borderColor: 'rgba(167, 139, 250, 0.15)',
   },
   dreamCardGradient: {
     padding: scale(24),

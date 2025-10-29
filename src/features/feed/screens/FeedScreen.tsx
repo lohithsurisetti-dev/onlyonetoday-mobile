@@ -25,6 +25,7 @@ import DaySummaryModal from '../components/DaySummaryModal';
 import { getTierColors as getStandardTierColors } from '@/shared/constants/tierColors';
 import { getFeedPosts } from '@/lib/api/posts';
 import type { Post as DBPost } from '@/types/database.types';
+import { PostCardSkeleton, DaySummaryCardSkeleton } from '@/shared/components/SkeletonLoader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -313,6 +314,8 @@ export default function FeedScreen() {
       overshootClamping: false,
     }).start();
     setShowDaySummaries(showSummaries);
+    // Immediately show loading state when toggling
+    setIsLoading(true);
   };
   
   // Animations
@@ -325,6 +328,12 @@ export default function FeedScreen() {
   
   // Load posts from Supabase
   const loadPosts = useCallback(async () => {
+    setIsLoading(true);
+    
+    // Minimum loading time to show skeleton (for better UX)
+    const startTime = Date.now();
+    const minLoadingTime = 300; // ms
+    
     try {
       const inputTypeFilter = showDaySummaries ? 'day' : 'action';
       const dbPosts = await getFeedPosts({
@@ -333,8 +342,21 @@ export default function FeedScreen() {
         limit: 50,
       });
 
+      // Check if response has posts array
+      if (!dbPosts || !dbPosts.posts) {
+        console.error('Invalid response structure:', dbPosts);
+        setPosts([]);
+        
+        // Ensure minimum loading time
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime < minLoadingTime) {
+          await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+        }
+        return;
+      }
+
       // Transform to match local Post type
-      const transformedPosts: Post[] = dbPosts.map(dbPost => ({
+      const transformedPosts: Post[] = dbPosts.posts.map(dbPost => ({
         id: dbPost.id,
         content: dbPost.content,
         time: getTimeAgo(dbPost.created_at),
@@ -355,11 +377,24 @@ export default function FeedScreen() {
         must_try_count: dbPost.reactions?.must_try || 0,
       }));
 
+      // Ensure minimum loading time
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime < minLoadingTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+      }
+
       setPosts(transformedPosts);
     } catch (error) {
       console.error('Failed to load posts:', error);
-      // Fallback to sample data on error
-      setPosts(SAMPLE_POSTS);
+      
+      // Ensure minimum loading time even on error
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime < minLoadingTime) {
+        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+      }
+      
+      // Show empty state on error
+      setPosts([]);
     } finally {
       setIsLoading(false);
     }
@@ -640,13 +675,18 @@ export default function FeedScreen() {
           </ScrollView>
         )}
         
-        {/* Posts */}
+        {/* Posts Section */}
         <View style={styles.postsContainer}>
           {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#8b5cf6" />
-              <Text style={styles.loadingText}>Loading feed...</Text>
-            </View>
+            <>
+              {Array.from({ length: 5 }).map((_, index) => (
+                showDaySummaries ? (
+                  <DaySummaryCardSkeleton key={`skeleton-${index}`} index={index} />
+                ) : (
+                  <PostCardSkeleton key={`skeleton-${index}`} index={index} />
+                )
+              ))}
+            </>
           ) : filteredPosts.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyEmoji}>🌌</Text>

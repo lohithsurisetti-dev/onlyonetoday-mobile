@@ -19,6 +19,106 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Circle, Path, Defs, LinearGradient as SvgLinearGradient, Stop, G } from 'react-native-svg';
+import { getCosmicColors } from '@/shared/constants/cosmicColorPalette';
+import { useAuthStore } from '@/lib/stores/authStore';
+
+// Floating star component for subtle background animation
+const FloatingStar = ({ delay = 0 }: { delay?: number }) => {
+  const translateY = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.5)).current;
+
+  useEffect(() => {
+    const animate = () => {
+      Animated.loop(
+        Animated.parallel([
+          Animated.sequence([
+            Animated.timing(translateY, {
+              toValue: -30,
+              duration: 3000 + Math.random() * 2000,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateY, {
+              toValue: 0,
+              duration: 3000 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(translateX, {
+              toValue: 20,
+              duration: 2500 + Math.random() * 2000,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+              toValue: -20,
+              duration: 2500 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+              toValue: 0,
+              duration: 2500 + Math.random() * 2000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(opacity, {
+              toValue: 0.3,
+              duration: 1500,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0.1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacity, {
+              toValue: 0.3,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(scale, {
+              toValue: 1,
+              duration: 1500,
+              delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(scale, {
+              toValue: 0.5,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(scale, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ]),
+        ])
+      ).start();
+    };
+
+    animate();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.star,
+        {
+          transform: [{ translateY }, { translateX }, { scale }],
+          opacity,
+        },
+      ]}
+    />
+  );
+};
 
 // Dynamic imports for Expo Go compatibility
 let captureRef: any = null;
@@ -45,7 +145,15 @@ type ShareCardProps = {
   visible: boolean;
   onClose: () => void;
   data: {
-    percentile: {
+    // V2: Narrative fields
+    narrative?: string;
+    matchCount?: number;
+    totalInScope?: number;
+    emotionalTone?: 'unique' | 'shared' | 'common';
+    celebration?: string;
+    badge?: string;
+    // Legacy fields (for backward compatibility)
+    percentile?: {
       value: number;
       tier: string;
       displayText: string;
@@ -56,6 +164,10 @@ type ShareCardProps = {
     content: string;
     vibe?: string;
     scope: string;
+    locationCity?: string | null;
+    locationState?: string | null;
+    locationCountry?: string | null;
+    locationDisplay?: string | null;
     inputType: string;
     temporal?: {
       week: { matches: number; total: number; comparison: string };
@@ -72,64 +184,24 @@ type ShareCardProps = {
   };
 };
 
-// Animated floating star for background
-const FloatingStar = ({ delay = 0, size = 2 }: { delay?: number; size?: number }) => {
-  const translateY = useRef(new Animated.Value(0)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(translateY, {
-            toValue: -20,
-            duration: 2000 + Math.random() * 1000,
-            delay,
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateY, {
-            toValue: 0,
-            duration: 2000 + Math.random() * 1000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(opacity, {
-            toValue: 0.6,
-            duration: 1000,
-            delay,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacity, {
-            toValue: 0.2,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ]),
-      ])
-    ).start();
-  }, []);
-
-  return (
-    <Animated.View
-      style={[
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: '#ffffff',
-          opacity,
-          transform: [{ translateY }],
-        },
-      ]}
-    />
-  );
-};
-
 export default function ShareCard({ visible, onClose, data, tierColors }: ShareCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const cardRef = useRef<View>(null);
+  
+  // Get username from auth store
+  const { user } = useAuthStore();
+  
+  // Get current date
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+  
+  // Get cosmic colors for varied, cohesive design
+  const cosmicColors = getCosmicColors(tierColors);
 
   useEffect(() => {
     if (visible) {
@@ -162,10 +234,12 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
     }
   }, [visible]);
 
+  // V2: Use narrative if available, otherwise fallback to percentile
+  const hasNarrative = !!data.narrative;
   const radius = 55;
   const strokeWidth = 5;
   const circumference = 2 * Math.PI * radius;
-  const progress = 1 - data.percentile.value / 100;
+  const progress = data.percentile ? 1 - data.percentile.value / 100 : 0;
 
   const handleShare = async () => {
     if (!captureRef || !Sharing) {
@@ -257,12 +331,12 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
           {/* The Shareable Card */}
           <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0a0a1a' }]}>
             <LinearGradient
-              colors={['#0a0a1a', '#1a1a2e', tierColors.backgroundGradient]}
+              colors={['#0a0a1a', '#1a1a2e', cosmicColors.theme.backgroundGradient || '#0a0a1a']}
               style={styles.cardGradient}
             >
               {/* Floating Stars Background */}
               <View style={styles.starsContainer} pointerEvents="none">
-                {[...Array(20)].map((_, i) => (
+                {[...Array(12)].map((_, i) => (
                   <View
                     key={i}
                     style={{
@@ -271,95 +345,186 @@ export default function ShareCard({ visible, onClose, data, tierColors }: ShareC
                       left: `${Math.random() * 100}%`,
                     }}
                   >
-                    <FloatingStar delay={i * 100} size={2 + Math.random() * 2} />
+                    <FloatingStar delay={i * 200} />
                   </View>
                 ))}
               </View>
 
               {/* Content */}
               <View style={styles.cardContent}>
-                {/* Header */}
+                {/* Top Section */}
+                <View style={styles.topSection}>
+                {/* Header - Premium */}
                 <View style={styles.cardHeader}>
                   <Text style={styles.brandName}>ONLYONE</Text>
-                  <View style={[styles.brandDivider, { backgroundColor: tierColors.primary }]} />
+                    <View style={[styles.brandDivider, { backgroundColor: cosmicColors.theme.primary }]} />
                   <Text style={styles.brandTagline}>TODAY</Text>
                 </View>
 
-                {/* Main Ring */}
-                <View style={styles.ringSection}>
-                  {/* Glow */}
-                  <View style={[styles.ringGlow, { backgroundColor: tierColors.glow }]} />
-                  
-                  <Svg width={140} height={140}>
-                    <Defs>
-                      <SvgLinearGradient id="shareGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <Stop offset="0%" stopColor={tierColors.primary} stopOpacity="1" />
-                        <Stop offset="50%" stopColor={tierColors.secondary} stopOpacity="1" />
-                        <Stop offset="100%" stopColor={tierColors.primary} stopOpacity="0.9" />
-                      </SvgLinearGradient>
-                    </Defs>
-                    
-                    {/* Background circle */}
-                    <Circle
-                      cx={70}
-                      cy={70}
-                      r={radius}
-                      stroke="rgba(255, 255, 255, 0.1)"
-                      strokeWidth={strokeWidth}
-                      fill="transparent"
-                    />
-                    
-                    {/* Progress circle */}
-                    <Circle
-                      cx={70}
-                      cy={70}
-                      r={radius}
-                      stroke="url(#shareGrad)"
-                      strokeWidth={strokeWidth}
-                      fill="transparent"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={circumference * progress}
-                      strokeLinecap="round"
-                      rotation="-90"
-                      origin="70, 70"
-                    />
-                  </Svg>
-
-                  {/* Center Content */}
-                  <View style={styles.ringCenter}>
-                    <Text style={styles.centerPercentile}>{data.percentile.displayText}</Text>
-                    <View style={[styles.centerTierBadge, { 
-                      backgroundColor: `${tierColors.primary}30`,
-                      borderColor: `${tierColors.primary}80`,
-                    }]}>
-                      <Text style={styles.centerTierText}>{data.percentile.tier?.toUpperCase() || 'UNKNOWN'}</Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Content Quote */}
-                <View style={styles.quoteSection}>
-                  <Text style={styles.quoteText} numberOfLines={3}>
+                  {/* Action and Results - Vertically Centered Together */}
+                  <View style={styles.actionResultsContainer}>
+                {/* User Action - THE HERO */}
+                <View style={styles.actionHeroSection}>
+                  <Text style={[styles.actionText, { color: cosmicColors.neutral.text.primary }]} numberOfLines={4}>
                     "{data.content}"
                   </Text>
+                    </View>
+                  
+                    {/* Result Numbers Display - More Descriptive */}
+                    {data.matchCount !== undefined ? (
+                    <View style={styles.shareNumbersContainer}>
+                        {(() => {
+                          // Only truly unique if matchCount is 1 AND totalInScope is exactly 1 (not 0 or null)
+                          const isTrulyUnique = (data.matchCount === 1 && data.totalInScope === 1);
+                          const displayMatchCount = data.matchCount || 1;
+                          // If totalInScope is 0/null but we have matchCount > 1, use matchCount as minimum
+                          const displayTotal = isTrulyUnique 
+                            ? 1 
+                            : (data.totalInScope && data.totalInScope > 0 
+                              ? data.totalInScope 
+                              : Math.max(displayMatchCount, 1));
+                          const percentage = isTrulyUnique 
+                            ? 100
+                            : (displayTotal > 0
+                              ? ((displayMatchCount / displayTotal) * 100)
+                              : 0);
+                          
+                          return (
+                            <View style={styles.shareResultCard}>
+                              <View style={[styles.shareResultMain, {
+                                backgroundColor: `${cosmicColors.theme.primary}15`,
+                                borderColor: `${cosmicColors.theme.primary}30`,
+                              }]}>
+                                <Text style={[styles.shareResultMainNumber, { color: cosmicColors.theme.primary }]}>
+                                  {displayMatchCount.toLocaleString()}
+                        </Text>
+                                <Text style={[styles.shareResultMainLabel, { color: cosmicColors.neutral.text.secondary }]}>
+                                  {isTrulyUnique ? 'First!' : `of ${displayTotal.toLocaleString()} people`}
+                        </Text>
+                      </View>
+                              <Text style={[styles.shareResultSubtext, { color: cosmicColors.neutral.text.tertiary }]}>
+                                {isTrulyUnique 
+                                  ? "You're the first to share this!"
+                                  : `${percentage.toFixed(1)}% of people did this today`
+                                }
+                      </Text>
+                    </View>
+                          );
+                        })()}
+                      </View>
+                    ) : null}
+                  </View>
+
+                  {/* Legacy: Percentile Ring (fallback) */}
+                  {data.matchCount === undefined && data.percentile ? (
+                  <View style={styles.ringSection}>
+                    {/* Glow */}
+                    <View style={[styles.ringGlow, { backgroundColor: tierColors.glow }]} />
+                    
+                    <Svg width={140} height={140}>
+                      <Defs>
+                        <SvgLinearGradient id="shareGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <Stop offset="0%" stopColor={tierColors.primary} stopOpacity="1" />
+                          <Stop offset="50%" stopColor={tierColors.secondary} stopOpacity="1" />
+                          <Stop offset="100%" stopColor={tierColors.primary} stopOpacity="0.9" />
+                        </SvgLinearGradient>
+                      </Defs>
+                      
+                      {/* Background circle */}
+                      <Circle
+                        cx={70}
+                        cy={70}
+                        r={radius}
+                        stroke="rgba(255, 255, 255, 0.1)"
+                        strokeWidth={strokeWidth}
+                        fill="transparent"
+                      />
+                      
+                      {/* Progress circle */}
+                      {data.percentile && (
+                        <Circle
+                          cx={70}
+                          cy={70}
+                          r={radius}
+                          stroke="url(#shareGrad)"
+                          strokeWidth={strokeWidth}
+                          fill="transparent"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={circumference * progress}
+                          strokeLinecap="round"
+                          rotation="-90"
+                          origin="70, 70"
+                        />
+                      )}
+                    </Svg>
+
+                    {/* Center Content */}
+                    {data.percentile && (
+                      <View style={styles.ringCenter}>
+                        <Text style={styles.centerPercentile}>{data.percentile.displayText}</Text>
+                        <View style={[styles.centerTierBadge, { 
+                          backgroundColor: `${tierColors.primary}30`,
+                          borderColor: `${tierColors.primary}80`,
+                        }]}>
+                          <Text style={styles.centerTierText}>{data.percentile.tier?.toUpperCase() || 'UNKNOWN'}</Text>
+                        </View>
+                      </View>
+                    )}
+                    </View>
+                  ) : null}
                 </View>
 
-                {/* Welcoming Footer for Other Users */}
-                <View style={styles.footer}>
+                {/* Bottom Section - Username, Date, Location, Footer */}
+                <View style={styles.bottomSection}>
+                  {/* Username and Date Section */}
+                  <View style={styles.userInfoSection}>
+                    {user?.username && (
+                      <Text style={[styles.usernameText, { color: cosmicColors.neutral.text.secondary }]}>
+                        @{user.username}
+                      </Text>
+                    )}
+                    <Text style={[styles.dateText, { color: cosmicColors.neutral.text.secondary }]}>
+                      {formattedDate}
+                    </Text>
+                    {/* Location Display */}
+                    {(data.locationDisplay || (data.locationCity || data.locationState || data.locationCountry)) && (
+                      <View style={styles.locationInfoRow}>
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke={cosmicColors.theme.primary} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                          <Circle cx="12" cy="10" r="3" stroke={cosmicColors.theme.primary} strokeWidth={1.5} />
+                        </Svg>
+                        <Text style={[styles.locationText, { color: cosmicColors.neutral.text.tertiary }]}>
+                          {data.locationDisplay || 
+                            [data.locationCity, data.locationState, data.locationCountry]
+                              .filter(Boolean)
+                              .join(', ') || 
+                            data.scope.charAt(0).toUpperCase() + data.scope.slice(1)}
+                        </Text>
+                  </View>
+                )}
+                  </View>
+
+                {/* Welcoming Footer - Premium */}
+                <View style={[styles.footer, { borderTopColor: cosmicColors.neutral.border }]}>
                   <View style={styles.footerContent}>
-                    <Text style={styles.welcomeMessage}>
+                    <Text style={[styles.welcomeMessage, { color: cosmicColors.neutral.text.secondary }]}>
                       Join the community. Every moment counts.
                     </Text>
-                    <Text style={styles.footerLink}>onlyonetoday.com</Text>
+                    <View style={styles.footerBrand}>
+                        <View style={[styles.footerDot, { backgroundColor: cosmicColors.theme.primary }]} />
+                        <Text style={[styles.footerLink, { color: cosmicColors.theme.primary }]}>onlyonetoday.com</Text>
+                        <View style={[styles.footerDot, { backgroundColor: cosmicColors.theme.primary }]} />
+                      </View>
+                    </View>
                   </View>
                 </View>
               </View>
 
-              {/* Decorative Corner Accents */}
-              <View style={[styles.cornerTL, { borderColor: tierColors.primary }]} />
-              <View style={[styles.cornerTR, { borderColor: tierColors.primary }]} />
-              <View style={[styles.cornerBL, { borderColor: tierColors.primary }]} />
-              <View style={[styles.cornerBR, { borderColor: tierColors.primary }]} />
+              {/* Decorative Corner Accents - Theme colors */}
+              <View style={[styles.cornerTL, { borderColor: cosmicColors.theme.primary }]} />
+              <View style={[styles.cornerTR, { borderColor: cosmicColors.theme.secondary }]} />
+              <View style={[styles.cornerBL, { borderColor: cosmicColors.theme.primary }]} />
+              <View style={[styles.cornerBR, { borderColor: cosmicColors.theme.secondary }]} />
             </LinearGradient>
           </View>
 
@@ -414,23 +579,32 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderRadius: 24, // Match card border radius
   },
-  starsContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 0,
-  },
   cardContent: {
     flex: 1,
-    padding: scale(24),
+    padding: scale(20),
+    paddingTop: scale(24),
+    paddingBottom: scale(16),
+    zIndex: 2,
+    position: 'relative',
     justifyContent: 'space-between',
-    zIndex: 1,
+  },
+  topSection: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  actionResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  bottomSection: {
+    width: '100%',
+    justifyContent: 'flex-end',
   },
   cardHeader: {
     alignItems: 'center',
-    marginBottom: scale(24),
+    marginBottom: scale(20),
   },
   brandName: {
     fontSize: moderateScale(28, 0.3),
@@ -473,6 +647,150 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Action Hero Section - THE MAIN FOCUS
+  actionHeroSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: scale(20),
+    paddingHorizontal: scale(12),
+    width: '100%',
+  },
+  actionText: {
+    fontSize: moderateScale(28, 0.4),
+    fontWeight: '800',
+    lineHeight: moderateScale(38, 0.4),
+    textAlign: 'center',
+    letterSpacing: 0.2,
+    fontStyle: 'italic',
+  },
+  shareNumbersContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  shareResultCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  shareResultMain: {
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(12),
+    borderRadius: scale(16),
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: scale(180),
+    marginBottom: scale(8),
+  },
+  shareResultMainNumber: {
+    fontSize: moderateScale(32, 0.4),
+    fontWeight: '900',
+    letterSpacing: scale(-0.5),
+    textAlign: 'center',
+    marginBottom: scale(4),
+  },
+  shareResultMainLabel: {
+    fontSize: moderateScale(12, 0.2),
+    fontWeight: '600',
+    letterSpacing: scale(0.2),
+    textAlign: 'center',
+    opacity: 0.9,
+  },
+  shareResultSubtext: {
+    fontSize: moderateScale(11, 0.2),
+    fontWeight: '500',
+    letterSpacing: scale(0.1),
+    textAlign: 'center',
+    opacity: 0.7,
+    paddingHorizontal: scale(20),
+  },
+  starsContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  star: {
+    width: 2.5,
+    height: 2.5,
+    borderRadius: 1.25,
+    backgroundColor: '#ffffff',
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+  },
+  userInfoSection: {
+    alignItems: 'center',
+    marginTop: scale(8),
+    marginBottom: scale(12),
+    gap: scale(4),
+  },
+  locationInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    marginTop: scale(2),
+  },
+  locationText: {
+    fontSize: moderateScale(10, 0.2),
+    fontWeight: '500',
+    letterSpacing: scale(0.2),
+    opacity: 0.6,
+  },
+  usernameText: {
+    fontSize: moderateScale(12, 0.2),
+    fontWeight: '600',
+    letterSpacing: scale(0.3),
+    opacity: 0.8,
+  },
+  dateText: {
+    fontSize: moderateScale(11, 0.2),
+    fontWeight: '500',
+    letterSpacing: scale(0.2),
+    opacity: 0.6,
+  },
+  // V2: Narrative section - Supporting, not dominant
+  narrativeSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: scale(24),
+    paddingHorizontal: scale(20),
+    width: '100%',
+  },
+  narrativeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(12),
+    marginBottom: scale(14),
+    width: '100%',
+    justifyContent: 'center',
+  },
+  narrativeBadgeEmoji: {
+    fontSize: moderateScale(32, 0.3),
+  },
+  narrativeStoryText: {
+    flex: 1,
+    fontSize: moderateScale(16, 0.25),
+    fontWeight: '600',
+    lineHeight: moderateScale(22, 0.25),
+    textAlign: 'center',
+    letterSpacing: 0.2,
+  },
+  matchCountBadge: {
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(12),
+    borderRadius: scale(18),
+    borderWidth: 1.5,
+  },
+  matchCountText: {
+    fontSize: moderateScale(13, 0.2),
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
   centerPercentile: {
     fontSize: moderateScale(26, 0.3),
     fontWeight: '900',
@@ -496,53 +814,58 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   quoteSection: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(16),
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: scale(16),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    marginBottom: scale(16),
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(20),
+    borderRadius: scale(18),
+    borderWidth: 1.5,
+    marginBottom: scale(20),
+    position: 'relative',
+  },
+  quoteIcon: {
+    position: 'absolute',
+    top: scale(12),
+    left: scale(16),
+    opacity: 0.3,
   },
   quoteText: {
-    fontSize: moderateScale(14, 0.2),
+    fontSize: moderateScale(16, 0.25),
     fontWeight: '500',
-    color: '#ffffff',
-    lineHeight: moderateScale(21, 0.2),
+    lineHeight: moderateScale(24, 0.25),
     textAlign: 'center',
+    fontStyle: 'italic',
+    paddingTop: scale(4),
   },
   footer: {
-    paddingTop: scale(24),
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    paddingTop: scale(12),
+    borderTopWidth: 1.5,
+    width: '100%',
   },
   footerContent: {
     alignItems: 'center',
   },
   welcomeMessage: {
-    fontSize: moderateScale(12, 0.2),
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: moderateScale(11, 0.2),
     textAlign: 'center',
-    lineHeight: moderateScale(18, 0.2),
-    marginBottom: scale(10),
-    fontWeight: '400',
-    letterSpacing: 0.3,
+    lineHeight: moderateScale(17, 0.2),
+    marginBottom: scale(12),
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
   footerBrand: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(6),
+    gap: scale(8),
   },
   footerDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    opacity: 0.6,
   },
   footerLink: {
-    fontSize: moderateScale(15, 0.2),
+    fontSize: moderateScale(14, 0.2),
     fontWeight: '700',
-    color: '#ffffff',
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
   },
   cornerTL: {
     position: 'absolute',

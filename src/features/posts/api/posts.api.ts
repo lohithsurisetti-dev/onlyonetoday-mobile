@@ -3,7 +3,7 @@
  * Real backend integration with vector embeddings
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase, getCurrentUser } from '@/lib/supabase';
 import type {
   CreatePostRequest,
   CreatePostResponse,
@@ -28,13 +28,35 @@ export async function createPost(data: CreatePostRequest): Promise<CreatePostRes
       locationCountry: data.locationCountry,
     });
 
+    // Get current user ID if authenticated - try session first (more reliable)
+    let userId: string | null = null;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        userId = session.user.id;
+        console.log('✅ Found user ID from session:', userId);
+      } else {
+        // Fallback to getCurrentUser
+        const { user } = await getCurrentUser();
+        userId = user?.id || null;
+        if (userId) {
+          console.log('✅ Found user ID from getCurrentUser:', userId);
+        } else {
+          console.log('⚠️ No user found - post will be anonymous');
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error getting user:', error);
+    }
+
     // Call Supabase Edge Function (with vector embeddings!)
     const { data: result, error } = await supabase.functions.invoke('create-post', {
       body: {
         content: data.content,
         inputType: data.inputType || 'action',
         scope: data.scope || 'world',
-        isAnonymous: false,
+        isAnonymous: !userId, // Anonymous if no user
+        userId: userId, // Pass user ID if authenticated
         locationCity: data.locationCity,
         locationState: data.locationState,
         locationCountry: data.locationCountry,
@@ -96,8 +118,18 @@ export async function createPost(data: CreatePostRequest): Promise<CreatePostRes
         locationCity: data.locationCity,
         locationState: data.locationState,
         locationCountry: data.locationCountry,
+        // V2: Narrative fields (from API response)
+        narrative: result.post.narrative,
+        matchCount: result.post.matchCount,
+        totalInScope: result.post.totalInScope,
+        emotionalTone: result.post.emotionalTone,
+        celebration: result.post.celebration,
+        badge: result.post.badge,
+        keywords: result.post.keywords,
+        detectedLanguage: result.post.detectedLanguage,
+        // Legacy fields (for backward compatibility)
         peopleWhoDidThis: result.post.matchCount,
-        totalPostsInScope: result.post.matchCount + 1, // Approximate
+        totalPostsInScope: result.post.totalInScope || result.post.matchCount + 1,
         percentile: {
           tier: result.temporal?.allTime?.tier || result.post.tier,
           value: result.temporal?.allTime?.percentile || result.post.percentile,

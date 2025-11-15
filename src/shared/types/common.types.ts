@@ -7,7 +7,7 @@ export type Scope = 'city' | 'state' | 'country' | 'world'
 
 export type InputType = 'action' | 'day'
 
-export type PercentileTier = 'elite' | 'rare' | 'unique' | 'notable' | 'beloved' | 'popular'
+export type EmotionalTone = 'unique' | 'shared' | 'common'
 
 export interface Location {
   city?: string | null
@@ -16,28 +16,42 @@ export interface Location {
   timezone?: string
 }
 
-export interface Percentile {
-  tier: PercentileTier
-  value: number
-  message: string
-  color: string
-  emoji: string
+// V2: Narrative-based story system
+export interface PostStory {
+  narrative: string
+  matchCount: number
+  totalInScope: number
+  emotionalTone: EmotionalTone
+  celebration: string
+  badge?: string
 }
 
 export interface Post {
   id: string
   content: string
-  normalizedContent: string
+  normalizedContent?: string
   inputType: InputType
   scope: Scope
   locationCity?: string | null
   locationState?: string | null
   locationCountry?: string | null
-  peopleWhoDidThis: number
-  totalPostsInScope: number
-  percentile?: Percentile
+  // V2: Narrative-based fields
+  narrative?: string
+  matchCount?: number
+  totalInScope?: number
+  emotionalTone?: EmotionalTone
+  celebration?: string
+  badge?: string
+  keywords?: string[]
+  detectedLanguage?: string
+  // Day summary specific
+  activities?: string[]
+  dayOfWeek?: string
+  // Legacy fields (for backward compatibility during migration)
+  peopleWhoDidThis?: number
+  totalPostsInScope?: number
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
 }
 
 export interface Stats {

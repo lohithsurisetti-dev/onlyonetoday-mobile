@@ -17,12 +17,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { getEmotionalToneColors } from '@/shared/constants/emotionalToneColors';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
-type FilterType = 'all' | 'unique' | 'beloved';
+type FilterType = 'all' | 'unique' | 'shared' | 'common';
 type ScopeFilter = 'world' | 'city' | 'state' | 'country';
 type ReactionFilter = 'all' | 'funny' | 'creative' | 'must_try';
 type InputTypeFilter = 'all' | 'action' | 'day';
@@ -92,7 +93,6 @@ export default function FilterSheet({
     onFilterChange('all');
     onScopeFilterChange('world');
     onReactionFilterChange('all');
-    onInputTypeFilterChange('all');
     onClose();
   };
 
@@ -154,8 +154,10 @@ export default function FilterSheet({
                   <Text style={styles.sectionTitle}>Post Type</Text>
                 </View>
                 <View style={styles.optionsGrid}>
-                  {(['all', 'unique', 'beloved'] as FilterType[]).map((type) => {
+                  {(['all', 'unique', 'shared', 'common'] as FilterType[]).map((type) => {
                     const isActive = filter === type;
+                    const displayLabel = type === 'all' ? 'ALL' : type === 'unique' ? 'UNIQUE' : type === 'shared' ? 'SHARED' : 'COMMON';
+                    const toneColors = type !== 'all' ? getEmotionalToneColors(type) : null;
                     return (
                       <TouchableOpacity
                         key={type}
@@ -165,11 +167,13 @@ export default function FilterSheet({
                       >
                         <BlurView intensity={isActive ? 60 : 20} tint="dark" style={styles.optionBlur}>
                           <LinearGradient
-                            colors={isActive ? getFilterGradient(type) : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
+                            colors={isActive && toneColors 
+                              ? [`${toneColors.primary}80`, `${toneColors.primary}40`]
+                              : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
                             style={styles.optionGradient}
                           >
                             <Text style={[styles.optionLabel, isActive && styles.optionLabelActive]}>
-                              {type.toUpperCase()}
+                              {displayLabel}
                             </Text>
                             {isActive && (
                               <View style={styles.activeIndicator}>
@@ -288,17 +292,6 @@ export default function FilterSheet({
   );
 }
 
-// Helper functions
-function getFilterGradient(type: FilterType): [string, string] {
-  switch (type) {
-    case 'unique':
-      return ['rgba(139, 92, 246, 0.5)', 'rgba(139, 92, 246, 0.25)'];
-    case 'beloved':
-      return ['rgba(244, 114, 182, 0.5)', 'rgba(244, 114, 182, 0.25)'];
-    default:
-      return ['rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 0.12)'];
-  }
-}
 
 function getReactionGradient(type: ReactionFilter): [string, string] {
   switch (type) {

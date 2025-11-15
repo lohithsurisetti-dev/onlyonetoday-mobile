@@ -23,6 +23,7 @@ import FeedPostShareCard from '../components/FeedPostShareCard';
 import DaySummaryCard from '../components/DaySummaryCard';
 import DaySummaryModal from '../components/DaySummaryModal';
 import { getTierColors as getStandardTierColors } from '@/shared/constants/tierColors';
+import { getEmotionalToneColors } from '@/shared/constants/emotionalToneColors';
 import { getFeedPosts } from '@/lib/api/posts';
 import type { Post as DBPost } from '@/types/database.types';
 import { PostCardSkeleton, DaySummaryCardSkeleton } from '@/shared/components/SkeletonLoader';
@@ -62,7 +63,7 @@ const getComparisonText = (tier: string): string => {
 // TYPES
 // ============================================================================
 
-export type FilterType = 'all' | 'unique' | 'beloved';
+export type FilterType = 'all' | 'unique' | 'shared' | 'common';
 export type ScopeFilter = 'world' | 'city' | 'state' | 'country';
 export type ReactionFilter = 'all' | 'funny' | 'creative' | 'must_try';
 export type InputTypeFilter = 'all' | 'action' | 'day';
@@ -77,6 +78,13 @@ interface Post {
   location_country?: string;
   input_type?: 'action' | 'day';
   username?: string;
+  // V2 fields
+  matchCount?: number;
+  totalInScope?: number;
+  emotionalTone?: 'unique' | 'shared' | 'common';
+  narrative?: string;
+  celebration?: string;
+  badge?: string;
   percentile?: {
     percentile: number;
     tier: 'elite' | 'rare' | 'unique' | 'notable' | 'beloved' | 'popular';
@@ -197,20 +205,23 @@ const SAMPLE_POSTS: Post[] = [
 // TIER COLORS (matching our cosmic theme)
 // ============================================================================
 
-// Use centralized tier colors
+// V2: Use emotional tone colors instead of tier colors
 function getTierColors(tier?: string) {
+  // Legacy support - fallback to tier colors if needed
   return getStandardTierColors(tier || 'beloved');
 }
 
+// V2: Get colors based on emotional tone
+function getEmotionalColors(tone?: 'unique' | 'shared' | 'common') {
+  return getEmotionalToneColors(tone || 'shared');
+}
+
 function getFilterPillColors(filter: FilterType): [string, string] {
-  switch (filter) {
-    case 'unique':
-      return ['rgba(139, 92, 246, 0.5)', 'rgba(139, 92, 246, 0.25)'];
-    case 'beloved':
-      return ['rgba(244, 114, 182, 0.5)', 'rgba(244, 114, 182, 0.25)'];
-    default:
-      return ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)'];
+  if (filter === 'all') {
+    return ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)'];
   }
+  const colors = getEmotionalToneColors(filter);
+  return [`${colors.primary}80`, `${colors.primary}40`];
 }
 
 function getReactionPillColors(reaction: ReactionFilter): [string, string] {
@@ -355,7 +366,7 @@ export default function FeedScreen() {
         return;
       }
 
-      // Transform to match local Post type
+      // Transform to match local Post type with V2 fields
       const transformedPosts: Post[] = dbPosts.posts.map(dbPost => ({
         id: dbPost.id,
         content: dbPost.content,
@@ -366,11 +377,19 @@ export default function FeedScreen() {
         location_country: dbPost.location_country,
         input_type: dbPost.input_type,
         username: dbPost.username || 'anonymous',
+        // V2 fields
+        matchCount: dbPost.matchCount || dbPost.match_count || 1,
+        totalInScope: dbPost.totalInScope || dbPost.total_in_scope || 1,
+        emotionalTone: dbPost.emotionalTone || dbPost.emotional_tone || 'unique',
+        narrative: dbPost.narrative,
+        celebration: dbPost.celebration,
+        badge: dbPost.badge,
+        // Legacy fields (for backward compatibility)
         percentile: dbPost.tier ? {
           percentile: dbPost.percentile || 0,
           tier: dbPost.tier,
-          displayText: dbPost.tier === 'elite' ? `Top ${(dbPost.percentile || 0).toFixed(1)}%` : dbPost.tier,
-          comparison: getComparisonText(dbPost.tier),
+          displayText: dbPost.displayText || (dbPost.tier === 'elite' ? `Top ${(dbPost.percentile || 0).toFixed(1)}%` : dbPost.tier),
+          comparison: dbPost.comparison || getComparisonText(dbPost.tier),
         } : undefined,
         funny_count: dbPost.reactions?.funny || 0,
         creative_count: dbPost.reactions?.creative || 0,
@@ -436,7 +455,7 @@ export default function FeedScreen() {
     }));
   }, [userReactions]);
   
-  // Filtered posts
+  // Filtered posts - V2: Use emotionalTone for filtering
   // Memoize filtered posts to prevent recalculation on every render
   const filteredPosts = useMemo(() => {
     return posts.filter(post => {
@@ -447,11 +466,22 @@ export default function FeedScreen() {
       if (showDaySummaries && post.input_type !== 'day') return false;
       if (!showDaySummaries && post.input_type !== 'action') return false;
       
-      // Apply other filters
-      if (filter === 'unique' && post.percentile && !['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier)) return false;
-      if (filter === 'beloved' && post.percentile && !['beloved', 'popular'].includes(post.percentile.tier)) return false;
+      // V2: Apply filters using emotionalTone
+      if (filter === 'unique' && post.emotionalTone !== 'unique') return false;
+      if (filter === 'shared' && post.emotionalTone !== 'shared') return false;
+      if (filter === 'common' && post.emotionalTone !== 'common') return false;
+      
+      // Legacy tier filter fallback (for old posts without emotionalTone)
+      if (filter === 'unique' && !post.emotionalTone && post.percentile && !['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier)) return false;
+      if (filter === 'shared' && !post.emotionalTone && post.percentile && !['notable', 'popular'].includes(post.percentile.tier)) return false;
+      if (filter === 'common' && !post.emotionalTone && post.percentile && !['beloved', 'popular'].includes(post.percentile.tier)) return false;
+      
+      // Scope filter
       if (scopeFilter !== 'world' && post.scope !== scopeFilter) return false;
+      
+      // Reaction filter
       if (reactionFilter !== 'all' && (!post[`${reactionFilter}_count`] || post[`${reactionFilter}_count`] === 0)) return false;
+      
       return true;
     });
   }, [posts, showDaySummaries, filter, scopeFilter, reactionFilter]);
@@ -489,7 +519,12 @@ export default function FeedScreen() {
             colors={['rgba(26, 26, 46, 0.95)', 'rgba(10, 10, 26, 0.95)']}
             style={styles.headerGradient}
           >
-            <Text style={styles.headerTitle}>Discover</Text>
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTitle}>Discover</Text>
+              <Text style={styles.headerDate}>
+                {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </Text>
+            </View>
           </LinearGradient>
         </BlurView>
       </Animated.View>
@@ -518,7 +553,12 @@ export default function FeedScreen() {
           <View style={styles.heroHeader}>
             <View style={styles.heroLeft}>
               <Text style={styles.heroTitle}>DISCOVER</Text>
-              <Text style={styles.heroSubtitle}>{filteredPosts.length} {showDaySummaries ? 'summaries' : 'actions'}</Text>
+              <View style={styles.heroSubtitleRow}>
+                <Text style={styles.heroSubtitle}>{filteredPosts.length} {showDaySummaries ? 'summaries' : 'actions'}</Text>
+                <Text style={styles.heroDate}>
+                  • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </Text>
+              </View>
             </View>
             
             {/* Filter Button */}
@@ -600,80 +640,84 @@ export default function FeedScreen() {
         </View>
 
         {/* Active Filters Pills */}
-        {hasActiveFilters && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.activeFiltersScroll}
-            contentContainerStyle={styles.activeFiltersContent}
-          >
-              {filter !== 'all' && (
-                <TouchableOpacity
-                  style={styles.activePill}
-                  onPress={() => setFilter('all')}
-                  activeOpacity={0.7}
-                >
-                  <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
-                    <LinearGradient
-                      colors={getFilterPillColors(filter)}
-                      style={styles.activePillGradient}
-                    >
-                      <Text style={styles.activePillText}>
-                        {filter === 'unique' ? 'Unique' : 'Common'}
-                      </Text>
-                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                        <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    </LinearGradient>
-                  </BlurView>
-                </TouchableOpacity>
-              )}
-              
-              {scopeFilter !== 'world' && (
-                <TouchableOpacity
-                  style={styles.activePill}
-                  onPress={() => setScopeFilter('world')}
-                  activeOpacity={0.7}
-                >
-                  <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
-                    <LinearGradient
-                      colors={['rgba(6, 182, 212, 0.4)', 'rgba(6, 182, 212, 0.2)']}
-                      style={styles.activePillGradient}
-                    >
-                      <Text style={styles.activePillText}>
-                        {scopeFilter === 'city' ? 'City' : scopeFilter === 'state' ? 'State' : 'Country'}
-                      </Text>
-                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                        <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    </LinearGradient>
-                  </BlurView>
-                </TouchableOpacity>
-              )}
-              
-              {reactionFilter !== 'all' && (
-                <TouchableOpacity
-                  style={styles.activePill}
-                  onPress={() => setReactionFilter('all')}
-                  activeOpacity={0.7}
-                >
-                  <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
-                    <LinearGradient
-                      colors={getReactionPillColors(reactionFilter)}
-                      style={styles.activePillGradient}
-                    >
-                      <Text style={styles.activePillText}>
-                        {reactionFilter === 'funny' ? 'Funny' : reactionFilter === 'creative' ? 'Creative' : 'Must Try'}
-                      </Text>
-                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                        <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    </LinearGradient>
-                  </BlurView>
-                </TouchableOpacity>
-              )}
-          </ScrollView>
-        )}
+        {hasActiveFilters ? (
+          <View style={styles.activeFiltersContainer}>
+            <View style={styles.activeFiltersWrapper}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.activeFiltersScroll}
+                contentContainerStyle={styles.activeFiltersContent}
+              >
+                {filter !== 'all' && (
+                  <TouchableOpacity
+                    style={styles.activePill}
+                    onPress={() => setFilter('all')}
+                    activeOpacity={0.7}
+                  >
+                    <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
+                      <LinearGradient
+                        colors={getFilterPillColors(filter)}
+                        style={styles.activePillGradient}
+                      >
+                        <Text style={styles.activePillText}>
+                          {filter === 'unique' ? 'Unique' : filter === 'shared' ? 'Shared' : 'Common'}
+                        </Text>
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </LinearGradient>
+                    </BlurView>
+                  </TouchableOpacity>
+                )}
+                
+                {scopeFilter !== 'world' && (
+                  <TouchableOpacity
+                    style={styles.activePill}
+                    onPress={() => setScopeFilter('world')}
+                    activeOpacity={0.7}
+                  >
+                    <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
+                      <LinearGradient
+                        colors={['rgba(6, 182, 212, 0.4)', 'rgba(6, 182, 212, 0.2)']}
+                        style={styles.activePillGradient}
+                      >
+                        <Text style={styles.activePillText}>
+                          {scopeFilter === 'city' ? 'City' : scopeFilter === 'state' ? 'State' : 'Country'}
+                        </Text>
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </LinearGradient>
+                    </BlurView>
+                  </TouchableOpacity>
+                )}
+                
+                {reactionFilter !== 'all' && (
+                  <TouchableOpacity
+                    style={styles.activePill}
+                    onPress={() => setReactionFilter('all')}
+                    activeOpacity={0.7}
+                  >
+                    <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
+                      <LinearGradient
+                        colors={getReactionPillColors(reactionFilter)}
+                        style={styles.activePillGradient}
+                      >
+                        <Text style={styles.activePillText}>
+                          {reactionFilter === 'funny' ? 'Funny' : reactionFilter === 'creative' ? 'Creative' : 'Must Try'}
+                        </Text>
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                        </Svg>
+                      </LinearGradient>
+                    </BlurView>
+                  </TouchableOpacity>
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        ) : null}
         
         {/* Posts Section */}
         <View style={styles.postsContainer}>
@@ -706,7 +750,7 @@ export default function FeedScreen() {
                   onShare={setSharePost}
                   onPress={setSummaryModalPost}
                   userReactions={userReactions}
-                  tierColors={getTierColors(post.percentile?.tier)}
+                  tierColors={getEmotionalColors(post.emotionalTone)}
                 />
               ) : (
                 <MemoizedPostCard
@@ -741,7 +785,7 @@ export default function FeedScreen() {
           visible={!!sharePost}
           onClose={() => setSharePost(null)}
           post={sharePost}
-          tierColors={getTierColors(sharePost.percentile?.tier)}
+          tierColors={getEmotionalColors(sharePost.emotionalTone)}
         />
       )}
 
@@ -751,7 +795,7 @@ export default function FeedScreen() {
           visible={!!summaryModalPost}
           onClose={() => setSummaryModalPost(null)}
           post={summaryModalPost}
-          tierColors={getTierColors(summaryModalPost.percentile?.tier)}
+          tierColors={getEmotionalColors(summaryModalPost.emotionalTone)}
           onShare={() => {
             setSharePost(summaryModalPost);
             setSummaryModalPost(null);
@@ -777,7 +821,8 @@ interface PostCardProps {
 function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  const tierColors = getTierColors(post.percentile?.tier);
+  // V2: Use emotional tone colors instead of tier colors
+  const emotionalColors = getEmotionalColors(post.emotionalTone);
   
   React.useEffect(() => {
     Animated.parallel([
@@ -797,8 +842,6 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
     ]).start();
   }, []);
   
-  // const isTopTier = post.percentile && ['elite', 'rare', 'unique', 'notable'].includes(post.percentile.tier);
-  
   return (
     <Animated.View
       style={[
@@ -814,15 +857,16 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
           colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0.03)']}
           style={styles.postCardGradient}
         >
-          {/* Header Row - Username, Percentile pill, Share */}
+          {/* Header Row - Username, Narrative badge, Share */}
           <View style={styles.compactHeader}>
             <Text style={styles.username}>@{post.username}</Text>
             <View style={{ flex: 1 }} />
-            {post.percentile && (
-              <View style={[styles.percentilePill, { borderColor: tierColors.primary }]}>
-                <Text style={[styles.percentilePillText, { color: tierColors.primary }]}>
-                  {post.percentile.displayText}
-                </Text>
+            {/* V2: Show match count badge */}
+                {post.matchCount !== undefined && (
+              <View style={[styles.narrativeBadge, { borderColor: emotionalColors.primary }]}>
+                  <Text style={[styles.narrativeBadgeText, { color: emotionalColors.primary }]}>
+                    {post.matchCount} {post.matchCount === 1 ? 'person' : 'people'}
+                  </Text>
               </View>
             )}
             <TouchableOpacity
@@ -831,7 +875,7 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
               activeOpacity={0.6}
             >
               <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#c4b5fd" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
               </Svg>
             </TouchableOpacity>
           </View>
@@ -843,21 +887,28 @@ function PostCard({ post, index, onReact, onShare, userReactions }: PostCardProp
           <View style={styles.compactFooter}>
             <Text style={styles.postTime}>{post.time}</Text>
             <View style={styles.dotSeparator} />
+            {/* Location Display - Show full location if available */}
+            {(() => {
+              const locationParts: string[] = [];
+              if (post.location_city) locationParts.push(post.location_city);
+              if (post.location_state) locationParts.push(post.location_state);
+              if (post.location_country) locationParts.push(post.location_country);
+              const locationDisplay = locationParts.length > 0 
+                ? locationParts.join(', ')
+                : (post.scope === 'world' ? 'World' : post.scope.charAt(0).toUpperCase() + post.scope.slice(1));
+              
+              return (
             <View style={styles.scopeCompact}>
               <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
-                {post.scope === 'world' ? (
-                  <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2.5} />
-                ) : (
-                  <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2.5} />
-                )}
+                    <Path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                    <Circle cx="12" cy="10" r="3" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={1.5} />
               </Svg>
               <Text style={styles.scopeCompactText} numberOfLines={1}>
-                {post.scope === 'world' ? 'World' : 
-                 post.scope === 'city' ? post.location_city :
-                 post.scope === 'state' ? post.location_state :
-                 post.location_country}
+                    {locationDisplay}
               </Text>
             </View>
+              );
+            })()}
             <View style={{ flex: 1 }} />
             <View style={styles.reactions}>
               {(['funny', 'creative', 'must_try'] as const).map(type => {
@@ -929,11 +980,22 @@ const styles = StyleSheet.create({
     paddingBottom: scale(16),
     paddingHorizontal: scale(20),
   },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   headerTitle: {
     fontSize: moderateScale(20, 0.3),
     fontWeight: '700',
     color: '#ffffff',
     letterSpacing: 0.5,
+  },
+  headerDate: {
+    fontSize: moderateScale(12, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontWeight: '500',
+    letterSpacing: 0.3,
   },
   scrollView: {
     flex: 1,
@@ -964,7 +1026,17 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
+  heroSubtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+  },
   heroSubtitle: {
+    fontSize: moderateScale(13, 0.2),
+    color: 'rgba(255, 255, 255, 0.5)',
+    letterSpacing: 0.3,
+  },
+  heroDate: {
     fontSize: moderateScale(13, 0.2),
     color: 'rgba(255, 255, 255, 0.5)',
     letterSpacing: 0.3,
@@ -1054,12 +1126,22 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#ffffff',
   },
+  activeFiltersContainer: {
+    paddingHorizontal: scale(20),
+    marginTop: scale(-8),
+    marginBottom: scale(8),
+    alignItems: 'flex-end',
+  },
+  activeFiltersWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
   activeFiltersScroll: {
-    marginTop: scale(14),
+    flexGrow: 0,
   },
   activeFiltersContent: {
     gap: scale(8),
-    paddingRight: scale(20),
+    flexDirection: 'row',
   },
   activePill: {
     borderRadius: scale(10),
@@ -1124,6 +1206,39 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
+  // V2: Narrative badge styles
+  narrativeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(10),
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  narrativeBadgeEmoji: {
+    fontSize: moderateScale(12, 0.2),
+  },
+  narrativeBadgeText: {
+    fontSize: moderateScale(9, 0.2),
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  // V2: Narrative container and text
+  narrativeContainer: {
+    padding: scale(10),
+    borderRadius: scale(12),
+    marginBottom: scale(10),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  narrativeText: {
+    fontSize: moderateScale(13, 0.2),
+    lineHeight: moderateScale(18, 0.2),
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
   dotSeparator: {
     width: scale(2),
     height: scale(2),
@@ -1137,7 +1252,7 @@ const styles = StyleSheet.create({
   },
   scopeCompactText: {
     fontSize: moderateScale(9, 0.2),
-    color: '#9ca3af',
+    color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '500',
     maxWidth: scale(80),
   },

@@ -291,22 +291,50 @@ export default function OTPVerificationScreen({ navigation, route }: OTPVerifica
 
       // If signup flow, create profile
       if (username && firstName && lastName) {
+        console.log('📝 Creating profile for new user...');
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: data.user.id,
-            username: username,
+            username: username.toLowerCase().trim(),
             first_name: firstName,
             last_name: lastName,
-            date_of_birth: dateOfBirth,
+            date_of_birth: dateOfBirth || null,
             signup_source: 'mobile',
           });
 
         if (profileError) {
           console.error('⚠️ Profile creation error:', profileError);
-          // Continue anyway - user is authenticated
+          
+          // Check if it's a duplicate username error (race condition)
+          if (profileError.code === '23505' || profileError.message.includes('unique') || profileError.message.includes('duplicate')) {
+            Alert.alert(
+              'Username Already Taken',
+              'This username was taken while you were signing up. Please go back and choose a different username.',
+              [
+                {
+                  text: 'Go Back',
+                  onPress: () => {
+                    // Sign out and go back
+                    supabase.auth.signOut();
+                    navigation.goBack();
+                  },
+                  style: 'default'
+                }
+              ]
+            );
+            setIsLoading(false);
+            return;
+          }
+          
+          // For other errors, show warning but continue
+          Alert.alert(
+            'Profile Creation Warning',
+            'Your account was created, but there was an issue saving your profile. You may need to complete your profile later.',
+            [{ text: 'OK' }]
+          );
         } else {
-          console.log('✅ Profile created');
+          console.log('✅ Profile created successfully');
         }
 
         // Update auth store with signup data

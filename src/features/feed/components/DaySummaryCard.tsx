@@ -89,10 +89,11 @@ function DaySummaryCard({
               
               <View style={{ flex: 1 }} />
               
-              {post.percentile && (
-                <View style={[styles.tierBadge, { borderColor: tierColors.primary }]}>
-                  <Text style={[styles.tierText, { color: tierColors.primary }]}>
-                    {post.percentile.displayText}
+              {/* V2: Show match count pill (no emoji) */}
+              {post.matchCount !== undefined && (
+                <View style={[styles.narrativeBadge, { borderColor: tierColors.primary }]}>
+                  <Text style={[styles.narrativeBadgeText, { color: tierColors.primary }]}>
+                    {post.matchCount} {post.matchCount === 1 ? 'person' : 'people'}
                   </Text>
                 </View>
               )}
@@ -103,10 +104,11 @@ function DaySummaryCard({
                 activeOpacity={0.6}
               >
                 <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#c4b5fd" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                  <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
               </TouchableOpacity>
             </View>
+
 
           {/* Content - Limited with press hint */}
           <Text style={styles.summaryText} numberOfLines={3}>
@@ -114,24 +116,39 @@ function DaySummaryCard({
           </Text>
           <Text style={styles.tapHint}>Tap to read more</Text>
 
-          {/* Footer - Time, Location, Reactions */}
+          {/* Footer - Time and Location on Same Line, Reactions */}
           <View style={styles.footer}>
-            <Text style={styles.time}>{post.time}</Text>
-            <View style={styles.dot} />
-            <View style={styles.scopeTag}>
-              <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
-                {post.scope === 'world' ? (
-                  <Circle cx="12" cy="12" r="10" stroke="#6b7280" strokeWidth={2.5} />
-                ) : (
-                  <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="#6b7280" strokeWidth={2.5} />
-                )}
-              </Svg>
-              <Text style={styles.scopeLabel} numberOfLines={1}>
-                {post.scope === 'world' ? 'World' : 
-                 post.scope === 'city' ? post.location_city :
-                 post.scope === 'state' ? post.location_state :
-                 post.location_country}
-              </Text>
+            <View style={styles.timeLocationRow}>
+              {post.time && (
+                <Text style={styles.time}>{post.time}</Text>
+              )}
+              {(() => {
+                const locationDisplay = post.scope === 'world' ? 'World' : 
+                  post.scope === 'city' ? post.location_city :
+                  post.scope === 'state' ? post.location_state :
+                  post.location_country;
+                
+                if (locationDisplay) {
+                  return (
+                    <>
+                      {post.time && <View style={styles.dot} />}
+                      <View style={styles.scopeTag}>
+                        <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
+                          {post.scope === 'world' ? (
+                            <Circle cx="12" cy="12" r="10" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={2.5} />
+                          ) : (
+                            <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={2.5} />
+                          )}
+                        </Svg>
+                        <Text style={styles.scopeLabel} numberOfLines={1}>
+                          {locationDisplay}
+                        </Text>
+                      </View>
+                    </>
+                  );
+                }
+                return null;
+              })()}
             </View>
 
             <View style={{ flex: 1 }} />
@@ -216,6 +233,39 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
+  // V2: Narrative badge styles
+  narrativeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(10),
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  narrativeBadgeEmoji: {
+    fontSize: moderateScale(12, 0.2),
+  },
+  narrativeBadgeText: {
+    fontSize: moderateScale(9, 0.2),
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  // V2: Narrative container and text
+  narrativeContainer: {
+    padding: scale(10),
+    borderRadius: scale(12),
+    marginBottom: scale(10),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  narrativeText: {
+    fontSize: moderateScale(13, 0.2),
+    lineHeight: moderateScale(18, 0.2),
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
   dateLabel: {
     fontSize: moderateScale(10, 0.2),
     color: '#9ca3af',
@@ -267,9 +317,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: scale(4),
   },
+  timeLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+  },
   scopeLabel: {
     fontSize: moderateScale(10, 0.2),
-    color: '#9ca3af',
+    color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '500',
     maxWidth: scale(80),
   },

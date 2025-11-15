@@ -288,12 +288,24 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
             duration: 300,
             useNativeDriver: false,
           }).start(() => {
+            // V2: Pass narrative-based fields instead of percentile
             const navigationParams = {
               content: content.trim(),
               scope,
-              percentile: response.post?.percentile || response.percentile || undefined,
               postId: response.post?.id,
-              matchCount: response.matchCount,
+              // Location data
+              locationCity: location?.city || null,
+              locationState: location?.state || null,
+              locationCountry: location?.country || null,
+              // V2: Narrative fields
+              narrative: response.post?.narrative,
+              matchCount: response.post?.matchCount || response.matchCount || 0,
+              totalInScope: response.post?.totalInScope,
+              emotionalTone: response.post?.emotionalTone,
+              celebration: response.post?.celebration,
+              badge: response.post?.badge,
+              // Legacy fields (for backward compatibility)
+              percentile: response.post?.percentile || response.percentile || undefined,
               displayText: response.percentile?.displayText,
               tier: response.percentile?.tier,
               temporal: response.temporal,
@@ -484,6 +496,7 @@ export default function CreateScreen({ navigation, onBack }: CreateScreenProps) 
                 placeholderTextColor="rgba(255, 255, 255, 0.3)"
                 multiline
                 maxLength={500}
+                scrollEnabled={true}
                 style={styles.textInput}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
@@ -800,12 +813,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: scale(16),
     marginBottom: scale(20),
+    maxHeight: scale(220), // Fixed max height to prevent layout changes (accounts for footer)
+    overflow: 'hidden',
   },
   textInput: {
     padding: scale(16),
     color: '#ffffff',
     fontSize: moderateScale(16, 0.2),
     minHeight: scale(130),
+    maxHeight: scale(180), // Fixed max height for scrolling (leaves room for footer ~40px)
     textAlignVertical: 'top',
     fontWeight: '300',
     lineHeight: moderateScale(24, 0.2),

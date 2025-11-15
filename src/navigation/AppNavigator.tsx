@@ -3,9 +3,10 @@
  * Stack navigation for the app
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View, ActivityIndicator } from 'react-native';
 import SignupScreen from '@/features/auth/screens/SignupScreen';
 import LoginScreen from '@/features/auth/screens/LoginScreen';
 import UserDetailsScreen from '@/features/auth/screens/UserDetailsScreen';
@@ -20,6 +21,7 @@ import DaysHubScreen from '@/features/days/screens/DaysHubScreen';
 import DayFeedScreen from '@/features/days/screens/DayFeedScreen';
 import CreateDreamScreen from '@/features/dreams/screens/CreateDreamScreen';
 import { DayOfWeek } from '@/features/days/types';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 export type RootStackParamList = {
   Signup: undefined;
@@ -88,10 +90,29 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
+  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Wait for auth initialization
+  useEffect(() => {
+    if (!isLoading) {
+      setIsInitialized(true);
+    }
+  }, [isLoading]);
+
+  // Show loading while checking auth
+  if (!isInitialized) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0a0a1a', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#8b5cf6" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Signup"
+        initialRouteName={isAuthenticated && user && !user.isAnonymous ? "Main" : "Signup"}
         screenOptions={{
           headerShown: false,
           animation: 'fade_from_bottom',

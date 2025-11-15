@@ -189,34 +189,63 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
       try {
         console.log('🔍 Checking username:', value.toLowerCase());
         
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('username', value.toLowerCase())
-          .limit(1);
+        // Use Edge Function for more reliable username check
+        const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/check-username?username=${encodeURIComponent(value.toLowerCase())}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-        console.log('✅ Username check response:', { data, error, hasData: data && data.length > 0 });
+        if (!response.ok) {
+          // If Edge Function fails, fallback to direct query
+          console.log('⚠️ Edge Function failed, trying direct query...');
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('username', value.toLowerCase())
+            .limit(1);
 
-        if (error) {
-          console.error('❌ Username check API error:', error);
+          if (error) {
+            console.error('❌ Username check error:', error);
+            setUsernameStatus('idle');
+            setErrors(prev => ({
+              ...prev,
+              username: 'Unable to check username. Please try again.'
+            }));
+            return;
+          }
+
+          const isTaken = data && data.length > 0;
+          setUsernameStatus(isTaken ? 'taken' : 'available');
+          return;
+        }
+
+        const result = await response.json();
+        console.log('✅ Username check response:', result);
+
+        if (result.error) {
           setUsernameStatus('idle');
           setErrors(prev => ({
             ...prev,
-            username: `API Error: ${error.message}`
+            username: result.error || 'Failed to check username'
           }));
           return;
         }
 
-        // If data array has items, username is taken
-        const isTaken = data && data.length > 0;
-        console.log(`📊 Username '${value}' is ${isTaken ? 'TAKEN' : 'AVAILABLE'}`);
-        setUsernameStatus(isTaken ? 'taken' : 'available');
+        setUsernameStatus(result.available ? 'available' : 'taken');
+        if (result.available) {
+          setErrors(prev => ({ ...prev, username: '' }));
+        }
       } catch (error: any) {
         console.error('❌ Username check exception:', error);
         setUsernameStatus('idle');
+        // Don't show error for network issues - just reset status
+        // User can try again when connection is restored
         setErrors(prev => ({
           ...prev,
-          username: `Error: ${error.message || 'Connection failed'}`
+          username: ''
         }));
       }
     }, 500);
@@ -248,7 +277,10 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
       newErrors.username = 'Username is already taken';
       isValid = false;
     } else if (usernameStatus === 'checking') {
-      newErrors.username = 'Checking username...';
+      newErrors.username = 'Please wait while we check username availability...';
+      isValid = false;
+    } else if (usernameStatus === 'idle' && username.length >= 3) {
+      newErrors.username = 'Please wait for username check to complete';
       isValid = false;
     }
 
@@ -271,15 +303,25 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
     setErrors(newErrors);
 
     if (isValid) {
+      // Final username check - make sure it's still available
+      if (usernameStatus !== 'available') {
+        setErrors(prev => ({
+          ...prev,
+          username: 'Please wait for username check to complete'
+        }));
+        return;
+      }
+
       setIsLoading(true);
       
       try {
-        // Send OTP to email
-        console.log('📧 Sending OTP to:', contact);
+        // Send OTP to email for signup
+        console.log('📧 Sending signup OTP to:', contact);
         
         const { data, error } = await supabase.auth.signInWithOtp({
           email: contact,
           options: {
+            // Include user metadata for profile creation after OTP verification
             data: {
               first_name: firstName,
               last_name: lastName,
@@ -290,6 +332,7 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
         });
 
         if (error) {
+          console.error('❌ OTP send error:', error);
           throw error;
         }
 
@@ -303,13 +346,13 @@ export default function UsernamePasswordScreen({ navigation, route }: UsernamePa
           lastName,
           username,
           dateOfBirth,
-          password, // Store for profile creation after OTP
+          // Note: Password is not used in OTP flow, but we keep it for potential future use
         });
       } catch (error: any) {
         console.error('❌ OTP send failed:', error);
         Alert.alert(
           'Failed to Send OTP',
-          error.message || 'Failed to send verification code. Please try again.'
+          error.message || 'Failed to send verification code. Please check your connection and try again.'
         );
       } finally {
         setIsLoading(false);

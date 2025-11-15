@@ -20,8 +20,10 @@ import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 import DaysHubScreen from '@/features/days/screens/DaysHubScreen';
 import DayFeedScreen from '@/features/days/screens/DayFeedScreen';
 import CreateDreamScreen from '@/features/dreams/screens/CreateDreamScreen';
+import DreamResponseScreen from '@/features/dreams/screens/DreamResponseScreen';
 import { DayOfWeek } from '@/features/days/types';
 import { useAuthStore } from '@/lib/stores/authStore';
+import type { DreamPost } from '@/lib/api/dreams';
 
 export type RootStackParamList = {
   Signup: undefined;
@@ -85,6 +87,10 @@ export type RootStackParamList = {
     day: DayOfWeek;
   };
   CreateDream: undefined;
+  DreamResponse: {
+    dream: DreamPost;
+    content: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -173,8 +179,14 @@ export default function AppNavigator() {
           name="CreateDream" 
           component={CreateDreamScreen}
           options={{
-            animation: 'slide_from_bottom',
-            presentation: 'modal',
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen 
+          name="DreamResponse" 
+          component={DreamResponseScreen}
+          options={{
+            animation: 'slide_from_right',
           }}
         />
       </Stack.Navigator>

@@ -114,52 +114,30 @@ export const getFeedPosts = async ({
   error?: string;
 }> => {
   try {
-    // Build query parameters
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
+    // Use Supabase functions.invoke (handles auth automatically)
+    const { data, error } = await supabase.functions.invoke('fetch-posts', {
+      body: {
+        page,
+        limit,
       inputType,
       scope,
+        tier,
+        reactionFilter,
       sortBy,
-    });
-
-    if (tier && tier !== 'all') {
-      params.append('tier', tier);
-    }
-    if (reactionFilter && reactionFilter !== 'all') {
-      params.append('reactionFilter', reactionFilter);
-    }
-    if (location?.city) {
-      params.append('locationCity', location.city);
-    }
-    if (location?.state) {
-      params.append('locationState', location.state);
-    }
-    if (location?.country) {
-      params.append('locationCountry', location.country);
-    }
-
-    // Call Edge Function with query parameters
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
-    const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-    
-    const response = await fetch(`${supabaseUrl}/functions/v1/fetch-posts?${params.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json',
-        'x-application-name': 'onlyone-mobile',
+        location: location ? {
+          city: location.city,
+          state: location.state,
+          country: location.country,
+        } : undefined,
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error) {
+      throw new Error(error.message || 'Failed to fetch posts');
     }
 
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to fetch posts');
+    if (!data || !data.success) {
+      throw new Error(data?.error || 'Failed to fetch posts');
     }
 
     return data;

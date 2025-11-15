@@ -298,11 +298,11 @@ export default function HomeScreen({ navigation, onTabChange }: HomeScreenProps)
                   colors={['rgba(236, 72, 153, 0.15)', 'transparent']}
                   style={styles.statGradient}
                 >
-                  <Text style={styles.statLabel}>SHARED</Text>
+                  <Text style={styles.statLabel}>DREAMS</Text>
                   <Text style={styles.statValue}>
-                    {stats?.sharedExperiencesToday?.toLocaleString() || '12,847'}
+                    {stats?.dreamsToday?.toLocaleString() || '1,234'}
                   </Text>
-                  <Text style={styles.statSubtext}>Experiences</Text>
+                  <Text style={styles.statSubtext}>Shared Today</Text>
                 </LinearGradient>
               </BlurView>
             </View>

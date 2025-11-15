@@ -9,7 +9,7 @@ import { queryKeys } from '@lib/queryClient';
 
 interface Stats {
   totalPostsToday: number;
-  sharedExperiencesToday: number;
+  dreamsToday: number;
   totalPosts: number;
   moderationStats?: {
     totalChecked: number;

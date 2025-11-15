@@ -11,7 +11,14 @@ export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'frida
 /**
  * Create a themed day post
  */
-export const createDayPost = async (content: string, dayOfWeek: DayOfWeek): Promise<{ success: boolean; post?: DayPost; error?: string }> => {
+export const createDayPost = async (
+  content: string, 
+  dayOfWeek: DayOfWeek,
+  scope: 'city' | 'state' | 'country' | 'world' = 'world',
+  locationCity?: string | null,
+  locationState?: string | null,
+  locationCountry?: string | null
+): Promise<{ success: boolean; post?: DayPost; error?: string }> => {
   try {
     console.log(`🎭 Creating day post for ${dayOfWeek}`);
     
@@ -27,26 +34,50 @@ export const createDayPost = async (content: string, dayOfWeek: DayOfWeek): Prom
     const { data, error } = await supabase.functions.invoke('create-day-post', {
       body: {
         content,
-        dayOfWeek
+        dayOfWeek,
+        scope,
+        locationCity: locationCity || null,
+        locationState: locationState || null,
+        locationCountry: locationCountry || null
       }
     });
 
-    console.log('📊 Create response - data:', data, 'error:', error);
+    console.log('📊 Create response - data:', JSON.stringify(data, null, 2));
+    console.log('📊 Create response - error:', error);
 
-    // Check if data contains an error response (even if error object exists)
-    if (data && !data.success && data.error) {
-      console.log('🚫 Backend error:', data.error);
+    // If there's an error object, try to extract the message
+    if (error) {
+      console.error('❌ Error creating day post:', error);
+      
+      // Try to extract error message from error object
+      let errorMessage = error.message || 'Failed to create day post';
+      
+      // If error has context, try to get the actual backend error
+      if (error.context && error.context.body) {
+        try {
+          const errorBody = typeof error.context.body === 'string' 
+            ? JSON.parse(error.context.body) 
+            : error.context.body;
+          if (errorBody?.error) {
+            errorMessage = errorBody.error;
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+      
       return {
         success: false,
-        error: data.error
+        error: errorMessage
       };
     }
 
-    if (error) {
-      console.error('❌ Error creating day post:', error);
+    // Check if data contains an error response (even if error object exists)
+    if (data && !data.success) {
+      console.log('🚫 Backend error in data:', data.error || data.message);
       return {
         success: false,
-        error: error.message || 'Failed to create day post'
+        error: data.error || data.message || 'Failed to create day post'
       };
     }
 
@@ -81,51 +112,39 @@ export const fetchDayPosts = async (
   try {
     console.log(`📚 Fetching day posts for ${dayOfWeek}, todayOnly: ${todayOnly}`);
 
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
-    const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-    
-    // Get session token for debugging
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-      console.log(`🔑 Auth token for fetch: ${session.access_token.substring(0, 50)}...`);
-      console.log(`📋 Full token: ${session.access_token}`);
-    } else {
-      console.log(`⚠️ No auth token found`);
-    }
-    
-    const params = new URLSearchParams({
+    // Use Supabase function invoke (handles auth automatically)
+    const { data, error } = await supabase.functions.invoke('fetch-day-posts', {
+      body: {
       dayOfWeek,
-      todayOnly: todayOnly.toString(),
-      limit: '10'
+        todayOnly,
+        limit: 10
+      }
     });
 
-    const response = await fetch(`${supabaseUrl}/functions/v1/fetch-day-posts?${params.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json',
-        'x-application-name': 'onlyone-mobile',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.success) {
+    if (error) {
+      console.error('❌ Fetch day posts error:', error);
       return {
         success: false,
         posts: [],
-        error: data.error || 'Failed to fetch day posts'
+        error: error.message || 'Failed to fetch day posts'
       };
     }
 
-    console.log(`✅ Fetched ${data.posts.length} day posts`);
+    // Handle both direct function response and nested response
+    const result = data?.data || data;
+
+    if (!result || !result.success) {
+      return {
+        success: false,
+        posts: [],
+        error: result?.error || 'Failed to fetch day posts'
+      };
+    }
+
+    console.log(`✅ Fetched ${result.posts?.length || 0} day posts`);
     return {
       success: true,
-      posts: data.posts
+      posts: result.posts || []
     };
   } catch (error) {
     console.error('❌ Fetch day posts error:', error);
@@ -185,35 +204,31 @@ export const getDayStats = async (): Promise<{
   try {
     console.log('📊 Fetching day stats...');
 
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
-    const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
+    // Use Supabase function invoke (handles auth automatically)
+    const { data, error } = await supabase.functions.invoke('get-day-stats', {});
 
-    const response = await fetch(`${supabaseUrl}/functions/v1/get-day-stats`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json',
-        'x-application-name': 'onlyone-mobile',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.success) {
+    if (error) {
+      console.error('❌ Fetch day stats error:', error);
       return {
         success: false,
-        error: data.error || 'Failed to fetch day stats'
+        error: error.message || 'Failed to fetch day stats'
+      };
+    }
+
+    // Handle both direct function response and nested response
+    const result = data?.data || data;
+
+    if (!result || !result.success) {
+      return {
+        success: false,
+        error: result?.error || 'Failed to fetch day stats'
       };
     }
 
     console.log('✅ Day stats fetched successfully');
     return {
       success: true,
-      stats: data.stats
+      stats: result.stats
     };
   } catch (error) {
     console.error('❌ Fetch day stats error:', error);

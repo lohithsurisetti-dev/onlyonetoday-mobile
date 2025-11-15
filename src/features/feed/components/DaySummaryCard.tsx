@@ -92,8 +92,8 @@ function DaySummaryCard({
               {/* V2: Show match count pill (no emoji) */}
               {post.matchCount !== undefined && (
                 <View style={[styles.narrativeBadge, { borderColor: tierColors.primary }]}>
-                  <Text style={[styles.narrativeBadgeText, { color: tierColors.primary }]}>
-                    {post.matchCount} {post.matchCount === 1 ? 'person' : 'people'}
+                    <Text style={[styles.narrativeBadgeText, { color: tierColors.primary }]}>
+                      {post.matchCount} {post.matchCount === 1 ? 'person' : 'people'}
                   </Text>
                 </View>
               )}
@@ -120,7 +120,7 @@ function DaySummaryCard({
           <View style={styles.footer}>
             <View style={styles.timeLocationRow}>
               {post.time && (
-                <Text style={styles.time}>{post.time}</Text>
+            <Text style={styles.time}>{post.time}</Text>
               )}
               {(() => {
                 const locationDisplay = post.scope === 'world' ? 'World' : 
@@ -132,17 +132,17 @@ function DaySummaryCard({
                   return (
                     <>
                       {post.time && <View style={styles.dot} />}
-                      <View style={styles.scopeTag}>
-                        <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
-                          {post.scope === 'world' ? (
+            <View style={styles.scopeTag}>
+              <Svg width={8} height={8} viewBox="0 0 24 24" fill="none">
+                {post.scope === 'world' ? (
                             <Circle cx="12" cy="12" r="10" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={2.5} />
-                          ) : (
+                ) : (
                             <Path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="rgba(255, 255, 255, 0.4)" strokeWidth={2.5} />
-                          )}
-                        </Svg>
-                        <Text style={styles.scopeLabel} numberOfLines={1}>
+                )}
+              </Svg>
+              <Text style={styles.scopeLabel} numberOfLines={1}>
                           {locationDisplay}
-                        </Text>
+              </Text>
                       </View>
                     </>
                   );

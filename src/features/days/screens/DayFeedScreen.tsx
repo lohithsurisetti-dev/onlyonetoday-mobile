@@ -26,6 +26,7 @@ import DayIcon from '../components/DayIcon';
 import DayShareCard from '../components/DayShareCard';
 import { DayPostCardSkeleton } from '@/shared/components/SkeletonLoader';
 import { fetchDayPosts, createDayPost, reactToDayPost } from '@/lib/api/days';
+import { useLocation } from '@/lib/hooks/useLocation';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
@@ -45,6 +46,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
   const dayTheme = getDayTheme(day);
   const currentDay = getCurrentDay();
   const isToday = day === currentDay;
+  const { location } = useLocation();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [postText, setPostText] = useState('');
@@ -89,7 +91,14 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
     if (!postText.trim() || !isToday) return;
 
     try {
-      const result = await createDayPost(postText, day);
+      const result = await createDayPost(
+        postText, 
+        day,
+        'world', // scope - can be made configurable later
+        location?.city || null,
+        location?.state || null,
+        location?.country || null
+      );
       if (result.success) {
         // Reload posts to get the new one
         await loadPosts();
@@ -103,7 +112,7 @@ export default function DayFeedScreen({ route, navigation }: DayFeedScreenProps)
       console.error('Error creating post:', error);
       alert('Failed to create post');
     }
-  }, [postText, isToday, day]);
+  }, [postText, isToday, day, location]);
 
   const handleReaction = useCallback(async (postId: string, reactionType: 'first' | 'second' | 'third') => {
     // Optimistic update
@@ -413,7 +422,35 @@ function DayPostCard({ post, dayTheme, index, isExpanded, userReaction, onToggle
               @{post.username}
             </Text>
             <View style={{ flex: 1 }} />
+            <View style={styles.timeLocationRow}>
             <Text style={styles.postTime}>{post.timeAgo}</Text>
+              {post.location && (
+                <>
+                  <Text style={styles.dotSeparator}>•</Text>
+                  <View style={styles.locationBadge}>
+                    <Svg width={scale(10)} height={scale(10)} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        stroke={dayTheme.color}
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Path
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        stroke={dayTheme.color}
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                    <Text style={[styles.locationText, { color: dayTheme.color }]} numberOfLines={1}>
+                      {post.location}
+                    </Text>
+                  </View>
+                </>
+              )}
+            </View>
             <TouchableOpacity
               style={styles.shareButton}
               onPress={() => onShare(post)}
@@ -865,6 +902,26 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(9, 0.2),
     color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '500',
+  },
+  timeLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+  },
+  dotSeparator: {
+    fontSize: moderateScale(8, 0.2),
+    color: 'rgba(255, 255, 255, 0.3)',
+    marginHorizontal: scale(2),
+  },
+  locationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+  },
+  locationText: {
+    fontSize: moderateScale(9, 0.2),
+    fontWeight: '500',
+    maxWidth: scale(100),
   },
   shareButton: {
     padding: scale(6),

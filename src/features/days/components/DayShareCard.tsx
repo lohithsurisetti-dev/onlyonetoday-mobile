@@ -42,6 +42,23 @@ const CARD_HEIGHT = CARD_WIDTH * 1.4; // Portrait aspect ratio
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 const moderateScale = (size: number, factor = 0.5) => size + (scale(size) - size) * factor;
 
+// Helper function to convert hex color to dark background gradient
+const getDayThemeBackgroundGradient = (color: string): string => {
+  // Convert hex to RGB
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
+  // Create a very dark version (reduce brightness by ~85%)
+  const darkR = Math.floor(r * 0.15);
+  const darkG = Math.floor(g * 0.15);
+  const darkB = Math.floor(b * 0.15);
+  
+  // Convert back to hex
+  return `#${darkR.toString(16).padStart(2, '0')}${darkG.toString(16).padStart(2, '0')}${darkB.toString(16).padStart(2, '0')}`;
+};
+
 type DayShareCardProps = {
   visible: boolean;
   onClose: () => void;
@@ -229,7 +246,7 @@ export default function DayShareCard({ visible, onClose, post, dayTheme }: DaySh
           {/* The Shareable Card */}
           <View ref={cardRef} style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT, backgroundColor: '#0a0a1a' }]}>
             <LinearGradient
-              colors={['#0a0a1a', '#1a1a2e', `${dayTheme.color}08`]}
+              colors={['#0a0a1a', '#1a1a2e', getDayThemeBackgroundGradient(dayTheme.color) || '#0a0a1a']}
               style={styles.cardGradient}
             >
               {/* Floating Stars Background */}
@@ -250,7 +267,9 @@ export default function DayShareCard({ visible, onClose, post, dayTheme }: DaySh
 
               {/* Content */}
               <View style={styles.cardContent}>
-                {/* Header */}
+                {/* Top Section */}
+                <View style={styles.topSection}>
+                  {/* Header - Match ShareCard */}
                 <View style={styles.cardHeader}>
                   <Text style={styles.brandName}>ONLYONE</Text>
                   <View style={[styles.brandDivider, { backgroundColor: dayTheme.color }]} />
@@ -260,7 +279,7 @@ export default function DayShareCard({ visible, onClose, post, dayTheme }: DaySh
                 {/* Day Icon & Name */}
                 <View style={styles.daySection}>
                   <View style={[styles.dayIconGlow, { backgroundColor: `${dayTheme.color}40` }]} />
-                  <DayIcon icon={dayTheme.icon} size={scale(80)} color={dayTheme.color} />
+                    <DayIcon icon={dayTheme.icon} size={scale(50)} color={dayTheme.color} />
                   <Text style={[styles.dayName, { color: dayTheme.color }]}>
                     {dayTheme.name}
                   </Text>
@@ -269,31 +288,57 @@ export default function DayShareCard({ visible, onClose, post, dayTheme }: DaySh
 
                 {/* Content Quote */}
                 <View style={styles.quoteSection}>
-                  <BlurView intensity={20} tint="dark" style={styles.quoteBlur}>
+                    <View style={styles.quoteBlur}>
                     <LinearGradient
-                      colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.04)']}
+                        colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.06)']}
                       style={styles.quoteGradient}
                     >
                       <Text style={styles.quoteText} numberOfLines={5}>
                         "{post.content}"
                       </Text>
                     </LinearGradient>
-                  </BlurView>
+                    </View>
+                  </View>
                 </View>
 
-                {/* Footer */}
-                <View style={styles.footer}>
+                {/* Bottom Section - Username, Date, Location, Footer */}
+                <View style={styles.bottomSection}>
+                  {/* Username and Date Section */}
+                  <View style={styles.userInfoSection}>
+                    <Text style={[styles.usernameText, { color: 'rgba(255, 255, 255, 0.7)' }]}>
+                      @{post.username}
+                    </Text>
+                    <Text style={[styles.dateText, { color: 'rgba(255, 255, 255, 0.7)' }]}>
+                      {new Date(post.timestamp).toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
+                    </Text>
+                    {post.location && (
+                      <View style={styles.locationInfoRow}>
+                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                          <Path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke={dayTheme.color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                          <Circle cx="12" cy="10" r="3" stroke={dayTheme.color} strokeWidth={1.5} />
+                        </Svg>
+                        <Text style={[styles.locationText, { color: 'rgba(255, 255, 255, 0.5)' }]}>
+                          {post.location}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Welcoming Footer - Premium */}
+                  <View style={[styles.footer, { borderTopColor: 'rgba(255, 255, 255, 0.1)' }]}>
                   <View style={styles.footerContent}>
-                    <View style={styles.userInfo}>
-                      <Text style={[styles.username, { color: dayTheme.color }]}>
-                        @{post.username}
+                      <Text style={[styles.welcomeMessage, { color: 'rgba(255, 255, 255, 0.7)' }]}>
+                        Join the community. Every moment counts.
                       </Text>
-                      <Text style={styles.timestamp}>• {post.timeAgo}</Text>
+                      <View style={styles.footerBrand}>
+                        <View style={[styles.footerDot, { backgroundColor: dayTheme.color }]} />
+                        <Text style={[styles.footerLink, { color: dayTheme.color }]}>onlyonetoday.com</Text>
+                        <View style={[styles.footerDot, { backgroundColor: dayTheme.color }]} />
                     </View>
-                    
-                    <View style={styles.ctaSection}>
-                      <Text style={styles.ctaText}>Share your {dayTheme.name} moments</Text>
-                      <View style={[styles.ctaAccent, { backgroundColor: dayTheme.color }]} />
                     </View>
                   </View>
                 </View>
@@ -386,53 +431,69 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    padding: scale(24),
+    padding: scale(20),
+    paddingTop: scale(24),
+    paddingBottom: scale(16),
+    zIndex: 2,
     justifyContent: 'space-between',
   },
+  topSection: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  bottomSection: {
+    width: '100%',
+    justifyContent: 'flex-end',
+  },
   
-  // Header
+  // Header - Match ShareCard
   cardHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: scale(8),
+    marginBottom: scale(20),
   },
   brandName: {
-    fontSize: moderateScale(18, 0.3),
+    fontSize: moderateScale(28, 0.3),
     fontWeight: '900',
     color: '#ffffff',
-    letterSpacing: 2,
+    letterSpacing: scale(6),
+    textShadowColor: 'rgba(255, 255, 255, 0.4)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   brandDivider: {
-    width: scale(3),
-    height: scale(3),
-    borderRadius: scale(1.5),
+    width: scale(50),
+    height: 2.5,
+    borderRadius: 2,
+    marginVertical: scale(10),
+    opacity: 0.8,
   },
   brandTagline: {
-    fontSize: moderateScale(18, 0.3),
-    fontWeight: '900',
+    fontSize: moderateScale(20, 0.3),
+    fontWeight: '700',
     color: '#ffffff',
-    letterSpacing: 2,
+    letterSpacing: scale(3),
+    opacity: 0.95,
   },
 
   // Day Section
   daySection: {
     alignItems: 'center',
-    gap: scale(12),
-    marginTop: scale(20),
+    gap: scale(8),
+    marginTop: scale(12),
+    marginBottom: scale(8),
   },
   dayIconGlow: {
     position: 'absolute',
-    width: scale(120),
-    height: scale(120),
-    borderRadius: scale(60),
+    width: scale(70),
+    height: scale(70),
+    borderRadius: scale(35),
     opacity: 0.3,
-    top: scale(10),
+    top: scale(5),
   },
   dayName: {
-    fontSize: moderateScale(32, 0.3),
-    fontWeight: '900',
-    letterSpacing: 1,
+    fontSize: moderateScale(22, 0.3),
+    fontWeight: '800',
+    letterSpacing: 0.5,
     textAlign: 'center',
   },
   dayVibe: {
@@ -447,7 +508,8 @@ const styles = StyleSheet.create({
   quoteSection: {
     flex: 1,
     justifyContent: 'center',
-    marginVertical: scale(20),
+    marginTop: scale(20),
+    marginBottom: scale(10),
   },
   quoteBlur: {
     borderRadius: scale(16),
@@ -457,53 +519,84 @@ const styles = StyleSheet.create({
   },
   quoteGradient: {
     padding: scale(20),
+    minHeight: scale(80),
   },
   quoteText: {
     fontSize: moderateScale(16, 0.2),
     color: '#ffffff',
     lineHeight: moderateScale(24, 0.2),
-    fontWeight: '500',
+    fontWeight: '600',
     textAlign: 'center',
     fontStyle: 'italic',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 
-  // Footer
+  // Footer - Match ShareCard
   footer: {
-    gap: scale(16),
+    paddingTop: scale(12),
+    borderTopWidth: 1.5,
+    width: '100%',
   },
   footerContent: {
-    gap: scale(12),
-  },
-  userInfo: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: scale(8),
   },
-  username: {
-    fontSize: moderateScale(14, 0.2),
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  timestamp: {
-    fontSize: moderateScale(12, 0.2),
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontWeight: '500',
-  },
-  ctaSection: {
+  userInfoSection: {
     alignItems: 'center',
-    gap: scale(8),
+    marginTop: scale(8),
+    marginBottom: scale(12),
+    gap: scale(4),
   },
-  ctaText: {
+  usernameText: {
     fontSize: moderateScale(12, 0.2),
-    color: 'rgba(255, 255, 255, 0.6)',
     fontWeight: '600',
     letterSpacing: 0.3,
   },
-  ctaAccent: {
-    width: scale(40),
-    height: scale(3),
-    borderRadius: scale(2),
+  dateText: {
+    fontSize: moderateScale(11, 0.2),
+    fontWeight: '500',
+    letterSpacing: 0.2,
+  },
+  locationInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    marginTop: scale(2),
+  },
+  locationText: {
+    fontSize: moderateScale(10, 0.2),
+    fontWeight: '500',
+    letterSpacing: scale(0.2),
+  },
+  footerBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+  },
+  welcomeMessage: {
+    fontSize: moderateScale(11, 0.2),
+    textAlign: 'center',
+    lineHeight: moderateScale(17, 0.2),
+    marginBottom: scale(12),
+    fontWeight: '500',
+    letterSpacing: 0.5,
+  },
+  footerBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+  },
+  footerDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    opacity: 0.6,
+  },
+  footerLink: {
+    fontSize: moderateScale(14, 0.2),
+    fontWeight: '700',
+    letterSpacing: 1.5,
   },
 
   // Camera Lens Corner Accents

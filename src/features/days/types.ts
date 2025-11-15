@@ -38,6 +38,9 @@ export interface DayPost {
   weekNumber: number;
   scope: 'world' | 'city' | 'state' | 'country';
   location?: string;
+  location_city?: string;
+  location_state?: string;
+  location_country?: string;
 }
 
 export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
@@ -45,9 +48,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     id: 'monday',
     name: 'Unpopular Monday',
     icon: 'mask',
-    color: '#ef4444',
-    secondaryColor: '#f87171',
-    gradient: ['#ef4444', '#dc2626'],
+    color: '#8b5cf6', // Nebula Violet - deep space purple
+    secondaryColor: '#a78bfa', // Violet-400
+    gradient: ['#8b5cf6', '#7c3aed'], // Violet-500 to Violet-600
     description: 'Share your unpopular opinions, hot takes, and work/college frustrations (but make it funny)',
     shortDesc: 'Hot takes & rebel thoughts',
     vibe: 'Rebellious, Funny, Cathartic',
@@ -62,9 +65,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     id: 'tuesday',
     name: 'Tiny Tuesday',
     icon: 'star',
-    color: '#fbbf24',
-    secondaryColor: '#fcd34d',
-    gradient: ['#fbbf24', '#f59e0b'],
+    color: '#94a3b8', // Aurora Silver - starlight silver (Slate-400)
+    secondaryColor: '#cbd5e1', // Slate-300
+    gradient: ['#cbd5e1', '#94a3b8'], // Slate-300 to Slate-400
     description: 'Celebrate small victories that nobody notices - your everyday accomplishments matter',
     shortDesc: 'Small victories & baby steps',
     vibe: 'Wholesome, Encouraging, Positive',
@@ -79,9 +82,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     id: 'wednesday',
     name: 'Random Wednesday',
     icon: 'dice',
-    color: '#a78bfa',
-    secondaryColor: '#c4b5fd',
-    gradient: ['#a78bfa', '#8b5cf6'],
+    color: '#6366f1', // Galaxy Indigo - deep indigo-blue
+    secondaryColor: '#818cf8', // Indigo-400
+    gradient: ['#6366f1', '#4f46e5'], // Indigo-500 to Indigo-600
     description: 'Try something completely new - random acts of spontaneity and "why not?" moments',
     shortDesc: 'Spontaneous & experimental',
     vibe: 'Adventurous, Playful, Chaotic',
@@ -96,9 +99,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     id: 'thursday',
     name: 'Thankful Thursday',
     icon: 'heart',
-    color: '#f472b6',
-    secondaryColor: '#f9a8d4',
-    gradient: ['#f472b6', '#ec4899'],
+    color: '#d946ef', // Cosmic Magenta - deep fuchsia (purple-red, not pink)
+    secondaryColor: '#e879f9', // Fuchsia-400
+    gradient: ['#d946ef', '#c026d3'], // Fuchsia-500 to Fuchsia-600
     description: 'Share gratitude, appreciation, and mindful moments - the small things that made your day',
     shortDesc: 'Gratitude & mindfulness',
     vibe: 'Reflective, Grateful, Warm',
@@ -113,9 +116,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     id: 'friday',
     name: 'Weekend Friday',
     icon: 'calendar',
-    color: '#34d399',
-    secondaryColor: '#6ee7b7',
-    gradient: ['#34d399', '#10b981'],
+    color: '#10b981', // Aurora Emerald - northern lights green
+    secondaryColor: '#34d399', // Emerald-400
+    gradient: ['#10b981', '#059669'], // Emerald-500 to Emerald-600
     description: 'Weekend plans, excitement, and freedom - share what you\'re looking forward to',
     shortDesc: 'Weekend vibes & plans',
     vibe: 'Liberated, Playful, Celebratory',
@@ -130,9 +133,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     id: 'saturday',
     name: 'Creative Saturday',
     icon: 'brush',
-    color: '#e879f9',
-    secondaryColor: '#f0abfc',
-    gradient: ['#e879f9', '#d946ef'],
+    color: '#00f5ff', // Neon Cyan - electric, vibrant, creative
+    secondaryColor: '#33f5ff', // Lighter neon cyan
+    gradient: ['#00f5ff', '#00d4e6'], // Neon cyan to deeper cyan
     description: 'Things that feed your soul - hobbies, passions, creative pursuits, and authentic self',
     shortDesc: 'Passions & creativity',
     vibe: 'Authentic, Personal, Meaningful',
@@ -147,9 +150,9 @@ export const DAY_THEMES: Record<DayOfWeek, DayTheme> = {
     id: 'sunday',
     name: 'Offline Sunday',
     icon: 'power',
-    color: '#38bdf8',
-    secondaryColor: '#7dd3fc',
-    gradient: ['#38bdf8', '#0ea5e9'],
+    color: '#3b82f6', // Stellar Blue - deep space blue
+    secondaryColor: '#60a5fa', // Blue-400
+    gradient: ['#3b82f6', '#2563eb'], // Blue-500 to Blue-600
     description: 'Digital detox, slow living, rest and recovery - embrace the quiet moments',
     shortDesc: 'Peace & simplicity',
     vibe: 'Peaceful, Minimal, Restorative',

@@ -218,7 +218,7 @@ function getEmotionalColors(tone?: 'unique' | 'shared' | 'common') {
 
 function getFilterPillColors(filter: FilterType): [string, string] {
   if (filter === 'all') {
-    return ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)'];
+      return ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)'];
   }
   const colors = getEmotionalToneColors(filter);
   return [`${colors.primary}80`, `${colors.primary}40`];
@@ -520,7 +520,7 @@ export default function FeedScreen() {
             style={styles.headerGradient}
           >
             <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>Discover</Text>
+            <Text style={styles.headerTitle}>Discover</Text>
               <Text style={styles.headerDate}>
                 {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </Text>
@@ -554,7 +554,7 @@ export default function FeedScreen() {
             <View style={styles.heroLeft}>
               <Text style={styles.heroTitle}>DISCOVER</Text>
               <View style={styles.heroSubtitleRow}>
-                <Text style={styles.heroSubtitle}>{filteredPosts.length} {showDaySummaries ? 'summaries' : 'actions'}</Text>
+              <Text style={styles.heroSubtitle}>{filteredPosts.length} {showDaySummaries ? 'summaries' : 'actions'}</Text>
                 <Text style={styles.heroDate}>
                   • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </Text>
@@ -643,78 +643,78 @@ export default function FeedScreen() {
         {hasActiveFilters ? (
           <View style={styles.activeFiltersContainer}>
             <View style={styles.activeFiltersWrapper}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.activeFiltersScroll}
-                contentContainerStyle={styles.activeFiltersContent}
-              >
-                {filter !== 'all' && (
-                  <TouchableOpacity
-                    style={styles.activePill}
-                    onPress={() => setFilter('all')}
-                    activeOpacity={0.7}
-                  >
-                    <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
-                      <LinearGradient
-                        colors={getFilterPillColors(filter)}
-                        style={styles.activePillGradient}
-                      >
-                        <Text style={styles.activePillText}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.activeFiltersScroll}
+            contentContainerStyle={styles.activeFiltersContent}
+          >
+              {filter !== 'all' && (
+                <TouchableOpacity
+                  style={styles.activePill}
+                  onPress={() => setFilter('all')}
+                  activeOpacity={0.7}
+                >
+                  <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
+                    <LinearGradient
+                      colors={getFilterPillColors(filter)}
+                      style={styles.activePillGradient}
+                    >
+                      <Text style={styles.activePillText}>
                           {filter === 'unique' ? 'Unique' : filter === 'shared' ? 'Shared' : 'Common'}
-                        </Text>
-                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                          <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                        </Svg>
-                      </LinearGradient>
-                    </BlurView>
-                  </TouchableOpacity>
-                )}
-                
-                {scopeFilter !== 'world' && (
-                  <TouchableOpacity
-                    style={styles.activePill}
-                    onPress={() => setScopeFilter('world')}
-                    activeOpacity={0.7}
-                  >
-                    <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
-                      <LinearGradient
-                        colors={['rgba(6, 182, 212, 0.4)', 'rgba(6, 182, 212, 0.2)']}
-                        style={styles.activePillGradient}
-                      >
-                        <Text style={styles.activePillText}>
-                          {scopeFilter === 'city' ? 'City' : scopeFilter === 'state' ? 'State' : 'Country'}
-                        </Text>
-                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                          <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                        </Svg>
-                      </LinearGradient>
-                    </BlurView>
-                  </TouchableOpacity>
-                )}
-                
-                {reactionFilter !== 'all' && (
-                  <TouchableOpacity
-                    style={styles.activePill}
-                    onPress={() => setReactionFilter('all')}
-                    activeOpacity={0.7}
-                  >
-                    <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
-                      <LinearGradient
-                        colors={getReactionPillColors(reactionFilter)}
-                        style={styles.activePillGradient}
-                      >
-                        <Text style={styles.activePillText}>
-                          {reactionFilter === 'funny' ? 'Funny' : reactionFilter === 'creative' ? 'Creative' : 'Must Try'}
-                        </Text>
-                        <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-                          <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                        </Svg>
-                      </LinearGradient>
-                    </BlurView>
-                  </TouchableOpacity>
-                )}
-              </ScrollView>
+                      </Text>
+                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                        <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </LinearGradient>
+                  </BlurView>
+                </TouchableOpacity>
+              )}
+              
+              {scopeFilter !== 'world' && (
+                <TouchableOpacity
+                  style={styles.activePill}
+                  onPress={() => setScopeFilter('world')}
+                  activeOpacity={0.7}
+                >
+                  <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
+                    <LinearGradient
+                      colors={['rgba(6, 182, 212, 0.4)', 'rgba(6, 182, 212, 0.2)']}
+                      style={styles.activePillGradient}
+                    >
+                      <Text style={styles.activePillText}>
+                        {scopeFilter === 'city' ? 'City' : scopeFilter === 'state' ? 'State' : 'Country'}
+                      </Text>
+                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                        <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </LinearGradient>
+                  </BlurView>
+                </TouchableOpacity>
+              )}
+              
+              {reactionFilter !== 'all' && (
+                <TouchableOpacity
+                  style={styles.activePill}
+                  onPress={() => setReactionFilter('all')}
+                  activeOpacity={0.7}
+                >
+                  <BlurView intensity={30} tint="dark" style={styles.activePillBlur}>
+                    <LinearGradient
+                      colors={getReactionPillColors(reactionFilter)}
+                      style={styles.activePillGradient}
+                    >
+                      <Text style={styles.activePillText}>
+                        {reactionFilter === 'funny' ? 'Funny' : reactionFilter === 'creative' ? 'Creative' : 'Must Try'}
+                      </Text>
+                      <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
+                        <Path d="M6 18L18 6M6 6l12 12" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                      </Svg>
+                    </LinearGradient>
+                  </BlurView>
+                </TouchableOpacity>
+              )}
+          </ScrollView>
             </View>
           </View>
         ) : null}
